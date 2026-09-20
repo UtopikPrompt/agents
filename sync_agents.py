@@ -1,82 +1,64 @@
 import os
-import yaml
+import shutil
 
 # Configurations
-SOURCE_DIR = "agents"  # Where you edit your agents
+SOURCE_DIR = "agents"
 VSCODE_DIR = ".github/agents"
 CURSOR_DIR = ".cursor/agents"
-
-# Sample agents to initialize if directory is empty
-DEFAULT_AGENTS = {
-    "code-reviewer": {
-        "description": "Reviews pull requests for performance, security, and styling.",
-        "model": "claude-3-5-sonnet",
-        "tools": ["edit", "search", "context"],
-        "instructions": "# Code Reviewer\nAct as a Principal Engineer. Review code for bugs, logic flaws, and optimization opportunities."
-    },
-    "git-assistant": {
-        "description": "Generates semantic commit messages and cleans up branch names.",
-        "model": "gpt-4o",
-        "tools": ["terminal", "context"],
-        "instructions": "# Git Assistant\nInspect the staged changes or git diff. Generate clean Conventional Commits style messages."
-    }
-}
 
 def setup_directories():
     for d in [SOURCE_DIR, VSCODE_DIR, CURSOR_DIR]:
         os.makedirs(d, exist_ok=True)
-
-def initialize_samples():
-    if not os.listdir(SOURCE_DIR):
-        print(f"Initializing source agents in '{SOURCE_DIR}/'...")
-        for name, data in DEFAULT_AGENTS.items():
-            file_path = os.path.join(SOURCE_DIR, f"{name}.yml")
-            with open(file_path, "w", encoding="utf-8") as f:
-                yaml.dump(data, f, sort_keys=False, allow_unicode=True)
 
 def sync_agents():
     print("Syncing AI agents to IDE directories...")
     
     # Clean output directories to avoid stale configurations
     for d in [VSCODE_DIR, CURSOR_DIR]:
-        for f in os.listdir(d):
-            if f.endswith(".md"):
-                os.remove(os.path.join(d, f))
+        if os.path.exists(d):
+            for f in os.listdir(d):
+                if f.endswith(".md"):
+                    try:
+                        os.remove(os.path.join(d, f))
+                    except Exception:
+                        pass
 
-    # Process each source workflow yaml file
+    files_processed = 0
+    # Process files inside the folder
     for filename in os.listdir(SOURCE_DIR):
-        if not filename.endswith((".yml", ".yaml")):
+        # Match your existing source naming convention
+        if not filename.lower().endswith(".agent.md"):
             continue
             
-        base_name = os.path.splitext(filename)[0]
+        # Clean file names (removing spaces for predictable resource lookups)
+        clean_name = filename.replace(" ", "-").lower()
+        base_name = clean_name.replace(".agent.md", "")
+        
         source_path = os.path.join(SOURCE_DIR, filename)
         
-        with open(source_path, "r", encoding="utf-8") as f:
-            try:
-                data = yaml.safe_load(f)
-            except yaml.YAMLError as e:
-                print(f"Error parsing {filename}: {e}")
-                continue
-
-        instructions = data.pop("instructions", "")
-        
-        # 1. Format for VS Code (Requires YAML Frontmatter + .agent.md extension)
-        vscode_frontmatter = yaml.dump(data, sort_keys=False).strip()
-        vscode_content = f"---\n{vscode_frontmatter}\n---\n\n{instructions}"
+        # 1. Format for VS Code (Keep the native .agent.md markup format)
         vscode_dest = os.path.join(VSCODE_DIR, f"{base_name}.agent.md")
-        with open(vscode_dest, "w", encoding="utf-8") as f:
-            f.write(vscode_content)
+        try:
+            shutil.copy2(source_path, vscode_dest)
+        except Exception as e:
+            print(f"Error copying to VS Code path: {e}")
+            continue
 
-        # 2. Format for Cursor / General Fallbacks (Clean Markdown, Metadata optional)
-        cursor_content = f"# Agent: {data.get('name', base_name)}\n> {data.get('description', '')}\n\n{instructions}"
+        # 2. Format for Cursor (Convert extension wrapper down to standard fallback .md)
         cursor_dest = os.path.join(CURSOR_DIR, f"{base_name}.md")
-        with open(cursor_dest, "w", encoding="utf-8") as f:
-            f.write(cursor_content)
+        try:
+            shutil.copy2(source_path, cursor_dest)
+        except Exception as e:
+            print(f"Error copying to Cursor path: {e}")
+            continue
 
-        print(f"Synced: {base_name}")
+        print(f"Synced: {filename} -> {base_name}")
+        files_processed += 1
+
+    if files_processed == 0:
+        print("Warning: No source '.agent.md' files were detected or compiled.")
 
 if __name__ == "__main__":
     setup_directories()
-    initialize_samples()
     sync_agents()
-    print("\nSync complete! Run 'git status' to see the updated configurations.")
+    print("\nSync complete! Run 'git status' to verify.")
