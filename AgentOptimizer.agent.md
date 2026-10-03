@@ -4,14 +4,14 @@ description: >
   Analyze and optimize a VS Code agent (its definition, tools, description/WHEN trigger,
   skills, and instructions) for the agent being invoked in the CURRENT conversation context.
   Invoke when an agent won't load, ignores instructions, fails to invoke tools/skills, has
-  broken base-on-context features, or shows slow, unexpected behavior; used especially from
-  remote SSH sessions where local skill files are not available.
+  broken base-on-context features, shows slow, unexpected behavior, or routes tasks poorly.
+  Used especially from remote SSH sessions where local skill files are not available.
 argument-hint: >
   Describe the agent symptom (won't load, ignoring instructions, not invoking tools,
   base-on-context broken, slow, unexpected behavior) and any config/logs.
 user-invocable: true
 disable-model-invocation: false
-tools: [read, edit, search, execute, agent, web/fetch, vscode/runCommand, todo]
+tools: [read, edit, search]
 ---
 
 # Agent Optimizer Agent
@@ -81,7 +81,32 @@ Capabilities:
 - Analyze context relevance and quality
 - Summarize key findings
 
-### 3. Quick Tool Access
+### 3. Routing-Quality Analysis
+Diagnose and improve how the agent routes tasks to subagents (or answers directly). This is the ongoing "re-check routing after real use" workflow.
+
+**Define "routes poorly" (measurable):**
+- **Wrong specialist** — the chosen subagent could not fully satisfy the acceptance criteria, or the user had to re-prompt.
+- **Excessive hops** — trivial tasks routed to a subagent when the agent could have answered directly (should short-circuit).
+- **Unnecessary fan-out** — decomposing a task that a single specialist could have handled.
+- **Over-fan-out** — splitting a task that should have stayed whole.
+- **Ambiguity loss** — overlapping specialists chosen inconsistently across similar tasks.
+- **NONE fallback** — the "no specialist fits" path firing too often, indicating a missing specialist or a loose trigger.
+
+**Method (repeatable):**
+1. **Collect a sample** — review the last N real routing decisions from the session store (e.g. `session_store_sql` query on the current agent's turns, or ask the user for recent examples).
+2. **Classify each** — for every task, record: task type, chosen subagent (or NONE/answer-directly), hops, whether the result satisfied the acceptance criteria, and a verdict (correct / wrong specialist / excessive hops / unnecessary fan-out / over-fan-out).
+3. **Compute a routing health score** — the share of decisions that were "correct". Flag any task type with a correctness rate below a threshold (e.g. < 80%) as a poor-routing candidate.
+4. **Root-cause the failures** — map each failure to a definition defect: ambiguous trigger, overlapping specialists, missing specialist, missing short-circuit, or missing fan-out policy.
+5. **Apply the smallest definition fix** — edit the agent's `description` (WHEN trigger), routing rules, fan-out policy, or add a specialist. Never touch project code.
+6. **Verify** — re-run the same classification on a new sample after the change and confirm the health score for the flagged task type improved. If it did not, revert or adjust and re-measure.
+
+**Repeatable report format** (use to compare before/after):
+- Routing health score: X%
+- Per task-type table: task type | chosen subagent | verdict | rate
+- Flagged task types (below threshold) and their root-cause fixes
+- Before/after comparison for the task types changed
+
+### 4. Quick Tool Access
 Rapid access to essential debugging and analysis tools:
 - `read_file` — read and analyze source files
 - `grep_search` — search for specific patterns and strings
@@ -166,10 +191,11 @@ spec and verify afterward. See capability #5 for the protocol.
 - [ ] No conflicting configurations exist
 
 ## Performance Optimization
-- Identify unnecessary agent overhead
-- Optimize tool invocation patterns
-- Reduce context size while maintaining relevance
-- Analyze execution-time bottlenecks
+- Identify unnecessary agent overhead, especially routing overhead: tasks routed to a subagent that a single specialist or a direct answer could have handled.
+- Optimize tool invocation patterns: prefer fewer, more targeted tool calls; avoid redundant reads or re-analysis of the same file.
+- Reduce context size while maintaining relevance: compact or skip re-reading unchanged content; use targeted search over broad reads.
+- Analyze execution-time bottlenecks: distinguish time spent in the Orchestrator's analysis vs. time spent waiting on subagents; if subagents dominate, check whether decomposition was necessary.
+- Prefer the smallest change that improves a measured metric (routing health score, hop count, or latency) — never rewrite the definition wholesale.
 
 ## Security Considerations
 - Respect user-defined permission boundaries
