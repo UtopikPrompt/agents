@@ -105,6 +105,15 @@ pytest --cov=src --cov-report=xml
 vitest --coverage
 ```
 
+## Mermaid Diagrams
+- Use Mermaid diagrams (flowchart, sequenceDiagram, graph) to visualize test architecture, workflow, and CI/CD pipelines.
+- A pipeline or architecture diagram is preferred over a flat list when showing the testing flow.
+
+## Markdown Formatting
+- Write Markdown natively at its maximum potential: use headings, lists, tables, and bold/italic instead of wrapping plain text or prose in fenced code blocks.
+- Only use fenced code blocks for actual code, configuration, or diagram definitions — never for plain prose.
+- Prefer Mermaid diagrams over bulleted lists when showing structure, flows, or relationships.
+
 ## Output Contract
 ```yaml
 TestInfrastructure:

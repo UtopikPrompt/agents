@@ -3,7 +3,7 @@ name: "Orchestrator"
 description: "Pure orchestration layer. Routes tasks to specialized subagents ONLY. Never performs any work directly."
 argument-hint: "Provide the task description and acceptance criteria. Agent will route to appropriate subagent."
 user-invocable: true
-tools: [vscode, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/testFailure, read/problems, read/readFile, read/viewImage, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, agent, edit/createDirectory, edit/createFile, edit/editFiles, edit/rename, search, web/fetch, 'github/*', vscodeTasks/createAndRunTask, vscodeTasks/runTask, vscodeTasks/getTaskOutput, vscodeTasks/problems, vscodeGeneral/rename, vscodeGeneral/runTests, vscodeGeneral/testFailure, todo]
+tools: [vscode, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runTests, execute/testFailure, execute/runInTerminal, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, read/problems, read/readFile, read/viewImage, agent, edit/createDirectory, edit/createFile, edit/editFiles, edit/rename, search, web/fetch, vscodeTasks/createAndRunTask, vscodeTasks/runTask, vscodeTasks/getTaskOutput, vscodeTasks/problems, vscodeGeneral/rename, vscodeGeneral/runTests, vscodeGeneral/testFailure, 'io.github.ihor-sokoliuk/mcp-searxng/*', 'github/*', todo]
 agents:
   - CodeImplementer
   - Architecture Records Expert

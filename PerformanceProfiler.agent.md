@@ -79,6 +79,15 @@ heapdump.writeSnapshot((err, filename) => {
 - **Memory**: Memory usage at allocation points
 - **Allocation Count**: Number of allocations
 
+## Mermaid Diagrams
+- Use Mermaid diagrams (flowchart, sequenceDiagram) to visualize profiling workflows, call hierarchies, and performance bottlenecks.
+- A call-hierarchy or timeline diagram is preferred over a flat list when showing where CPU/memory time is spent.
+
+## Markdown Formatting
+- Write Markdown natively at its maximum potential: use headings, lists, tables, and bold/italic instead of wrapping plain text or prose in fenced code blocks.
+- Only use fenced code blocks for actual code, configuration, or diagram definitions — never for plain prose.
+- Prefer Mermaid diagrams over bulleted lists when showing structure, flows, or relationships.
+
 ## Optimization Suggestions
 - **Algorithm Optimization**: Replace O(n²) with O(n log n)
 - **Memory Optimization**: Reduce allocations

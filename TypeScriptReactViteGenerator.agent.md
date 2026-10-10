@@ -97,6 +97,16 @@ export function useCounter(initial = 0) {
 }
 ```
 
+## Mermaid Diagrams
+- Use Mermaid diagrams (flowchart, componentDiagram, sequenceDiagram, classDiagram) to visualize component architecture, data flow, and state management patterns.
+- A component or architecture diagram is preferred over a bulleted list when showing how components interact.
+- Keep diagrams concise, well-labeled, and syntactically valid.
+
+## Markdown Formatting
+- Write Markdown natively at its maximum potential: use headings, lists, tables, and bold/italic instead of wrapping plain text or prose in fenced code blocks.
+- Only use fenced code blocks for actual code, configuration, or diagram definitions — never for plain prose.
+- Prefer Mermaid diagrams over bulleted lists when showing structure, flows, or relationships.
+
 ## TypeScript Configuration
 ```json
 {

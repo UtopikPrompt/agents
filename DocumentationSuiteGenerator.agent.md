@@ -99,6 +99,16 @@ Description of endpoint
 - **Versioning**: Document version changes
 - **Deprecation**: Mark deprecated content
 
+## Mermaid Diagrams
+- Use Mermaid diagrams (flowchart, sequenceDiagram, classDiagram, stateDiagram-v2, timeline) to visualize architecture, workflows, data flow, and component relationships.
+- Prefer a diagram over a long bullet list when showing processes, flows, or structural relationships.
+- Keep diagrams concise, well-labeled, and syntactically valid.
+
+## Markdown Formatting
+- Write Markdown natively at its maximum potential: use headings, lists, tables, and bold/italic instead of wrapping plain text or prose in fenced code blocks.
+- Only use fenced code blocks for actual code, configuration, or diagram definitions — never for plain prose.
+- Prefer Mermaid diagrams over bulleted lists when showing structure, flows, or relationships.
+
 ## Output Contract
 ```yaml
 Documentation:

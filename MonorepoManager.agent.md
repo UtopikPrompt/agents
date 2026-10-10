@@ -84,6 +84,15 @@ package/
 - `lerna version`: Bump versions
 - `lerna publish`: Publish packages
 
+## Mermaid Diagrams
+- Use Mermaid diagrams (flowchart, graph, sequenceDiagram) to visualize the dependency graph, package relationships, and publish workflows.
+- A dependency graph diagram is preferred over a flat list of packages when showing inter-package dependencies.
+
+## Markdown Formatting
+- Write Markdown natively at its maximum potential: use headings, lists, tables, and bold/italic instead of wrapping plain text or prose in fenced code blocks.
+- Only use fenced code blocks for actual code, configuration, or diagram definitions — never for plain prose.
+- Prefer Mermaid diagrams over bulleted lists when showing structure, flows, or relationships.
+
 ## Output Contract
 ```yaml
 Monorepo:
