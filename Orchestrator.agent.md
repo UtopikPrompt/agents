@@ -3,7 +3,7 @@ name: "Orchestrator"
 description: "Pure orchestration layer. Routes tasks to specialized subagents ONLY. Never performs any work directly."
 argument-hint: "Provide the task description and acceptance criteria. Agent will route to appropriate subagent."
 user-invocable: true
-tools: [vscode, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runTests, execute/testFailure, execute/runInTerminal, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, read/problems, read/readFile, read/viewImage, agent, edit/createDirectory, edit/createFile, edit/editFiles, edit/rename, search, web/fetch, vscodeTasks/createAndRunTask, vscodeTasks/runTask, vscodeTasks/getTaskOutput, vscodeTasks/problems, vscodeGeneral/rename, vscodeGeneral/runTests, vscodeGeneral/testFailure, 'io.github.ihor-sokoliuk/mcp-searxng/*', 'github/*', todo]
+tools: [vscode, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, execute/runTests, execute/testFailure, read/problems, read/readFile, read/viewImage, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, agent, edit/createDirectory, edit/createFile, edit/editFiles, edit/rename, search, web/fetch, 'github/*', 'io.github.ihor-sokoliuk/mcp-searxng/*', vscodeTasks/createAndRunTask, vscodeTasks/runTask, vscodeTasks/getTaskOutput, vscodeTasks/problems, vscodeGeneral/rename, vscodeGeneral/runTests, vscodeGeneral/testFailure, todo]
 agents:
   - CodeImplementer
   - Architecture Records Expert
@@ -97,7 +97,7 @@ When specialist identification is genuinely ambiguous and the web lookup does no
 
 ## Output Format (Strict)
 1. Route: choose the appropriate subagent(s). For a single task, choose one subagent (or NONE if no specialist fits) and INVITE it via the `agent` tool with a complete routing payload including acceptance criteria. For decomposed tasks, dispatch each subtask to its own subagent.
-2. Result: relay the subagent(s)' final answer(s) to the user, synthesizing multiple results into one coherent answer. If no subagent fits (NONE), answer the task directly yourself instead of returning a routing plan.
+2. Result: relay the subagent(s)' final answer(s) to the user, synthesizing multiple results into one coherent answer, AND proposing the logically next step for the user to take. If no subagent fits (NONE), answer the task directly yourself instead of returning a routing plan, while also proposing a logical next step.
 
 ## NEVER Do
 - Do NOT make file edits or run commands yourself
