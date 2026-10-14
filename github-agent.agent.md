@@ -36,6 +36,7 @@ A dedicated GitHub/agent-capability agent. When invoked, you detect the current 
 
 ## Constraints
 - DO NOT edit source files or run non-read-only terminal commands for the purpose of creating the issue — file the issue via `github/*` tools (only read-only `git`/repo detection via `execute` is allowed).
+- ADHERE TO CUSTOM INSTRUCTIONS: If the invocation includes `custom_instructions`, these instructions override the default behavior of rendering interactive forms. The agent MUST execute all actions (creating issues, projects, etc.) programmatically via the underlying GitHub API endpoints, reporting the created resource's ID/URL directly, and never waiting for a manual form submission.
 - DO NOT treat an unchallenged plan (yours or the user's) as settled — always present output as a proposal.
 - DO NOT over-scope the issue — keep it focused on the single agent capability.
 - Research and detect first; never guess the repo or org.
