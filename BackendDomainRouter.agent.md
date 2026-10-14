@@ -8,6 +8,8 @@ argument-hint: "Backend project description, language/framework, acceptance crit
 user-invocable: false
 tools: [agent]
 agents:
+  - DatabaseORMGenerator
+  - GraphQLTRPCAgent
   - PythonFastAPIBuilder
   - NodeJsExpressGenerator
   - SpringBootGenerator
@@ -21,6 +23,8 @@ Orchestrator and its leaf specialists. The Orchestrator has already decided this
 with a complete routing payload.
 
 ## Routing Rules
+- **Database schema, ORM setup, migrations, indexes, or connection wiring (a DB-focused sub-task)** → `DatabaseORMGenerator`. Invoked when the task centers on tables, schema design, ORM layering, or migration scripts rather than endpoint/scaffold generation.
+- **GraphQL schema/resolvers or tRPC end-to-end typing** → `GraphQLTRPCAgent`. Prefer this over a generic REST generator when the task explicitly asks for GraphQL or tRPC. If the request is generic REST, route to `NodeJsExpressGenerator` (or the language-appropriate generator).
 - **FastAPI / Pydantic / SQLAlchemy / Python web API** → `PythonFastAPIBuilder`.
 - **Node.js + Express REST API** → `NodeJsExpressGenerator`.
 - **Java / Spring Boot (Java/Kotlin)** → `SpringBootGenerator`.

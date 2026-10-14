@@ -8,6 +8,7 @@ argument-hint: "Frontend project description, stack preference, acceptance crite
 user-invocable: false
 tools: [agent]
 agents:
+  - ComponentLibraryDesignSystemAgent
   - TypeScriptReactViteGenerator
   - NextjsGenerator
 ---
@@ -20,6 +21,7 @@ Orchestrator and its leaf specialists. The Orchestrator has already decided this
 with a complete routing payload.
 
 ## Routing Rules
+- **Shared component library / design system / reusable components / theming tokens** → `ComponentLibraryDesignSystemAgent`.
 - **Next.js (App Router / Server Components / ISR / Next.js-specific)** → `NextjsGenerator`.
 - **Vite SPA / PWA / plain React dashboard (no Next.js)** → `TypeScriptReactViteGenerator`.
 - **Specialized (charts / data-viz / d3 / Three.js / WebGL)** → `TypeScriptReactViteGenerator` unless a dedicated viz stack is requested; if a dedicated stack is named, prefer the most specific match.

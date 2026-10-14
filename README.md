@@ -17,7 +17,7 @@ leaves), enables clean composition, deduplicates overlapping specialists, and
 scales the roster by adding routers or leaves locally.
 
 ```mermaid
-flowchart TB
+flowchart LR
     O["Orchestrator<br/>(Tier-0 global router)"]
     O --> FrontendRouter["Frontend Domain Router<br/>(Tier-1)"]
     O --> BackendRouter["Backend Domain Router<br/>(Tier-1)"]
@@ -32,6 +32,7 @@ flowchart TB
     FrontendRouter --> NextjsGenerator
     FrontendRouter --> TypeScriptReactViteGenerator
 
+    BackendRouter --> GraphQLTRPCAgent
     BackendRouter --> PythonFastAPIBuilder
     BackendRouter --> NodeJsExpressGenerator
     BackendRouter --> SpringBootGenerator
@@ -51,7 +52,8 @@ flowchart TB
     classDef router fill:#6f9e6f,stroke:#516399,color:#000;
     classDef leaf fill:#9db8ff,stroke:#516399,color:#000;
     class O,FrontendRouter,BackendRouter,InfraDevOpsRouter,DocsGovRouter hub,router;
-    class CodeImplementer,AgentOptimizer,Brainstorm,CompactionExpert,WebDiagnosisExpert,NextjsGenerator,TypeScriptReactViteGenerator,PythonFastAPIBuilder,NodeJsExpressGenerator,SpringBootGenerator,MonorepoManager,DevContainerOrchestrator,MCPServerGenerator,PerformanceProfiler,TestInfrastructureGenerator,ReleaseManager,ArchitectureRecordsExpert,DocumentationSuiteGenerator,github_agent leaf;
+    class CodeImplementer,AgentOptimizer,Brainstorm,CompactionExpert,WebDiagnosisExpert,NextjsGenerator,TypeScriptReactViteGenerator,GraphQLTRPCAgent,PythonFastAPIBuilder,NodeJsExpressGenerator,SpringBootGenerator,MonorepoManager,DevContainerOrchestrator,MCPServerGenerator,PerformanceProfiler,TestInfrastructureGenerator,ReleaseManager,ArchitectureRecordsExpert,DocumentationSuiteGenerator,github_agent leaf;
+
 
 ```
 
@@ -78,6 +80,7 @@ flowchart TB
 | **github-agent** | no | no | PR/issue/code-search review, triage, GitHub Projects, agent capability filing |
 | **NextjsGenerator** | no | no | Next.js architecture: App Router, Server Components, ISR |
 | **NodeJsExpressGenerator** | no | no | Node.js/Express REST API bootstrapping |
+| **GraphQLTRPCAgent** | no | no | GraphQL schema/resolvers or tRPC end-to-end typing |
 | **SpringBootGenerator** | no | no | Java/Spring Boot backend scaffolding |
 
 ## Routing Rules (Orchestrator)
@@ -95,7 +98,7 @@ pick the single Tier-2 leaf.
 
 **Tier-1 — Domain routers (sub-rules)**
 - **Frontend**: Next.js → `NextjsGenerator`; Vite SPA → `TypeScriptReactViteGenerator`.
-- **Backend**: FastAPI → `PythonFastAPIBuilder`; Node.js+Express → `NodeJsExpressGenerator`; Spring Boot → `SpringBootGenerator`.
+- **Backend**: GraphQL/tRPC → `GraphQLTRPCAgent`; FastAPI → `PythonFastAPIBuilder`; Node.js+Express → `NodeJsExpressGenerator`; Spring Boot → `SpringBootGenerator`.
 - **Infra & DevOps**: Monorepo → `MonorepoManager`; dev container → `DevContainerOrchestrator`; MCP → `MCPServerGenerator`; profiling → `PerformanceProfiler`; tests/CI → `TestInfrastructureGenerator`; release → `ReleaseManager`.
 - **Docs & Governance**: ADRs → `ArchitectureRecordsExpert`; docs → `DocumentationSuiteGenerator`; GitHub → `github-agent`.
 - **Fan-out** — decompose independent multi-part tasks and dispatch each to its own specialist in parallel.
@@ -106,7 +109,7 @@ pick the single Tier-2 leaf.
 | Domain | Router | Leaves |
 |---|---|---|
 | Frontend | Frontend Domain Router | NextjsGenerator, TypeScriptReactViteGenerator |
-| Backend | Backend Domain Router | PythonFastAPIBuilder, NodeJsExpressGenerator, SpringBootGenerator |
+| Backend | Backend Domain Router | GraphQLTRPCAgent, PythonFastAPIBuilder, NodeJsExpressGenerator, SpringBootGenerator |
 | Infra & DevOps | Infra & DevOps Domain Router | MonorepoManager, DevContainerOrchestrator, MCPServerGenerator, PerformanceProfiler, TestInfrastructureGenerator, ReleaseManager |
 | Docs & Governance | Docs & Governance Domain Router | ArchitectureRecordsExpert, DocumentationSuiteGenerator, github-agent |
 

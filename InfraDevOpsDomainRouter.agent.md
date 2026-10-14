@@ -8,6 +8,10 @@ argument-hint: "Infra/DevOps task description, acceptance criteria."
 user-invocable: false
 tools: [agent]
 agents:
+  - IaCGenerator
+  - SecurityAuthAgent
+  - ObservabilityAgent
+  - CloudDeploymentAgent
   - MonorepoManager
   - DevContainerOrchestrator
   - MCPServerGenerator
@@ -24,6 +28,10 @@ Orchestrator and its leaf specialists. The Orchestrator has already decided this
 it with a complete routing payload.
 
 ## Routing Rules (most specific wins)
+- **Infrastructure-as-code generation (Bicep / ARM / Terraform / Pulumi)** → `IaCGenerator`.
+- **Security hardening / authentication / RBAC / secrets management** → `SecurityAuthAgent`.
+- **Observability / error monitoring / distributed tracing / metrics / alerting** → `ObservabilityAgent`.
+- **Cross-cloud deployment / provisioning / container orchestration** → `CloudDeploymentAgent`.
 - **Multi-package workspace coordination / version sync** → `MonorepoManager`.
 - **VS Code dev container config / Dockerfile / environment provisioning** → `DevContainerOrchestrator`.
 - **Model Context Protocol server setup (JSON-RPC)** → `MCPServerGenerator`.
