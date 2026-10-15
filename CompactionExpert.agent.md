@@ -1,5 +1,5 @@
 ---
-name: "Compaction Expert"
+name: "CompactionExpert"
 description: "Context containment utility agent. Drastically shrinks active conversation logs every 3 turns to protect local Ollama VRAM window limits while rigidly preserving state truth."
 argument-hint: "Current raw thread log to compress."
 user-invocable: false

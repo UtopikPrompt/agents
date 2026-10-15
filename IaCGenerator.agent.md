@@ -1,5 +1,5 @@
 ---
-name: "IaC Generator"
+name: "IaCGenerator"
 description: "Specialized for infrastructure-as-code generation. Creates secure Bicep/ARM templates, Terraform, and Pulumi programs for Azure (and multi-cloud). Applies Azure best practices, resource grouping, parameterization, and moduleization."
 argument-hint: "Infrastructure requirements, target cloud (Azure/AWS/GCP), IaC format preference, and security/compliance needs."
 user-invocable: false

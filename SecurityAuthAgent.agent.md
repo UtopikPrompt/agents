@@ -1,5 +1,5 @@
 ---
-name: "Security & Auth Agent"
+name: "SecurityAuthAgent"
 description: "Specialized for security hardening and authentication. Handles RBAC roles/policies, secrets management (Key Vault, secrets), auth patterns (JWT, OAuth2, OpenID Connect, API keys), and compliance patterns (Azure Security Center, policy assignment)."
 argument-hint: "Auth method, resource scope, compliance requirements, and identity provider."
 user-invocable: false

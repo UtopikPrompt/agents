@@ -54,7 +54,6 @@ flowchart LR
     class O,FrontendRouter,BackendRouter,InfraDevOpsRouter,DocsGovRouter hub,router;
     class CodeImplementer,AgentOptimizer,Brainstorm,CompactionExpert,WebDiagnosisExpert,NextjsGenerator,TypeScriptReactViteGenerator,GraphQLTRPCAgent,PythonFastAPIBuilder,NodeJsExpressGenerator,SpringBootGenerator,MonorepoManager,DevContainerOrchestrator,MCPServerGenerator,PerformanceProfiler,TestInfrastructureGenerator,ReleaseManager,ArchitectureRecordsExpert,DocumentationSuiteGenerator,github_agent leaf;
 
-
 ```
 
 ## Agent Index

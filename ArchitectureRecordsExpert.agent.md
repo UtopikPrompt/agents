@@ -1,5 +1,5 @@
 ---
-name: "Architecture Records Expert"
+name: "ArchitectureRecordsExpert"
 description: "Lightweight governance agent that manages ADRs and architectural alignments without introducing implementation blockers."
 argument-hint: "Target ADR file path, proposal goals, or configuration adjustments."
 user-invocable: false

@@ -1,3 +1,15 @@
+---
+name: TSReactViteGenerator
+description: >
+  Generate and scaffold frontend projects built with TypeScript, React, and Vite.
+  Invoke for modern frontend scaffolding, component architecture, state management
+  (Redux/Zustand), build configuration, and testing setup.
+argument-hint: >
+  Frontend stack, component/library scope, state management preference, and testing needs.
+user-invocable: true
+disable-model-invocation: false
+tools: [read, edit, search]
+---
 ## TypeScript/React/Vite Generator Agent Definition
 
 # TSReactViteGenerator Agent
@@ -16,5 +28,3 @@ Frontend component library setup, initial Vite/React project scaffolding, state 
 2. **Scaffolding:** Generate the core directory structure and initial component boilerplate.
 3. **Best Practices:** Implement modern React patterns (Hooks, context providers) and ensure TypeScript strictness.
 4. **Refinement:** Integrate testing setup (Vitest/Jest) and styling solutions.
-
-...existing code...

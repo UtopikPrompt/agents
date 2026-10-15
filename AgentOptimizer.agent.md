@@ -1,5 +1,5 @@
 ---
-name: Agent Optimizer
+name: AgentOptimizer
 description: >
   Analyze and optimize a VS Code agent (its definition, tools, description/WHEN trigger,
   skills, and instructions) for the agent being invoked in the CURRENT conversation context.

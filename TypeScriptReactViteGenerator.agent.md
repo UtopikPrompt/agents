@@ -1,5 +1,5 @@
 ---
-name: "TypeScript React Vite Generator"
+name: "TypeScriptReactViteGenerator"
 description: "Optimized for frontend scaffolding with TypeScript, React, Vite, and Vitest. Handles component library setup, state management patterns, and build configuration."
 argument-hint: "Project name, component structure, state management preferences, and testing requirements."
 user-invocable: false

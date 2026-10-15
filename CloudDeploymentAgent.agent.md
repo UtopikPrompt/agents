@@ -1,5 +1,5 @@
 ---
-name: "Cloud Deployment Agent"
+name: "CloudDeploymentAgent"
 description: "Specialized for cross-cloud deployment and provisioning. Creates cloud-init scripts, deployment pipelines, container orchestration, and multi-cloud provisioning strategies (AWS/GCP/Azure). Supports Azure DevOps, GitHub Actions, and IaC-driven deployments."
 argument-hint: "Target cloud(s), deployment pipeline needs, and orchestration requirements."
 user-invocable: false

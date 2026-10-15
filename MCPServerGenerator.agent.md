@@ -1,5 +1,5 @@
 ---
-name: "MCP Server Generator"
+name: "MCPServerGenerator"
 description: "Specialized for Model Context Protocol server setup with full structure, configuration files, and client integration. Handles MCP server scaffolding, JSON-RPC protocol setup, and editor integration."
 argument-hint: "Server name, language, capabilities, and editor integration requirements."
 user-invocable: false

@@ -1,5 +1,5 @@
 ---
-name: "Test Infrastructure Generator"
+name: "TestInfrastructureGenerator"
 description: "Generates test suites across frameworks (pytest, vitest, jest), handles mocking strategies, test data fixtures, and CI/CD pipeline configuration."
 argument-hint: "Project type, testing framework, coverage requirements, and CI/CD platform."
 user-invocable: false

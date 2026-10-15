@@ -1,5 +1,5 @@
 ---
-name: "Docs & Governance Domain Router"
+name: "DocsGovernanceDomainRouter"
 description: >
   Docs/Governance sub-layer. Routes documentation, ADR, and governance tasks to a
   single leaf agent. Invoke ONLY when the Orchestrator has classified the task as

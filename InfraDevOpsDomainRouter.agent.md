@@ -1,5 +1,5 @@
 ---
-name: "Infra & DevOps Domain Router"
+name: "InfraDevOpsDomainRouter"
 description: >
   Infra/DevOps sub-layer. Routes infrastructure, DevOps, and tooling tasks to a
   single leaf agent. Invoke ONLY when the Orchestrator has classified the task as

@@ -1,5 +1,5 @@
 ---
-name: "Frontend Domain Router"
+name: "FrontendDomainRouter"
 description: >
   Frontend-router sub-layer. Routes frontend-scaffolding tasks to a single leaf agent.
   Invoke ONLY when the Orchestrator has classified the task as Frontend work. Never
@@ -23,8 +23,8 @@ with a complete routing payload.
 ## Routing Rules
 - **Shared component library / design system / reusable components / theming tokens** → `ComponentLibraryDesignSystemAgent`.
 - **Next.js (App Router / Server Components / ISR / Next.js-specific)** → `NextjsGenerator`.
-- **Vite SPA / PWA / plain React dashboard (no Next.js)** → `TypeScriptReactViteGenerator`.
-- **Specialized (charts / data-viz / d3 / Three.js / WebGL)** → `TypeScriptReactViteGenerator` unless a dedicated viz stack is requested; if a dedicated stack is named, prefer the most specific match.
+  - **Vite SPA / PWA / plain React dashboard (no Next.js)** → `TSReactViteGenerator`.
+- **Specialized (charts / data-viz / d3 / Three.js / WebGL)** → `TSReactViteGenerator` unless a dedicated viz stack is requested; if a dedicated stack is named, prefer the most specific match.
 - **Ambiguous React stack (Next vs. Vite unclear)** — if you cannot confidently pick, prefer Next.js only when the task mentions SSR/SSG/ISR/API routes; otherwise prefer the Vite SPA. When truly ambiguous and not resolvable, return `Target Subagent: NONE` and explain.
 
 ## Invocation

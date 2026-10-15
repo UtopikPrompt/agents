@@ -1,5 +1,5 @@
 ---
-name: "MultiLanguage Builder"
+name: "MultiLanguageBuilder"
 description: "Handles polyglot builds across Python/Node.js/TypeScript with polyglot package management (pip/pnpm/yarn). Manages workspace isolation, version pinning, and cross-language dependency resolution."
 argument-hint: "Target workspace path, polyglot stack components, and dependency constraints."
 user-invocable: false
