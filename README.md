@@ -8,8 +8,7 @@ file is a self-contained prompt that governs one agent's behavior, tools, and tr
 The agents form a **3-tier tree topology**. The `Orchestrator` is the **Tier-0**
 global router: it never performs work itself — it classifies an incoming task into a
 domain, selects a **Tier-1 domain router**, which then routes to exactly one **Tier-2
-leaf** specialist. Cross-cutting agents (Agent Optimizer, Brainstorm, Compaction
-Expert, Agent Optimizer, Web Diagnosis Expert) live at the root and are invoked by
+leaf** specialist. Cross-cutting agents (Agent Optimizer, Brainstorm, Compaction Expert, Web Diagnosis Expert) live at the root and are invoked by
 the Orchestrator for special-purpose diagnostics, not for routine routing.
 
 This hierarchy reduces routing context cost (each router only carries its own
@@ -28,6 +27,7 @@ flowchart LR
     O --> Brainstorm
     O --> CompactionExpert
     O --> WebDiagnosisExpert
+    O --> MultiLanguageBuilder
 
     FrontendRouter --> NextjsGenerator
     FrontendRouter --> TypeScriptReactViteGenerator
@@ -43,16 +43,17 @@ flowchart LR
     InfraDevOpsRouter --> PerformanceProfiler
     InfraDevOpsRouter --> TestInfrastructureGenerator
     InfraDevOpsRouter --> ReleaseManager
+    InfraDevOpsRouter --> PRCIErrDiagnosticFix
 
     DocsGovRouter --> ArchitectureRecordsExpert
     DocsGovRouter --> DocumentationSuiteGenerator
-    DocsGovRouter --> github_agent
+    DocsGovRouter --> github-agent
 
     classDef hub fill:#3b3f7d,stroke:#e0e0e0,color:#fff;
     classDef router fill:#6f9e6f,stroke:#516399,color:#000;
     classDef leaf fill:#9db8ff,stroke:#516399,color:#000;
     class O,FrontendRouter,BackendRouter,InfraDevOpsRouter,DocsGovRouter hub,router;
-    class CodeImplementer,AgentOptimizer,Brainstorm,CompactionExpert,WebDiagnosisExpert,NextjsGenerator,TypeScriptReactViteGenerator,GraphQLTRPCAgent,PythonFastAPIBuilder,NodeJsExpressGenerator,SpringBootGenerator,MonorepoManager,DevContainerOrchestrator,MCPServerGenerator,PerformanceProfiler,TestInfrastructureGenerator,ReleaseManager,ArchitectureRecordsExpert,DocumentationSuiteGenerator,github_agent leaf;
+    class CodeImplementer,AgentOptimizer,Brainstorm,CompactionExpert,WebDiagnosisExpert,NextjsGenerator,TypeScriptReactViteGenerator,GraphQLTRPCAgent,PythonFastAPIBuilder,NodeJsExpressGenerator,SpringBootGenerator,MonorepoManager,DevContainerOrchestrator,MCPServerGenerator,PerformanceProfiler,TestInfrastructureGenerator,ReleaseManager,ArchitectureRecordsExpert,DocumentationSuiteGenerator,github-agent,MultiLanguageBuilder,PRCIErrDiagnosticFix leaf;
 
 ```
 
@@ -61,7 +62,7 @@ flowchart LR
 | Agent | Invocation | User-invocable | Key Focus |
 |---|---|---|---|
 | **Orchestrator** | yes | yes | Pure routing layer; routes tasks to specialists, synthesizes results |
-| **Agent Optimizer** | yes | yes | Diagnostics & optimization of a VS Code agent's definition, tools, and instructions |
+| **AgentOptimizer** | yes | yes | Diagnostics & optimization of a VS Code agent's definition, tools, and instructions |
 | **Architecture Records Expert** | no | no | Manages ADRs and architectural alignments inside `./docs` |
 | **Brainstorm** | no | no | Divergent thinking: generates low-token architectural alternatives & edge cases |
 | **CodeImplementer** | no | no | Implements/refactors/fixes code with zero prose; atomic, typed edits |
@@ -77,6 +78,7 @@ flowchart LR
 | **Performance Profiler** | no | no | CPU/memory profiling for Python (Tachyon, Memray) and Node.js |
 | **Release Manager** | no | no | Version bumping, changelogs, Git tagging, publishing |
 | **github-agent** | no | no | PR/issue/code-search review, triage, GitHub Projects, agent capability filing |
+| **PRCIErrDiagnosticFix** | no | no | Root-cause diagnosis of failing CI/Actions jobs & PR errors, then suggests fixes |
 | **NextjsGenerator** | no | no | Next.js architecture: App Router, Server Components, ISR |
 | **NodeJsExpressGenerator** | no | no | Node.js/Express REST API bootstrapping |
 | **GraphQLTRPCAgent** | no | no | GraphQL schema/resolvers or tRPC end-to-end typing |
@@ -91,14 +93,15 @@ pick the single Tier-2 leaf.
 **Tier-0 — Orchestrator (global classification)**
 1. **Trivial-task short-circuit** — answer simple questions/lookups directly, don't route.
 2. **Domain classification** — map the task to a domain: Frontend, Backend, Infra & DevOps, or Docs & Governance (see *Domain Map*).
-3. **Cross-cutting diagnostics** — Agent Optimizer / Brainstorm / Compaction Expert / Web Diagnosis Expert handle special-purpose diagnostics, not routine routing.
+3. **Cross-cutting diagnostics** — Agent Optimizer / Brainstorm / Compaction Expert / Web Diagnosis Expert / MultiLanguage Builder handle special-purpose diagnostics, not routine routing.
 4. **GitHub / agent-capability workflows** → route to `github-agent` (via the Docs & Governance router).
-5. **Default** — if no clear domain emerges, route to the most general-capable router.
+5. **Failing CI / GitHub Actions jobs and PR errors needing root-cause diagnosis + fix** → route to `PRCIErrDiagnosticFix` (via the Infra & DevOps router).
+6. **Default** — if no clear domain emerges, route to the most general-capable router.
 
 **Tier-1 — Domain routers (sub-rules)**
 - **Frontend**: Next.js → `NextjsGenerator`; Vite SPA → `TypeScriptReactViteGenerator`.
 - **Backend**: GraphQL/tRPC → `GraphQLTRPCAgent`; FastAPI → `PythonFastAPIBuilder`; Node.js+Express → `NodeJsExpressGenerator`; Spring Boot → `SpringBootGenerator`.
-- **Infra & DevOps**: Monorepo → `MonorepoManager`; dev container → `DevContainerOrchestrator`; MCP → `MCPServerGenerator`; profiling → `PerformanceProfiler`; tests/CI → `TestInfrastructureGenerator`; release → `ReleaseManager`.
+- **Infra & DevOps**: Monorepo → `MonorepoManager`; dev container → `DevContainerOrchestrator`; MCP → `MCPServerGenerator`; profiling → `PerformanceProfiler`; tests → `TestInfrastructureGenerator`; release → `ReleaseManager`; CI/Actions failure diagnosis → `PRCIErrDiagnosticFix`.
 - **Docs & Governance**: ADRs → `ArchitectureRecordsExpert`; docs → `DocumentationSuiteGenerator`; GitHub → `github-agent`.
 - **Fan-out** — decompose independent multi-part tasks and dispatch each to its own specialist in parallel.
 - **Post-routing self-check** — verify results against acceptance criteria; bounded re-attempt, then escalate to Agent Optimizer once.
@@ -109,11 +112,12 @@ pick the single Tier-2 leaf.
 |---|---|---|
 | Frontend | Frontend Domain Router | NextjsGenerator, TypeScriptReactViteGenerator |
 | Backend | Backend Domain Router | GraphQLTRPCAgent, PythonFastAPIBuilder, NodeJsExpressGenerator, SpringBootGenerator |
-| Infra & DevOps | Infra & DevOps Domain Router | MonorepoManager, DevContainerOrchestrator, MCPServerGenerator, PerformanceProfiler, TestInfrastructureGenerator, ReleaseManager |
+| Infra & DevOps | Infra & DevOps Domain Router | MonorepoManager, DevContainerOrchestrator, MCPServerGenerator, PerformanceProfiler, TestInfrastructureGenerator, ReleaseManager, PRCIErrDiagnosticFix |
 | Docs & Governance | Docs & Governance Domain Router | ArchitectureRecordsExpert, DocumentationSuiteGenerator, github-agent |
 
 ## Notes
 
 - `NextjsGenerator` and `TypeScriptReactViteGenerator` are both React-focused; the Orchestrator routes Next.js-specific work to `NextjsGenerator` and Vite-based SPA work to `TypeScriptReactViteGenerator`.
 - Each `.agent.md` file lives at `c:\Users\Steeve\AppData\Roaming\Code\User\prompts\<Agent>.agent.md` and is loaded into the Orchestrator's routing context at invocation time.
+- **Failing CI / GitHub Actions jobs and PR errors** needing root-cause diagnosis + fix route to `PRCIErrDiagnosticFix` (via the Infra & DevOps router).
 - Each domain router only carries its own leaves in its frontmatter `agents:` list, so routing decisions for that domain are made without any other tier's agents present in context.
