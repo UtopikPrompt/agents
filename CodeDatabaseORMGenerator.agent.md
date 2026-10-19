@@ -1,5 +1,5 @@
 ---
-name: "DatabaseORMGenerator"
+name: "CodeDatabaseORMGenerator"
 description: "Specialized for database schema and ORM setup. Handles SQL/ORM scaffolding, migrations, indexes, constraints, connection pooling, seeding, and query patterns. Supports PostgreSQL, MySQL, SQLite, and MariaDB with SQLAlchemy (Python), Prisma (Node.js), Hibernate/JPA (Java), and Eloquent (PHP)."
 argument-hint: "Database engine, tables/relations, migration requirements, and ORM preference."
 user-invocable: false

@@ -1,5 +1,5 @@
 ---
-name: "MonorepoManager"
+name: "InfraMonorepoManager"
 description: "Handles workspace coordination across multiple packages, manages dependency graphs, version synchronization, and publish workflows."
 argument-hint: "Monorepo path, package structure, and version management requirements."
 user-invocable: false

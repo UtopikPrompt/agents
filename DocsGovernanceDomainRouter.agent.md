@@ -3,7 +3,7 @@ name: "DocsGovernanceDomainRouter"
 description: >
   Docs/Governance sub-layer. Routes documentation, ADR, and governance tasks to a
   single leaf agent. Invoke ONLY when the Orchestrator has classified the task as
-  Docs/Governance work. Never performs work itself; delegates to exactly one leaf subagent.
+  GOV_/Governance work. Never performs work itself; delegates to exactly one leaf subagent.
 argument-hint: "Docs/governance task description, target audience, acceptance criteria."
 user-invocable: false
 tools: [agent]

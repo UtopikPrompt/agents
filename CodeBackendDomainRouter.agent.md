@@ -1,5 +1,5 @@
 ---
-name: "BackendDomainRouter"
+name: "CodeBackendDomainRouter"
 description: >
   Backend-router sub-layer. Routes backend-scaffolding tasks to a single leaf agent.
   Invoke ONLY when the Orchestrator has classified the task as Backend work. Never

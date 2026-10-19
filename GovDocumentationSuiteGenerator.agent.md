@@ -1,5 +1,5 @@
 ---
-name: "DocumentationSuiteGenerator"
+name: "GovDocumentationSuiteGenerator"
 description: "Handles ADRs, API docs, READMEs, and user-facing documentation with consistent formatting and cross-referencing."
 argument-hint: "Documentation type, target audience, and project context."
 user-invocable: false

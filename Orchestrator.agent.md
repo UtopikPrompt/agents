@@ -6,32 +6,13 @@ user-invocable: true
 tools: [vscode, execute/getTerminalOutput, execute/killTerminal, execute/sendToTerminal, execute/runTask, execute/createAndRunTask, execute/runInTerminal, read/problems, read/readFile, read/viewImage, read/terminalSelection, read/terminalLastCommand, read/getTaskOutput, agent, edit/createDirectory, edit/createFile, edit/editFiles, edit/rename, search, web/fetch, 'github/*', 'io.github.ihor-sokoliuk/mcp-searxng/*', vscodeTasks/createAndRunTask, vscodeTasks/runTask, vscodeTasks/getTaskOutput, vscodeTasks/problems, vscodeGeneral/rename]
 agents:
   # Global routing layer (cross-cutting)
-  - CodeImplementer
-  - ArchitectureRecordsExpert
-  - WebDiagnosisExpert
-  - Brainstorm
-  - CompactionExpert
   - AgentOptimizer
-  # Domain routers (route to leaf specialists)
-  - FrontendDomainRouter
-  - BackendDomainRouter
-  - InfraDevOpsDomainRouter
+  - Brainstorm
+  - CodeImplementer
+  - CompactionExpert
   - DocsGovernanceDomainRouter
-  # Leaf specialists (invoked only by their domain router)
-  - TSReactViteGenerator
-  - NextjsGenerator
-  - PythonFastAPIBuilder
-  - NodeJsExpressGenerator
-  - SpringBootGenerator
-  - MonorepoManager
-  - DevContainerOrchestrator
-  - MCPServerGenerator
-  - PerformanceProfiler
-  - TestInfrastructureGenerator
-  - DocumentationSuiteGenerator
-  - ReleaseManager
-  - github-agent
-  - PRCIErrDiagnosticFix
+  - InfraDevOpsDomainRouter
+  - WebDiagnosisExpert
 ---
 ## Efficiency — Progressive Deepening
 - Always begin with the cheapest action that can answer the question: a quick `grep_search` / `file_search`, a targeted read of only the relevant lines, or a read-only `get_errors` diagnostic pass.
@@ -70,7 +51,7 @@ context small (it carries the taxonomy of routers, not 18 leaf definitions).
 1. **CodeImplementer** — task is a direct code-change/implementation request (not a full build). Route to root layer.
 2. **Ambiguous / cross-cutting / pure review or planning** → **Brainstorm** (root layer).
 3. **Task is a build/scaffold of a frontend app** → **FrontendDomainRouter**.
-4. **Task is a build/scaffold of a backend app** → **BackendDomainRouter**.
+4. **Task is a build/scaffold of a backend app** → **CodeBackendDomainRouter**.
 5. **Task is infra/DevOps/tooling** → **InfraDevOpsDomainRouter**.
 6. **Task is docs/ADRs/governance** → **DocsGovernanceDomainRouter**.
 7. **GitHub / agent-capability workflows** → **github-agent** (via DocsGovernanceDomainRouter, or root layer when the task is clearly agent-definition review).
@@ -78,27 +59,22 @@ context small (it carries the taxonomy of routers, not 18 leaf definitions).
 9. **No specialist fits** → return `Target Subagent: NONE` and explain why.
 
 > **Build vs. change:** a task that *builds/scaffolds an app* routes to the matching **Domain Router**; a task that *edits/fixes/refactors existing code* routes to **CodeImplementer** (root layer). When a task both edits existing code AND builds a new module, let CodeImplementer own the edit and route the new-module portion to the matching Domain Router.
-1. **CodeImplementer** (root) - When task requires actual code changes, file generation, or implementation/refactoring of existing code.
-2. **Web Diagnosis Expert** (root) - When task requires external documentation lookup or third-party error research.
-3. **Brainstorm** (root) - When task is architectural crossroads, requires divergent thinking or edge-case mapping.
-4. **Compaction Expert** (root) - ONLY when the conversation shows context pressure (large recent output, many turns, or the user reports slowness) — NOT on a fixed turn count.
-5. **FrontendDomainRouter** — frontend-scaffolding tasks (React/Vite SPA, Next.js, data-viz); the router then selects the leaf.
-6. **BackendDomainRouter** — backend-scaffolding tasks (FastAPI, Express, Spring Boot); the router then selects the leaf.
-7. **InfraDevOpsDomainRouter** — infra/DevOps/tooling tasks (monorepo, devcontainers, MCP, profiling, testing, release); the router then selects the leaf.
-8. **DocsGovernanceDomainRouter** — ADRs/RFCs (→ Architecture Records Expert), general docs/READMEs (→ Documentation Suite Generator), GitHub/agent-capability workflows (→ github-agent); the router then selects the leaf.
-9. **WebCheck** — when the task references a specific tool, library, skill, or agent whose exact behavior or correct specialist match is unclear, check the web (`web/fetch`) to disambiguate *which domain/router* before routing.
-10. **Agent Optimizer** — escalation target only (Post-Routing Self-Check), never a first-choice route.
+1. **Domain Router / Leaf Specialists** - If a specialized specialist (e.g., NextjsGenerator, PythonFastAPIBuilder, TSReactViteGenerator) perfectly matches the scaffolding or building intent, route there. Domain Routers guide this selection.
+2. **CodeImplementer** (root) - If the task is a direct code-change/implementation request (editing existing files) AND no specialized builder/router fit, route to CodeImplementer as a fallback.
+3. **Web Diagnosis Expert** (root) - When task requires external documentation lookup or third-party error research.
+4. **Brainstorm** (root) - When task is architectural crossroads, requires divergent thinking, edge-case mapping.
+5. **Compaction Expert** (root) - ONLY when the conversation shows context pressure (large recent output, many turns, or the user reports slowness) — NOT on a fixed turn count.
 
 ## Routing Priority (apply when more than one rule matches)
 1. **Trivial-task short-circuit** — if the task is a simple question, quick explanation, small factual lookup, or one-line fix that any specialist (or you) can answer directly, DO NOT route. Answer it yourself. This avoids wasted routing hops.
 2. **Compaction Expert** — context shrinking takes precedence over all other routing, but only when the conversation shows context pressure (large recent output, many back-and-forth turns, or the user signals it is getting slow) — NOT on a fixed turn count.
 3. **Domain routers win over direct leaves** — classify the task, then route to the matching **Domain Router** (or root-layer cross-cutting agent); the router picks the most specific leaf. Within a router, apply "most specific wins" (e.g. ADRs → Architecture Records Expert, not Documentation Suite Generator; Next.js-specific → NextjsGenerator, not the generic frontend SPA agent).
    - Docs/ADRs governance → **Architecture Records Expert**; general docs/READMEs → **Documentation Suite Generator**; never CodeImplementer for these.
-   - Backend API scaffolding → **BackendDomainRouter** → Python FastAPI Builder.
+   - Backend API scaffolding → **CodeBackendDomainRouter** → Python FastAPI Builder.
    - Frontend scaffolding → **FrontendDomainRouter** → appropriate React leaf.
 4. **Ambiguous / cross-cutting / pure review or planning** → **Brainstorm** (root layer).
 4bis. **GitHub / agent-capability workflows** → **github-agent** (via DocsGovernanceDomainRouter).
-4bis-bis. **Failing CI / GitHub Actions jobs and PR errors needing root-cause diagnosis + fix** → **PRCIErrDiagnosticFix** (via InfraDevOpsDomainRouter, since CI/pipelines are DevOps/tooling).
+4bis-bis. **Failing CI / GitHub Actions jobs and PR errors needing root-cause diagnosis + fix** → **InfraPRCIErrDiagnosticFix** (via InfraDevOpsDomainRouter, since CI/pipelines are DevOps/tooling).
 5. **Otherwise** → route to the closest matching **Domain Router** and let it pick the leaf; name the router explicitly.
 6. **No specialist fits** → return `Target Subagent: NONE` and explain why.
 7. **Ambiguous specialist match** — first check the web (`web/fetch`) to disambiguate *which domain/router*, then fall back to asking the user.
@@ -121,9 +97,9 @@ context small (it carries the taxonomy of routers, not 18 leaf definitions).
 ## Post-Routing Self-Check (Bounded Escalation)
 After a subagent returns, VERIFY the result against the stated acceptance criteria and check for problems:
 1. **Result matches criteria AND no problems found** → deliver it to the user (normal path).
-2. **Result does NOT match criteria** → do ONE bounded re-attempt: re-read the routing rule, then either (a) re-route to a different specialist, or (b) if you can answer directly, answer it. Do not re-route to the same specialist twice.
+2. **Result does NOT match criteria** → do EXACTLY ONE bounded re-attempt: re-read the routing rule, then either (a) re-route to a DIFFERENT specialist, or (b) if you can answer directly, answer it. Never re-route to the same specialist twice, and never re-attempt the same point a second time — this is the hard retry cap.
 3. **Problem found** → Address the problem first, ensuring the underlying bug is definitively fixed before considering the task resolved or testing/updates are made. If the bug is fixed and the criteria match, deliver the result. If not, proceed to step 4.
-4. **Re-attempt STILL fails OR bug remains unfixed** → escalate to the **AgentOptimizer** subagent for a definition-level fix. Stop after this single escalation; do not loop.
+4. **Re-attempt STILL fails OR bug remains unfixed** → escalate to the **AgentOptimizer** subagent for a definition-level fix. This is a HARD terminal step: escalate EXACTLY ONCE and then STOP — do not loop, do not re-attempt, do not re-escalate. The agent must deliver a result or stop; it may never cycle back to step 2 or step 3.
 5. **Escalation caveat** — The Agent Optimizer fixes routing for FUTURE sessions, not this one. Tell the user this distinction instead of implying the current result was fixed.
 6. Only escalate when a genuine routing failure is observed (wrong specialist or unsatisfied criteria) — NOT for routine ambiguity or the first time you are unsure.
 

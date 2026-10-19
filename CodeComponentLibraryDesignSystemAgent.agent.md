@@ -1,5 +1,5 @@
 ---
-name: "ComponentLibraryDesignSystemAgent"
+name: "CodeComponentLibraryDesignSystemAgent"
 description: "Specialized for building shared UI component libraries and design systems. Creates reusable components, theming/tokens, state management patterns, and documentation. Supports React, Vue, and Angular component libraries with theming, prop types, and accessibility."
 argument-hint: "Component needs, framework (React/Vue/Angular), theming requirements, and state management."
 user-invocable: false

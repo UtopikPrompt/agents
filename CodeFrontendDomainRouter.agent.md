@@ -1,5 +1,5 @@
 ---
-name: "FrontendDomainRouter"
+name: "CodeFrontendDomainRouter"
 description: >
   Frontend-router sub-layer. Routes frontend-scaffolding tasks to a single leaf agent.
   Invoke ONLY when the Orchestrator has classified the task as Frontend work. Never

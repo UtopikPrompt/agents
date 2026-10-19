@@ -1,5 +1,5 @@
 ---
-name: "PerformanceProfiler"
+name: "InfraPerformanceProfiler"
 description: "Manages CPU/memory profiling across Python (Tachyon, Memray) and Node.js (Chrome DevTools), handles result analysis and optimization suggestions."
 argument-hint: "Target application, profiling type (CPU/memory), and analysis requirements."
 user-invocable: false

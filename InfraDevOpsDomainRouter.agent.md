@@ -3,7 +3,7 @@ name: "InfraDevOpsDomainRouter"
 description: >
   Infra/DevOps sub-layer. Routes infrastructure, DevOps, and tooling tasks to a
   single leaf agent. Invoke ONLY when the Orchestrator has classified the task as
-  Infra/DevOps work. Never performs work itself; delegates to exactly one leaf subagent.
+  INFRA_/DevOps work. Never performs work itself; delegates to exactly one leaf subagent.
 argument-hint: "Infra/DevOps task description, acceptance criteria."
 user-invocable: false
 tools: [agent]
@@ -13,6 +13,7 @@ agents:
   - ObservabilityAgent
   - CloudDeploymentAgent
   - MonorepoManager
+  - KubernetesEngineer
   - DevContainerOrchestrator
   - MCPServerGenerator
   - PerformanceProfiler
@@ -44,6 +45,7 @@ it with a complete routing payload.
 - **CPU/memory profiling (Python & Node.js)** → `PerformanceProfiler`.
 - **Test suites + CI/CD pipeline configuration** → `TestInfrastructureGenerator`.
 - **Version bumping / changelog / Git tagging / publishing** → `ReleaseManager`.
+- **Kubernetes cluster engineering (Helm/Kustomize, Operators, AKS/cluster-engine, RBAC, Ingress, pod/namespace troubleshooting)** → `KubernetesEngineer`.
 - **Ambiguous / cross-cutting / pure review or planning** → `Brainstorm` (handled by Orchestrator root layer; if reached here, prefer the closest specific leaf).
 
 ## Invocation

@@ -1,12 +1,12 @@
 ---
-name: TSReactViteGenerator
+name: CodeTypeScriptReactViteGenerator
 description: >
   Generate and scaffold frontend projects built with TypeScript, React, and Vite.
   Invoke for modern frontend scaffolding, component architecture, state management
   (Redux/Zustand), build configuration, and testing setup.
 argument-hint: >
   Frontend stack, component/library scope, state management preference, and testing needs.
-user-invocable: true
+user-invocable: false
 disable-model-invocation: false
 tools: [read, edit, search]
 ---

@@ -1,5 +1,5 @@
 ---
-name: "ReleaseManager"
+name: "InfraReleaseManager"
 description: "Handles version bumping, changelog generation, Git tagging, and package publishing workflows across all workspaces."
 argument-hint: "Project path, version bump type, and publishing targets."
 user-invocable: false
