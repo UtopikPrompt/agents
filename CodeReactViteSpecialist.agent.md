@@ -1,5 +1,5 @@
 ---
-name: CodeTypeScriptReactViteGenerator
+name: CodeReactViteSpecialist
 description: >
   Generate and scaffold frontend projects built with TypeScript, React, and Vite.
   Invoke for modern frontend scaffolding, component architecture, state management
@@ -8,11 +8,11 @@ argument-hint: >
   Frontend stack, component/library scope, state management preference, and testing needs.
 user-invocable: false
 disable-model-invocation: false
-tools: [read, edit, search]
+tools: [read, edit, search, execute]
 ---
-## TypeScript/React/Vite Generator Agent Definition
+## TypeScript/React/Vite Specialist Agent Definition
 
-# TSReactViteGenerator Agent
+# CodeReactViteSpecialist
 
 ## Trigger
 Frontend component library setup, initial Vite/React project scaffolding, state management integration, or unit/end-to-end testing setup for modern frontend applications.

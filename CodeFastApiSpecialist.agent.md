@@ -1,5 +1,5 @@
 ---
-name: "CodePythonFastAPIBuilder"
+name: "CodeFastApiSpecialist"
 description: "Specialized for backend API scaffolding with FastAPI, Pydantic, SQLAlchemy, and pytest. Handles OpenAPI spec generation, dependency injection patterns, and async database setup."
 argument-hint: "API name, database configuration, authentication requirements, and endpoint specifications."
 user-invocable: false

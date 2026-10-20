@@ -2,8 +2,8 @@
 """
 Agent Roster Validator
 ======================
-Validates the multi-tier agent roster (the .agent.md prompt files) for the 3-tier
-Orchestrator architecture. The architecture is instruction-based (declarative prompt
+Validates single-dispatcher execution and separate four-level ownership.
+The architecture is instruction-based (declarative prompt
 files), so "testing" here means verifying *definitions* and *routing consistency*,
 not running executable code.
 
@@ -14,15 +14,19 @@ Checks performed:
   [DEF-4] `tools` entries are well-formed.
   [RST-1] Every leaf referenced by a router's `agents:` list resolves to a real file
           whose frontmatter `name` matches (no dangling/unknown references).
-  [RST-2] Every agent file is reachable: listed in a router's `agents:` list, the
-          Orchestrator's `agents:` list, or the README routing rules (backtick refs).
-          Catches orphaned files with no routing entry.
+  [RST-2] Every agent file is reachable by delegation from Orchestrator.
   [RST-3] Every leaf named in the README routing rules / Domain Map resolves to a real file.
+    [RST-4] Only Orchestrator delegates; each catalog agent has one logical owner.
+    [RST-5] Ownership contains no cycles.
+    [RST-6] The ownership diagram and Domain Map match the catalog.
+    [RST-7] Advisors and workers occupy their documented ownership tiers.
+    [CAT-1] The compact catalog resolves all advisors, workers, and route targets.
 
 Exit code 0 = PASS, 1 = FAIL.
 """
 
-import os
+from collections import Counter
+import json
 import re
 import sys
 from pathlib import Path
@@ -43,10 +47,17 @@ except ImportError:
 # Resolve the prompts directory relative to this script so the validator is portable.
 PROMPTS_DIR = Path(__file__).resolve().parent
 README_PATH = PROMPTS_DIR / "README.md"
+CATALOG_PATH = PROMPTS_DIR / "routing-catalog.json"
 AGENT_GLOB = "*.agent.md"
 
 # Required frontmatter fields.
 REQUIRED_FIELDS = ("name", "description", "tools")
+TIER1_ADVISORS = {
+    "CodeDomainAdvisor", "InfraDevOpsAdvisor",
+    "DocsGovernanceAdvisor", "UtilityAdvisor",
+}
+CODE_SUBADVISORS = {"CodeFrontendAdvisor", "CodeBackendAdvisor"}
+DISPATCHER_TOOLS = {"read/readFile", "search", "agent", "vscode/askQuestions"}
 
 
 # --------------------------------------------------------------------------- #
@@ -64,10 +75,14 @@ def parse_frontmatter(text):
     open_idx = next(i for i, line in enumerate(lines) if line.strip() == "---")
     # Collect lines until the next '---' delimiter.
     content_lines = []
+    closed = False
     for line in lines[open_idx + 1:]:
         if line.strip() == "---":
+            closed = True
             break
         content_lines.append(line)
+    if not closed:
+        return None, "frontmatter is missing its closing delimiter (---)"
     raw = "\n".join(content_lines)
     try:
         data = yaml.safe_load(raw)
@@ -79,8 +94,15 @@ def parse_frontmatter(text):
 
 
 def filename_stem(path: Path) -> str:
-    """Return the filename stem (path without the .agent.md extension)."""
-    return path.with_suffix("").name
+    """Return the filename 'stem' of a roster file, i.e. its canonical agent name.
+    A roster file is named '<AgentName>.agent.md'; the stem is '<AgentName>'."""
+    # Strip the '.md' extension first.
+    if path.suffix == ".md":
+        path = path.with_suffix("")
+    # Strip the '.agent' middle suffix introduced by the '.agent.md' naming.
+    if path.name.endswith(".agent"):
+        path = path.with_suffix("")
+    return path.name
 
 
 # --------------------------------------------------------------------------- #
@@ -110,7 +132,7 @@ def load_agents():
             "fm": name if isinstance(name, dict) else {},
         }
         files.append(entry)
-        if entry["name"]:
+        if isinstance(entry["name"], str) and entry["name"]:
             registry[entry["name"]] = path
             stems[entry["stem"]] = path
         if entry["stem"]:
@@ -127,21 +149,33 @@ def load_readme_refs(files, registry):
     """
     readme = README_PATH.read_text(encoding="utf-8")
 
-    # Backtick-quoted references in the README (routing rules / Domain Map).
     readme_refs = set()
-    for tok in re.findall(r"`([^`]+)`", readme):
-        if tok in registry:
+    prose = re.sub(r"```[^\n]*\n.*?```", "", readme, flags=re.DOTALL)
+    for tok in re.findall(r"`([^`\n]+)`", prose):
+        if tok in registry or re.fullmatch(
+            r"[A-Z][A-Za-z0-9]*(?:Agent|Advisor|Generalist|Specialist|Diagnostician|Diagnostics|Summarizer|Router|Generator|Builder|Expert|Manager|Orchestrator|Implementer|Executor)",
+            tok,
+        ):
             readme_refs.add(tok)
+    readme_refs.update(re.findall(r"^\|\s*\*\*([A-Za-z]\w*)\*\*\s*\|", prose, re.MULTILINE))
+    domain_map = re.search(r"^## Domain Map\s*\n(.*?)(?=^## |\Z)", prose, re.MULTILINE | re.DOTALL)
+    if domain_map:
+        for line in domain_map.group(1).splitlines():
+            cells = [cell.strip().strip("`*") for cell in line.strip().strip("|").split("|")]
+            if len(cells) != 3 or cells[0] == "Domain Prefix" or set(cells[0]) <= {"-", ":"}:
+                continue
+            readme_refs.add(cells[1])
+            readme_refs.update(child.strip().strip("`*") for child in cells[2].split(","))
 
     # Router agents lists (frontmatter `agents:` of files whose name ends with 'Router').
     router_agents = []
     for f in files:
-        if f["fm"].get("name", "").endswith("Router"):
+        if isinstance(f["name"], str) and f["name"].endswith("Advisor"):
             agents = f["fm"].get("agents")
-            router_agents.append([a for a in (agents or []) if isinstance(a, str)])
+            router_agents.append([a for a in agents if isinstance(a, str)] if isinstance(agents, list) else [])
     # Orchestrator agents list.
     orch = next((f["fm"] for f in files if f["fm"].get("name") == "Orchestrator"), {}).get("agents")
-    orchestrator_agents = [a for a in (orch or []) if isinstance(a, str)]
+    orchestrator_agents = [a for a in orch if isinstance(a, str)] if isinstance(orch, list) else []
 
     return router_agents, orchestrator_agents, readme_refs
 
@@ -161,6 +195,7 @@ class Report:
 
 def check_definition(files, report):
     """DEF checks: frontmatter validity, name/stem match, required fields, tools."""
+    seen_names = set()
     for f in files:
         stem = f["stem"]
         if f["err"]:
@@ -173,6 +208,12 @@ def check_definition(files, report):
                 report.add("DEF-1", f["path"], f"Missing required frontmatter field: '{field}'")
         # DEF-2: name matches stem exactly (no spaces).
         if f["name"] is not None:
+            if not isinstance(f["name"], str):
+                report.add("DEF-2", f["path"], "frontmatter name must be a string")
+                continue
+            if f["name"] in seen_names:
+                report.add("DEF-2", f["path"], f"Duplicate agent name: '{f['name']}'")
+            seen_names.add(f["name"])
             if f["name"] != stem:
                 report.add("DEF-2", f["path"],
                            f"frontmatter name '{f['name']}' does not match filename stem '{stem}' "
@@ -187,44 +228,41 @@ def check_definition(files, report):
         tools = fm.get("tools")
         if tools is None:
             report.add("DEF-4", f["path"], "Missing 'tools' field")
-        elif not isinstance(tools, list) or len(tools) == 0:
-            report.add("DEF-4", f["path"], "'tools' must be a non-empty list")
+        elif not isinstance(tools, list):
+            report.add("DEF-4", f["path"], "'tools' must be a list (empty for tool-free advisors)")
         else:
             for tool in tools:
-                if not isinstance(tool, str) or "/" not in tool and "*" not in tool:
+                if not isinstance(tool, str) or " " in tool:
                     report.add("DEF-4", f["path"], f"Malformed tool entry: {tool!r} "
                                                   f"(expected 'group/operation' or 'group/*' form)")
 
 
 def check_reachability(files, registry, stems, router_agents, orchestrator_agents, readme_refs, report):
     """RST checks: router leaf resolution, coverage, README routing resolution."""
-    # Build the set of all canonical names that reference an agent.
-    referenced = set(readme_refs)
-    referenced.update(orchestrator_agents)
-    for agents in router_agents:
-        referenced.update(agents)
+    adjacency = {}
+    for entry in files:
+        children = entry["fm"].get("agents", [])
+        if isinstance(entry["name"], str):
+            adjacency[entry["name"]] = [child for child in children if isinstance(child, str)] if isinstance(children, list) else []
+        if "agents" in entry["fm"] and not isinstance(children, list):
+            report.add("RST-1", entry["path"], "agents must be a list of agent names")
+        elif isinstance(children, list):
+            for child in children:
+                if not isinstance(child, str) or child not in registry:
+                    report.add("RST-1", entry["path"], f"Agent reference {child!r} does not resolve")
+
+    reachable = set()
+    pending = ["Orchestrator"] if "Orchestrator" in registry else []
+    while pending:
+        current = pending.pop()
+        if current in reachable:
+            continue
+        reachable.add(current)
+        pending.extend(child for child in adjacency.get(current, []) if child in registry)
 
     # RST-1: router / Orchestrator agents-list entries must resolve to real files.
     def resolves(name):
         return registry.get(name) is not None
-
-    for f in files:
-        if not f["fm"].get("name", "").endswith("Router"):
-            continue
-        for leaf in f["fm"].get("agents", []):
-            if not isinstance(leaf, str):
-                report.add("RST-1", f["path"], f"Non-string entry in agents list: {leaf!r}")
-                continue
-            if not resolves(leaf):
-                report.add("RST-1", f["path"], f"Agent '{leaf}' referenced by this router does not exist "
-                                              f"(missing file or name mismatch)")
-
-    # Orchestrator agents resolution.
-    orch = next((f for f in files if f["fm"].get("name") == "Orchestrator"), None)
-    if orch:
-        for leaf in orch["fm"].get("agents", []):
-            if not isinstance(leaf, str) or not resolves(leaf):
-                report.add("RST-1", orch["path"], f"Agent '{leaf}' in Orchestrator agents list does not resolve")
 
     # RST-2: coverage — every agent file must be reachable.
     for f in files:
@@ -232,15 +270,182 @@ def check_reachability(files, registry, stems, router_agents, orchestrator_agent
         if not name:
             report.add("RST-2", f["path"], "No frontmatter name; cannot determine reachability")
             continue
-        if name not in referenced:
-            report.add("RST-2", f["path"], f"Agent '{name}' is unreachable — not listed by any router, "
-                                          f"the Orchestrator, or in the README routing rules")
+        if not isinstance(name, str) or name not in reachable:
+            report.add("RST-2", f["path"], f"Agent '{name}' is not reachable from Orchestrator")
 
     # RST-3: README routing-rule references must resolve.
     for name in sorted(readme_refs):
         if not resolves(name):
             report.add("RST-3", README_PATH, f"README routing rule references '{name}', which does not resolve "
                                             f"(missing file or name mismatch)")
+
+
+def load_catalog():
+    return json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+
+
+def readme_section(readme, heading):
+    match = re.search(r"^## " + re.escape(heading) + r"\s*\n(.*?)(?=^## |\Z)", readme, re.MULTILINE | re.DOTALL)
+    return match.group(1) if match else ""
+
+
+def check_topology(files, registry, report, readme=None, catalog=None):
+    """Validate flat invocation separately from catalog ownership and documentation."""
+    if catalog is None:
+        try:
+            catalog = load_catalog()
+        except (OSError, ValueError) as error:
+            report.add("CAT-1", CATALOG_PATH, f"Cannot load catalog: {error}")
+            return
+    runtime_edges = []
+    for entry in files:
+        name = entry["name"]
+        children = entry["fm"].get("agents", [])
+        if not isinstance(name, str):
+            continue
+        targets = [child for child in children if isinstance(child, str)] if isinstance(children, list) else []
+        runtime_edges.extend((name, child) for child in targets)
+        tools = entry["fm"].get("tools", [])
+        tools = tools if isinstance(tools, list) else []
+        if name == "Orchestrator":
+            if "agent" not in tools or any(tool not in DISPATCHER_TOOLS for tool in tools):
+                report.add("RST-4", entry["path"], "Dispatcher needs agent access and only classification tools")
+        elif targets or any(isinstance(tool, str) and tool.split("/")[0] == "agent" for tool in tools):
+            report.add("RST-4", entry["path"], "Only Orchestrator may delegate; nested agent access is forbidden")
+        if name.endswith("Advisor") and (entry["fm"].get("tools") != [] or entry["fm"].get("agents") != []):
+            report.add("RST-4", entry["path"], "Advisors must have explicit tools: [] and agents: []")
+
+    expected_runtime = Counter(("Orchestrator", name) for name in registry if name != "Orchestrator")
+    if Counter(runtime_edges) != expected_runtime:
+        report.add("RST-4", registry.get("Orchestrator", README_PATH), "Dispatcher must directly allow every advisor and worker exactly once; no nested edges")
+
+    if not isinstance(catalog, dict) or catalog.get("schema_version") != 1 or catalog.get("dispatcher") != "Orchestrator":
+        report.add("CAT-1", CATALOG_PATH, "Expected schema_version 1 and dispatcher Orchestrator")
+        return
+    groups = catalog.get("domains")
+    if not isinstance(groups, list):
+        report.add("CAT-1", CATALOG_PATH, "domains must be a list")
+        return
+    adjacency = {"Orchestrator": []}
+    declarations = {}
+    route_targets = set()
+    domain_names = set()
+    for group in groups:
+        if not isinstance(group, dict):
+            report.add("CAT-1", CATALOG_PATH, "Each domain must be an object")
+            continue
+        advisor, parent = group.get("advisor"), group.get("parent")
+        children, routes = group.get("children"), group.get("routes")
+        domain = group.get("domain")
+        if not isinstance(domain, str) or not domain or domain in domain_names:
+            report.add("CAT-1", CATALOG_PATH, "Domain names must be unique non-empty strings")
+        else:
+            domain_names.add(domain)
+        if not isinstance(advisor, str) or not advisor.endswith("Advisor") or advisor not in registry or advisor in declarations:
+            report.add("CAT-1", CATALOG_PATH, f"Invalid or duplicate advisor: {advisor!r}")
+            continue
+        if not isinstance(parent, str) or parent not in registry:
+            report.add("CAT-1", CATALOG_PATH, f"Unresolved owner for {advisor}: {parent!r}")
+            continue
+        declarations[advisor] = parent
+        if not isinstance(children, list) or any(not isinstance(child, str) for child in children):
+            report.add("CAT-1", CATALOG_PATH, f"{advisor} children must be a list of agent names")
+            children = []
+        adjacency[advisor] = children
+        if parent == "Orchestrator":
+            adjacency["Orchestrator"].append(advisor)
+        for child in children:
+            if child not in registry:
+                report.add("CAT-1", CATALOG_PATH, f"Unresolved owned agent: {child}")
+        if not isinstance(routes, dict):
+            report.add("CAT-1", CATALOG_PATH, f"{advisor} routes must be a label-to-worker object")
+            continue
+        for label, target in routes.items():
+            if not isinstance(label, str) or not label or not isinstance(target, str) or target not in children or target.endswith("Advisor"):
+                report.add("CAT-1", CATALOG_PATH, f"Invalid worker route in {advisor}: {label!r} -> {target!r}")
+            else:
+                route_targets.add(target)
+
+    advisors = {name for name in registry if name.endswith("Advisor")}
+    workers = set(registry) - advisors - {"Orchestrator"}
+    if set(declarations) != advisors:
+        report.add("CAT-1", CATALOG_PATH, "Every advisor needs exactly one domain declaration")
+    if route_targets != workers:
+        report.add("CAT-1", CATALOG_PATH, f"Worker route coverage mismatch: missing {sorted(workers - route_targets)}, extra {sorted(route_targets - workers)}")
+    edges = [(parent, child) for parent, children in adjacency.items() for child in children]
+
+    owners = {}
+    for parent, child in edges:
+        owners.setdefault(child, []).append(parent)
+    if set(adjacency["Orchestrator"]) != TIER1_ADVISORS:
+        report.add("RST-7", CATALOG_PATH, "Ownership root must contain the four Tier-1 advisors")
+    for name, path in registry.items():
+        parents = owners.get(name, [])
+        if name == "Orchestrator":
+            if parents:
+                report.add("RST-4", path, "Orchestrator must not have an ownership parent")
+        elif len(parents) != 1:
+            report.add("RST-4", path, f"Expected exactly one ownership parent, found {parents}")
+    for name, parent in declarations.items():
+        if owners.get(name) != [parent]:
+            report.add("RST-7", CATALOG_PATH, f"Declared owner for {name} disagrees with ownership edges")
+    for name in CODE_SUBADVISORS:
+        if owners.get(name) != ["CodeDomainAdvisor"]:
+            report.add("RST-7", registry.get(name, README_PATH), f"{name} must be owned by CodeDomainAdvisor")
+
+    visiting = set()
+    visited = set()
+
+    def visit(name):
+        if name in visiting:
+            report.add("RST-5", registry.get(name, README_PATH), f"Ownership cycle reaches {name}")
+            return
+        if name in visited:
+            return
+        visiting.add(name)
+        for child in adjacency.get(name, []):
+            visit(child)
+        visiting.remove(name)
+        visited.add(name)
+
+    for name in adjacency:
+        visit(name)
+
+    depths = {"Orchestrator": 0} if "Orchestrator" in registry else {}
+    pending = list(depths)
+    while pending:
+        parent = pending.pop(0)
+        for child in adjacency.get(parent, []):
+            if child in registry and child not in depths:
+                depths[child] = depths[parent] + 1
+                pending.append(child)
+    for name, depth in depths.items():
+        expected = 0 if name == "Orchestrator" else 1 if name in TIER1_ADVISORS else 3 if any(parent in CODE_SUBADVISORS for parent in owners.get(name, [])) else 2
+        if depth != expected:
+            report.add("RST-7", registry[name], f"Expected Tier-{expected}, found Tier-{depth}")
+    if set(depths) != set(registry):
+        report.add("RST-7", CATALOG_PATH, f"Ownership has unreachable agents: {sorted(set(registry) - set(depths))}")
+
+    if readme is None:
+        readme = README_PATH.read_text(encoding="utf-8")
+    diagram_edges = []
+    for diagram in re.findall(r"```mermaid\s*\n(.*?)```", readme_section(readme, "Ownership"), re.DOTALL):
+        diagram_edges.extend(
+            ("Orchestrator" if parent == "O" else parent, child)
+            for parent, child in re.findall(r"^\s*(\w+)\s*-->\s*(\w+)", diagram, re.MULTILINE)
+        )
+    missing = Counter(edges) - Counter(diagram_edges)
+    extra = Counter(diagram_edges) - Counter(edges)
+    if missing or extra:
+        report.add("RST-6", README_PATH, f"Ownership diagram/catalog mismatch: missing {dict(missing)}, extra {dict(extra)}")
+    documented_domains = Counter()
+    for line in readme_section(readme, "Domain Map").splitlines():
+        cells = [cell.strip().strip("`*") for cell in line.strip().strip("|").split("|")]
+        if len(cells) == 3 and cells[0] != "Domain Prefix" and not set(cells[0]) <= {"-", ":"}:
+            documented_domains.update((cells[1], child.strip().strip("`*")) for child in cells[2].split(","))
+    expected_domains = Counter((advisor, child) for advisor, children in adjacency.items() if advisor != "Orchestrator" for child in children)
+    if documented_domains != expected_domains:
+        report.add("RST-6", README_PATH, "Domain Map ownership does not match the catalog")
 
 
 # --------------------------------------------------------------------------- #
@@ -256,7 +461,7 @@ def build_report(report, files, registry, readme_refs):
     lines.append("")
 
     # Summary.
-    checks = ("DEF-1", "DEF-2", "DEF-3", "DEF-4", "RST-1", "RST-2", "RST-3")
+    checks = ("DEF-1", "DEF-2", "DEF-3", "DEF-4", "RST-1", "RST-2", "RST-3", "RST-4", "RST-5", "RST-6", "RST-7", "CAT-1")
     passed = all(v == 0 for v in report.check_counts.values())
     total_issues = sum(report.check_counts.values())
     if passed:
@@ -276,9 +481,14 @@ def build_report(report, files, registry, readme_refs):
             "DEF-2": "name matches filename stem",
             "DEF-3": "description present",
             "DEF-4": "tools well-formed",
-            "RST-1": "Router/Orchestrator leaf resolution",
+            "RST-1": "Invocation targets resolve",
             "RST-2": "Every agent reachable",
             "RST-3": "README routing references resolve",
+            "RST-4": "Single-dispatcher boundaries and unique ownership",
+            "RST-5": "No ownership cycles",
+            "RST-6": "Ownership documentation matches catalog",
+            "RST-7": "Documented ownership tiers and reachability",
+            "CAT-1": "Catalog structure and worker route coverage",
         }[check]
         lines.append(f"| {check} | {purpose} | {report.check_counts.get(check, 0)} |")
     lines.append("")
@@ -298,9 +508,12 @@ def build_report(report, files, registry, readme_refs):
     # Roster health.
     lines.append("## Roster Health")
     lines.append("")
-    lines.append(f"- Routers: {len([f for f in files if f['fm'].get('name', '').endswith('Router')])}")
-    lines.append(f"- Leaf specialists: {len([f for f in files if not f['fm'].get('name', '').endswith('Router')])}")
+    advisors = [entry for entry in files if isinstance(entry["name"], str) and entry["name"].endswith("Advisor")]
+    lines.append(f"- Dispatchers: {int('Orchestrator' in registry)}")
+    lines.append(f"- Tool-free advisors: {len(advisors)}")
+    lines.append(f"- Workers: {len(files) - len(advisors) - int('Orchestrator' in registry)}")
     lines.append(f"- README routing references: {len(readme_refs)}")
+    lines.append("- Static definition checks only; direct invocation and advisory decisions require runtime smoke tests.")
     lines.append("")
 
     return "\n".join(lines)
@@ -317,6 +530,7 @@ def main():
     try:
         check_definition(files, report)
         check_reachability(files, registry, stems, router_agents, orchestrator_agents, readme_refs, report)
+        check_topology(files, registry, report)
     except Exception as exc:  # pragma: no cover
         sys.stderr.write(f"[ERROR] validator crashed: {exc}\n")
         sys.exit(2)

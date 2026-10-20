@@ -1,0 +1,120 @@
+{
+    "schema_version": 1,
+    "dispatcher": "Orchestrator",
+    "domains": [
+        {
+            "domain": "CODE_",
+            "advisor": "CodeDomainAdvisor",
+            "parent": "Orchestrator",
+            "routes": {
+                "cross-language builds and package dependency resolution": "MultiLanguageBuilder",
+                "local framework errors and dependency diagnosis": "CodeFrameworkDiagnostician",
+                "generic coding with no specialist match": "CodeGeneralist"
+            },
+            "children": [
+                "CodeFrontendAdvisor",
+                "CodeBackendAdvisor",
+                "MultiLanguageBuilder",
+                "CodeFrameworkDiagnostician",
+                "CodeGeneralist"
+            ]
+        },
+        {
+            "domain": "CODE_ / Frontend",
+            "advisor": "CodeFrontendAdvisor",
+            "parent": "CodeDomainAdvisor",
+            "routes": {
+                "Next.js including API routes and server components": "CodeNextJsSpecialist",
+                "React or TypeScript SPA, Vite, PWA, charts or WebGL": "CodeReactViteSpecialist",
+                "shared component library, design system, theming tokens": "CodeDesignSystemSpecialist"
+            },
+            "children": [
+                "CodeNextJsSpecialist",
+                "CodeReactViteSpecialist",
+                "CodeDesignSystemSpecialist"
+            ]
+        },
+        {
+            "domain": "CODE_ / Backend",
+            "advisor": "CodeBackendAdvisor",
+            "parent": "CodeDomainAdvisor",
+            "routes": {
+                "FastAPI, Pydantic, Python web API": "CodeFastApiSpecialist",
+                "Node.js and Express REST": "CodeExpressSpecialist",
+                "Java or Kotlin Spring Boot": "CodeSpringBootSpecialist",
+                "GraphQL or tRPC schema and resolvers": "CodeGraphQLTRPCAgent",
+                "database schema, ORM, migrations or indexes": "CodeDatabaseORMGenerator"
+            },
+            "children": [
+                "CodeSpringBootSpecialist",
+                "CodeExpressSpecialist",
+                "CodeGraphQLTRPCAgent",
+                "CodeDatabaseORMGenerator",
+                "CodeFastApiSpecialist"
+            ]
+        },
+        {
+            "domain": "INFRA_/_DevOps",
+            "advisor": "InfraDevOpsAdvisor",
+            "parent": "Orchestrator",
+            "routes": {
+                "monorepo coordination and package version synchronization": "InfraMonorepoManager",
+                "dev container, Dockerfile or environment provisioning": "InfraDevContainerSpecialist",
+                "MCP server implementation and client integration": "InfraMCPServerGenerator",
+                "logging, tracing, metrics, dashboards or alerts": "InfraObservabilitySpecialist",
+                "cloud deployment and provisioning": "InfraCloudDeploymentAgent",
+                "Kubernetes, Helm, Kustomize, ingress or operators": "InfraKubernetesEngineer",
+                "security, authentication, RBAC or secrets": "InfraSecurityAuthAgent",
+                "Bicep, ARM, Terraform or Pulumi": "InfraIaCGenerator",
+                "CPU or memory profiling": "InfraPerformanceProfiler",
+                "test infrastructure, fixtures or CI configuration": "InfraTestInfrastructureGenerator",
+                "release, changelog, versioning or publication": "InfraReleaseManager",
+                "failing CI or GitHub Actions diagnosis": "InfraCIDiagnostics"
+            },
+            "children": [
+                "InfraMonorepoManager",
+                "InfraDevContainerSpecialist",
+                "InfraMCPServerGenerator",
+                "InfraObservabilitySpecialist",
+                "InfraCloudDeploymentAgent",
+                "InfraKubernetesEngineer",
+                "InfraSecurityAuthAgent",
+                "InfraIaCGenerator",
+                "InfraPerformanceProfiler",
+                "InfraTestInfrastructureGenerator",
+                "InfraReleaseManager",
+                "InfraCIDiagnostics"
+            ]
+        },
+        {
+            "domain": "GOV_/_Docs",
+            "advisor": "DocsGovernanceAdvisor",
+            "parent": "Orchestrator",
+            "routes": {
+                "ADRs, RFCs and architecture governance": "GovArchitectureRecordsExpert",
+                "README, API documentation or user documentation": "GovDocumentationSuiteGenerator",
+                "GitHub issues, PRs, triage or agent capability proposals": "GovGithubAgent"
+            },
+            "children": [
+                "GovArchitectureRecordsExpert",
+                "GovDocumentationSuiteGenerator",
+                "GovGithubAgent"
+            ]
+        },
+        {
+            "domain": "Miscellaneous",
+            "advisor": "UtilityAdvisor",
+            "parent": "Orchestrator",
+            "routes": {
+                "agent definition, tool or skill diagnostics": "AgentOptimizer",
+                "architectural alternatives and cross-cutting planning": "Brainstorm",
+                "explicit checkpoint or observed context pressure": "ContextSummarizer"
+            },
+            "children": [
+                "AgentOptimizer",
+                "Brainstorm",
+                "ContextSummarizer"
+            ]
+        }
+    ]
+}
