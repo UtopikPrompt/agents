@@ -31,6 +31,7 @@ class RosterValidatorTests(unittest.TestCase):
         with patch.object(Path, "read_text", return_value=self.readme):
             routers, root, refs = VALIDATOR["load_readme_refs"](self.files, self.registry)
         VALIDATOR["check_definition"](self.files, report)
+        VALIDATOR["check_tool_profiles"](self.files, report)
         VALIDATOR["check_reachability"](
             self.files, self.registry, self.stems, routers, root, refs, report
         )
@@ -229,12 +230,86 @@ class RosterValidatorTests(unittest.TestCase):
         self.readme = self.readme.replace("flowchart TD", "flowchart TD\n    D --> ExtraExecutionStep")
         self.assertEqual(self.validate().findings, [])
 
+    def test_missing_domain_organization_section_is_rejected(self):
+        self.readme = self.readme.replace("## Domain Organization", "## Unrelated Section")
+        self.assert_check("RST-6")
+
+    def test_domain_organization_has_no_execution_tier_labels(self):
+        section = VALIDATOR["readme_section"](self.readme, "Domain Organization")
+        self.assertIn("belongs to", section)
+        self.assertNotRegex(section, r"Tier-\d")
+
     def test_domain_map_parity_is_checked(self):
         self.readme = self.readme.replace(
             "| AgentOptimizer, Brainstorm, ContextSummarizer |",
             "| AgentOptimizer, Brainstorm |",
         )
         self.assert_check("RST-6")
+
+    def test_implementation_workers_require_native_search(self):
+        for entry in self.baseline:
+            required, _ = VALIDATOR["tool_profile"](entry["name"])
+            if not VALIDATOR["IMPLEMENTATION_TOOLS"] <= required:
+                continue
+            with self.subTest(agent=entry["name"]):
+                self.files = copy.deepcopy(self.baseline)
+                self.agent(entry["name"])["fm"]["tools"].remove("search")
+                self.assert_check("TOOL-1")
+
+    def test_ci_worker_requires_edit_access(self):
+        self.agent("InfraCIDiagnostics")["fm"]["tools"].remove("edit")
+        self.assert_check("TOOL-1")
+
+    def test_implementation_worker_requires_execution(self):
+        self.agent("CodeNextJsSpecialist")["fm"]["tools"].remove("execute")
+        self.assert_check("TOOL-1")
+
+    def test_read_only_and_documentation_workers_reject_execution(self):
+        names = set(VALIDATOR["READ_ONLY_TOOLS"]) | VALIDATOR["CUSTOMIZATION_WORKERS"]
+        for name in names:
+            with self.subTest(agent=name):
+                self.files = copy.deepcopy(self.baseline)
+                self.agent(name)["fm"]["tools"].append("execute")
+                self.assert_check("TOOL-1")
+
+    def test_read_only_workers_reject_editing(self):
+        for name in VALIDATOR["READ_ONLY_TOOLS"]:
+            with self.subTest(agent=name):
+                self.files = copy.deepcopy(self.baseline)
+                self.agent(name)["fm"]["tools"].append("edit")
+                self.assert_check("TOOL-1")
+
+    def test_unrelated_workers_reject_github_access(self):
+        self.agent("CodeGeneralist")["fm"]["tools"].append("github/*")
+        self.assert_check("TOOL-1")
+
+    def test_dispatcher_rejects_github_access(self):
+        self.agent("Orchestrator")["fm"]["tools"].append("github/*")
+        self.assert_check("TOOL-1")
+
+    def test_github_worker_cannot_edit_source_files(self):
+        self.agent("GovGithubAgent")["fm"]["tools"].append("edit")
+        self.assert_check("TOOL-1")
+
+    def test_tool_profile_rejects_duplicate_tools(self):
+        self.agent("CodeGeneralist")["fm"]["tools"].append("read")
+        self.assert_check("TOOL-1")
+
+    def test_tool_profile_rejects_unknown_tool_groups(self):
+        self.agent("CodeGeneralist")["fm"]["tools"].append("unknown/*")
+        self.assert_check("TOOL-1")
+
+    def test_implementation_planning_tool_is_optional(self):
+        self.agent("CodeNextJsSpecialist")["fm"]["tools"].remove("todo")
+        self.assertEqual(self.validate().findings, [])
+
+    def test_documentation_worker_requires_search(self):
+        self.agent("GovDocumentationSuiteGenerator")["fm"]["tools"].remove("search")
+        self.assert_check("TOOL-1")
+
+    def test_framework_diagnostician_requires_search(self):
+        self.agent("CodeFrameworkDiagnostician")["fm"]["tools"].remove("search")
+        self.assert_check("TOOL-1")
 
 
 if __name__ == "__main__":

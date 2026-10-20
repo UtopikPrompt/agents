@@ -42,22 +42,26 @@ flowchart TD
 The advisor and worker are separate calls from the main dispatcher. No subagent
 needs to invoke another subagent. An advisor decision is not an execution receipt.
 
-## Ownership
+## Domain Organization
 
-The four-level tree below is organizational, not a required call chain.
+This graph groups agents by domain; it is not a call chain or approval hierarchy.
+Each arrow places the right-hand agent in the left-hand group: read it as
+"belongs to," not "invokes." Advisors do not supervise, approve, or invoke their
+grouped specialists. Actual calls are shown separately in the Execution diagram.
+
 The source of truth is [routing-catalog.json](routing-catalog.json). Each non-root
-agent has exactly one owner. CodeGeneralist is the coding fallback worker;
-advisors never implement changes. Agent filenames now describe their advisory role.
+agent has exactly one organizational owner. CodeGeneralist is the coding fallback
+worker; advisors return selection advice and never implement changes.
 
 ```mermaid
 flowchart LR
-    O["Orchestrator<br/>(Tier-0 dispatcher)"]
-    O --> CodeDomainAdvisor["CodeDomainAdvisor<br/>(Tier-1 ownership)"]
-    O --> InfraDevOpsAdvisor["InfraDevOpsAdvisor<br/>(Tier-1 ownership)"]
-    O --> DocsGovernanceAdvisor["DocsGovernanceAdvisor<br/>(Tier-1 ownership)"]
-    O --> UtilityAdvisor["UtilityAdvisor<br/>(Tier-1 ownership)"]
-    CodeDomainAdvisor --> CodeFrontendAdvisor["CodeFrontendAdvisor<br/>(Tier-2 ownership)"]
-    CodeDomainAdvisor --> CodeBackendAdvisor["CodeBackendAdvisor<br/>(Tier-2 ownership)"]
+    O["Orchestrator<br/>(Dispatcher; roster root)"]
+    O --> CodeDomainAdvisor["CodeDomainAdvisor<br/>(Coding domain)"]
+    O --> InfraDevOpsAdvisor["InfraDevOpsAdvisor<br/>(Infrastructure domain)"]
+    O --> DocsGovernanceAdvisor["DocsGovernanceAdvisor<br/>(Documentation and governance)"]
+    O --> UtilityAdvisor["UtilityAdvisor<br/>(Utility domain)"]
+    CodeDomainAdvisor --> CodeFrontendAdvisor["CodeFrontendAdvisor<br/>(Frontend group)"]
+    CodeDomainAdvisor --> CodeBackendAdvisor["CodeBackendAdvisor<br/>(Backend group)"]
     CodeDomainAdvisor --> MultiLanguageBuilder["MultiLanguageBuilder"]
     CodeDomainAdvisor --> CodeFrameworkDiagnostician["CodeFrameworkDiagnostician"]
     CodeDomainAdvisor --> CodeGeneralist["CodeGeneralist"]
@@ -94,16 +98,16 @@ flowchart LR
     UtilityAdvisor --> ContextSummarizer["ContextSummarizer"]
 
     classDef hub fill:#3b3f7d,stroke:#e0e0e0,color:#fff;
-    classDef router fill:#6f9e6f,stroke:#516399,color:#000;
-    classDef subrouter fill:#a3c1ad,stroke:#516399,color:#000;
-    classDef tier2 fill:#9db8ff,stroke:#516399,color:#000;
-    classDef tier3 fill:#f2d49b,stroke:#516399,color:#000;
+    classDef domainAdvisor fill:#6f9e6f,stroke:#516399,color:#000;
+    classDef subdomainAdvisor fill:#a3c1ad,stroke:#516399,color:#000;
+    classDef worker fill:#9db8ff,stroke:#516399,color:#000;
+    classDef frameworkWorker fill:#f2d49b,stroke:#516399,color:#000;
     
     class O hub;
-    class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor router;
-    class CodeFrontendAdvisor,CodeBackendAdvisor subrouter;
-    class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist tier3;
-    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent tier2;
+    class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor domainAdvisor;
+    class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
+    class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist frameworkWorker;
+    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent worker;
 ```
 
 
@@ -178,6 +182,93 @@ flowchart LR
 | GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent |
 | Miscellaneous | UtilityAdvisor | AgentOptimizer, Brainstorm, ContextSummarizer |
 
+## Tool Policy
+
+Tool lists follow the agent's role, not a shared all-tools template. The validator
+enforces required and allowed capabilities with `TOOL-1`; missing native search
+must not silently become extra shell commands, and missing edit access must not
+be worked around through terminal writes.
+
+| Role | Required Tools | Optional or Restricted Tools |
+|---|---|---|
+| Orchestrator | `read/readFile`, `search`, `agent`, `vscode/askQuestions` | No edit, execution, GitHub, or web access |
+| Six selection advisors | None | Explicit `tools: []` and `agents: []` |
+| Implementation workers | `read`, `search`, `edit`, `execute` | `todo` optional; GitHub access only for InfraCIDiagnostics |
+| Brainstorm and CodeFrameworkDiagnostician | `read`, `search` | No editing, execution, browsing, or delegation |
+| ContextSummarizer | `read` | No editing, execution, or runtime compaction |
+| AgentOptimizer and documentation/governance writers | `read`, `search`, `edit` | `todo` optional for GovDocumentationSuiteGenerator; no terminal access |
+| GovGithubAgent | `read`, `search`, `execute`, `github/*` | Terminal limited by instructions to read-only repository inspection; no source editing |
+
+Tool availability is not authorization. Review/diagnosis stays read-only even for
+a worker that can edit. CI fixes require an explicit request; deployment, commit,
+publication, or data changes still require the relevant approval. Broad terminal
+access is not a sandbox that technically enforces read-only command behavior.
+
+GitHub's provider group is retained only for the two GitHub-facing workers;
+provider-specific operation identifiers must be verified at runtime before
+narrowing that group. CI diagnostics uses GitHub for read-only evidence, not
+automatic repository mutations. No other agent receives this service group.
+
+Documentation workers follow existing lint configuration and available editor
+diagnostics. They cannot run CLI linters with their profile: report such checks
+as not run unless execution evidence was supplied, and return the exact command
+for a separately commissioned implementation worker. Never claim validation
+from merely reading a command or configuration file.
+
+These are statically checked role profiles, not proof of live MCP registration,
+authentication, editor tool discovery, command safety, or measured context savings.
+
+## Model Policy
+
+Start with the model selected in VS Code. Agent definitions currently omit both
+`model` and `reasoning-effort`; the runtime resolves those defaults. Do not pin
+a separate model for every framework or agent. This is the inherited baseline,
+not automatic model switching or a claim that every available model is suitable.
+
+| Role | Baseline | Candidate Override After Evaluation |
+|---|---|---|
+| Orchestrator | Inherited model with reliable reasoning and tool use | Prioritize correct dispatch and evidence handling over raw speed |
+| Domain advisors | Inherited model | Fast, inexpensive model with reliable JSON and specialist selection |
+| Implementation specialists and CodeGeneralist | Same inherited coding baseline | Strong coding model when focused task results justify it |
+| Security, architecture, and complex diagnostics | Inherited model | Stronger reasoning for demonstrated difficult cases |
+| ContextSummarizer | Inherited model | Accurate summarization with sufficient input capacity and state preservation |
+
+Override rules:
+
+- First evaluate a cheaper advisor model; do not assume low price means adequate
+    selection accuracy. Keep the inherited baseline until the candidate passes.
+- Use exact model identifiers available in the user's model picker and supported
+    by the active harness. Confirm tool use, structured output, context capacity,
+    and organization policy before adding frontmatter overrides.
+- Where supported, `model` can be an ordered list of verified available fallback
+    identifiers. An availability fallback is not task-aware model routing or a
+    quality guarantee. Do not configure placeholders or guess model identifiers.
+- Leave `reasoning-effort` unset unless the chosen model supports it and a
+    measured task-specific benefit warrants a pin. Do not globally force high effort.
+- If a configured model fails, use only an approved available fallback or report
+    the blocker. Never silently downgrade a security-sensitive task to save cost.
+
+Evaluation gate:
+
+1. Compare the inherited baseline and candidate on the same representative tasks
+     with equivalent payloads, tool permissions, and acceptance checks.
+2. For advisors, include clear, ambiguous, missing-context, and out-of-domain cases.
+     Check valid JSON, expected status, and selection of a worker from the supplied
+     candidates, not another advisor or an invented agent.
+3. For workers, check accepted outputs, regressions, scope compliance, and actual
+     validation evidence. For summaries, check preservation of constraints, active
+     failures, and essential contracts rather than brevity alone.
+4. Record exact model identifiers, task outcomes, retries, elapsed time, and usage
+     or cost when exposed. Compare total cost per successful task, including failed
+     attempts and retries, not just the first call. Do not invent missing telemetry.
+5. Pin only roles with demonstrated benefit without unacceptable quality loss.
+     Keep the baseline when evidence is inconclusive and repeat the comparison
+     after a model or harness change. Existing roster tests are not model benchmarks.
+
+Model choice does not itself reduce the payload. The compact catalog, minimal
+task context, local worker inspection, and concise results remain the context
+controls. No candidate-model comparison or cheaper advisor pin is claimed here.
+
 ## Name Migration
 
 Update saved agent selections and external workflow references to these names.
@@ -220,8 +311,9 @@ python -m unittest -v test_agent_roster_validator
 
 Python and PyYAML are required. Validation checks two distinct contracts: flat
 runtime invocation from Orchestrator, and the catalog's single-parent ownership
-tree with tier depths and documentation parity. Catalog targets must resolve to
-real workers, and advisors must be tool-free. Passing static checks does not
+tree with domain nesting and documentation parity. Catalog targets must resolve to
+real workers, advisors must be tool-free, and role-specific required/allowed
+tool profiles must match. Passing static checks does not
 prove output quality, token savings, or runtime agent discovery.
 
 ## Runtime Verification

@@ -21,6 +21,7 @@ Checks performed:
     [RST-6] The ownership diagram and Domain Map match the catalog.
     [RST-7] Advisors and workers occupy their documented ownership tiers.
     [CAT-1] The compact catalog resolves all advisors, workers, and route targets.
+    [TOOL-1] Role-based tool profiles require needed capabilities and reject excess access.
 
 Exit code 0 = PASS, 1 = FAIL.
 """
@@ -58,6 +59,13 @@ TIER1_ADVISORS = {
 }
 CODE_SUBADVISORS = {"CodeFrontendAdvisor", "CodeBackendAdvisor"}
 DISPATCHER_TOOLS = {"read/readFile", "search", "agent", "vscode/askQuestions"}
+READ_ONLY_TOOLS = {
+    "Brainstorm": {"read", "search"},
+    "CodeFrameworkDiagnostician": {"read", "search"},
+    "ContextSummarizer": {"read"},
+}
+CUSTOMIZATION_WORKERS = {"AgentOptimizer", "GovArchitectureRecordsExpert", "GovDocumentationSuiteGenerator"}
+IMPLEMENTATION_TOOLS = {"read", "search", "edit", "execute"}
 
 
 # --------------------------------------------------------------------------- #
@@ -235,6 +243,40 @@ def check_definition(files, report):
                 if not isinstance(tool, str) or " " in tool:
                     report.add("DEF-4", f["path"], f"Malformed tool entry: {tool!r} "
                                                   f"(expected 'group/operation' or 'group/*' form)")
+
+
+def tool_profile(name):
+    if name == "Orchestrator":
+        return DISPATCHER_TOOLS, DISPATCHER_TOOLS
+    if name.endswith("Advisor"):
+        return set(), set()
+    if name in READ_ONLY_TOOLS:
+        return READ_ONLY_TOOLS[name], READ_ONLY_TOOLS[name]
+    if name in CUSTOMIZATION_WORKERS:
+        required = {"read", "search", "edit"}
+        optional = {"todo"} if name == "GovDocumentationSuiteGenerator" else set()
+        return required, required | optional
+    if name == "GovGithubAgent":
+        required = {"github/*", "read", "search", "execute"}
+        return required, required
+    required = IMPLEMENTATION_TOOLS | ({"github/*"} if name == "InfraCIDiagnostics" else set())
+    return required, required | {"todo"}
+
+
+def check_tool_profiles(files, report):
+    for entry in files:
+        name, tools = entry["name"], entry["fm"].get("tools")
+        if entry["err"] or not isinstance(name, str) or not isinstance(tools, list):
+            continue
+        if any(not isinstance(tool, str) for tool in tools):
+            continue
+        actual = set(tools)
+        required, allowed = tool_profile(name)
+        missing, excess = required - actual, actual - allowed
+        if missing or excess or len(actual) != len(tools):
+            report.add("TOOL-1", entry["path"],
+                       f"Tool profile mismatch: missing {sorted(missing)}, excess {sorted(excess)}, "
+                       f"duplicate entries: {len(actual) != len(tools)}")
 
 
 def check_reachability(files, registry, stems, router_agents, orchestrator_agents, readme_refs, report):
@@ -429,7 +471,7 @@ def check_topology(files, registry, report, readme=None, catalog=None):
     if readme is None:
         readme = README_PATH.read_text(encoding="utf-8")
     diagram_edges = []
-    for diagram in re.findall(r"```mermaid\s*\n(.*?)```", readme_section(readme, "Ownership"), re.DOTALL):
+    for diagram in re.findall(r"```mermaid\s*\n(.*?)```", readme_section(readme, "Domain Organization"), re.DOTALL):
         diagram_edges.extend(
             ("Orchestrator" if parent == "O" else parent, child)
             for parent, child in re.findall(r"^\s*(\w+)\s*-->\s*(\w+)", diagram, re.MULTILINE)
@@ -461,7 +503,7 @@ def build_report(report, files, registry, readme_refs):
     lines.append("")
 
     # Summary.
-    checks = ("DEF-1", "DEF-2", "DEF-3", "DEF-4", "RST-1", "RST-2", "RST-3", "RST-4", "RST-5", "RST-6", "RST-7", "CAT-1")
+    checks = ("DEF-1", "DEF-2", "DEF-3", "DEF-4", "RST-1", "RST-2", "RST-3", "RST-4", "RST-5", "RST-6", "RST-7", "CAT-1", "TOOL-1")
     passed = all(v == 0 for v in report.check_counts.values())
     total_issues = sum(report.check_counts.values())
     if passed:
@@ -489,6 +531,7 @@ def build_report(report, files, registry, readme_refs):
             "RST-6": "Ownership documentation matches catalog",
             "RST-7": "Documented ownership tiers and reachability",
             "CAT-1": "Catalog structure and worker route coverage",
+            "TOOL-1": "Role-specific required and allowed tools",
         }[check]
         lines.append(f"| {check} | {purpose} | {report.check_counts.get(check, 0)} |")
     lines.append("")
@@ -529,6 +572,7 @@ def main():
 
     try:
         check_definition(files, report)
+        check_tool_profiles(files, report)
         check_reachability(files, registry, stems, router_agents, orchestrator_agents, readme_refs, report)
         check_topology(files, registry, report)
     except Exception as exc:  # pragma: no cover

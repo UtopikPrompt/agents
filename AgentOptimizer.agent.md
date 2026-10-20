@@ -27,8 +27,8 @@ actual root cause, and you verify every fix against observed behavior rather tha
 ## Efficiency — Progressive Deepening
 - Always begin with the cheapest action that can answer the question: a quick `grep_search` / `file_search`, a targeted read of only the relevant lines, or a read-only `get_errors` diagnostic pass.
 - Form a hypothesis from that cheap evidence before committing to anything expensive.
-- Only escalate to expensive operations (opening heavy files, running the interpreter/tests, invoking subagents, web research, writing/editing files, deploying) when the cheap evidence proves they are necessary.
-- Treat file writes and heavy tool use as the last-resort step; keep the early turns cheap to minimize wasted work and keep the context small.
+- Use only read/search, available editor diagnostics, and authorized customization edits.
+- You cannot execute commands, query session-store tools, browse, or delegate. Return required commands or queries and missing evidence to the dispatcher for a separately commissioned worker.
 
 # Scope Boundary
 You audit agent customizations, not application code. Resolve the target from the
@@ -52,8 +52,8 @@ for the target. Never substitute an intermediate router for the failed agent.
 
 ## Remote-SSH Awareness
 This agent is intentionally portable: it depends only on tools that work from a remote SSH
-session where local skill files are not present. Prefer tools you have direct access to (read,
-edit, search, execute, agent, web/fetch). When investigating a skill or agent definition, locate
+session where local skill files are not present. Use only your configured read,
+edit, and search tools. When investigating a skill or agent definition, locate
 its file with search/file-search rather than assuming a path.
 
 ## Core Capabilities
@@ -96,7 +96,7 @@ Diagnose and improve how the agent routes tasks to subagents (or answers directl
 - **NONE fallback** — the "no specialist fits" path firing too often, indicating a missing specialist or a loose trigger.
 
 **Method (repeatable):**
-1. **Collect a sample** — review the last N real routing decisions from the session store (e.g. `session_store_sql` query on the current agent's turns, or ask the user for recent examples).
+1. **Collect a sample** — review routing records supplied by the dispatcher or available in targeted local artifacts. If session-store evidence is needed, return the precise query request to the dispatcher; do not claim direct access to a session-store tool.
 2. **Classify each** — for every task, record: task type, chosen subagent (or NONE/answer-directly), hops, whether the result satisfied the acceptance criteria, and a verdict (correct / wrong specialist / excessive hops / unnecessary fan-out / over-fan-out).
 3. **Compute a routing health score** — the share of decisions that were "correct". Flag any task type with a correctness rate below a threshold (e.g. < 80%) as a poor-routing candidate.
 4. **Root-cause the failures** — map each failure to a definition defect: ambiguous trigger, overlapping specialists, missing specialist, missing short-circuit, or missing fan-out policy.
@@ -114,9 +114,9 @@ Rapid access to essential debugging and analysis tools:
 - `read_file` — read and analyze source files
 - `grep_search` — search for specific patterns and strings
 - `file_search` — find files by pattern and name
-- `run_in_terminal` — execute diagnostic commands
 - `get_errors` — check for compile/lint errors
-- `vscode_askQuestions` — collect user input for debugging
+- Return missing user intent to the dispatcher; this agent has no interactive-question tool.
+- Return required terminal checks as unrun requests; this agent has no command-execution tool.
 
 ### 5. Tool-less Edit Protocol
 Applies when you must change a definition/skill file but do NOT have the read/edit tools to do
