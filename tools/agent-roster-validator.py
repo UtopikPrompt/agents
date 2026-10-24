@@ -22,12 +22,13 @@ Checks performed:
     [RST-7] Advisors and workers occupy their documented ownership tiers.
     [CAT-1] The compact catalog resolves all advisors, workers, and route targets.
     [TOOL-1] Role-based tool profiles require needed capabilities and reject excess access.
+    [NAM-1] Canonical names follow domain prefixes, role suffixes, and explicit exceptions.
+    [DOC-1] README index coverage and embedded routing match the roster and catalog.
 
 Exit code 0 = PASS, 1 = FAIL.
 """
 
 from collections import Counter
-import json
 import re
 import sys
 from pathlib import Path
@@ -46,9 +47,9 @@ except ImportError:
 # Configuration
 # --------------------------------------------------------------------------- #
 # Resolve the prompts directory relative to this script so the validator is portable.
-PROMPTS_DIR = Path(__file__).resolve().parent
+PROMPTS_DIR = Path(__file__).resolve().parent.parent
 README_PATH = PROMPTS_DIR / "README.md"
-CATALOG_PATH = PROMPTS_DIR / "routing-catalog.json"
+CATALOG_PATH = PROMPTS_DIR / "Orchestrator.agent.md"
 AGENT_GLOB = "*.agent.md"
 
 # Required frontmatter fields.
@@ -66,6 +67,20 @@ READ_ONLY_TOOLS = {
 }
 CUSTOMIZATION_WORKERS = {"AgentOptimizer", "GovArchitectureRecordsExpert", "GovDocumentationSuiteGenerator"}
 IMPLEMENTATION_TOOLS = {"read", "search", "edit", "execute"}
+DOMAIN_PREFIXES = {
+    "CodeDomainAdvisor": "Code", "CodeFrontendAdvisor": "Code",
+    "CodeBackendAdvisor": "Code", "InfraDevOpsAdvisor": "Infra",
+    "DocsGovernanceAdvisor": "Gov",
+}
+NAMING_EXCEPTIONS = {
+    "MultiLanguageBuilder": "CodeDomainAdvisor",
+    "AgentOptimizer": "UtilityAdvisor", "Brainstorm": "UtilityAdvisor",
+    "ContextSummarizer": "UtilityAdvisor",
+}
+WORKER_SUFFIXES = (
+    "Agent", "Specialist", "Expert", "Generator", "Manager", "Builder",
+    "Diagnostician", "Diagnostics", "Generalist", "Engineer", "Profiler",
+)
 
 
 # --------------------------------------------------------------------------- #
@@ -134,6 +149,7 @@ def load_agents():
         name, err = parse_frontmatter(text)
         entry = {
             "path": path,
+            "text": text,
             "stem": filename_stem(path),
             "name": name.get("name") if isinstance(name, dict) else None,
             "err": err,
@@ -222,6 +238,8 @@ def check_definition(files, report):
             if f["name"] in seen_names:
                 report.add("DEF-2", f["path"], f"Duplicate agent name: '{f['name']}'")
             seen_names.add(f["name"])
+            if not re.fullmatch(r"[A-Z][A-Za-z0-9]*", f["name"]):
+                report.add("NAM-1", f["path"], "Name must use ASCII PascalCase without separators")
             if f["name"] != stem:
                 report.add("DEF-2", f["path"],
                            f"frontmatter name '{f['name']}' does not match filename stem '{stem}' "
@@ -256,7 +274,7 @@ def tool_profile(name):
         required = {"read", "search", "edit"}
         optional = {"todo"} if name == "GovDocumentationSuiteGenerator" else set()
         return required, required | optional
-    if name in {"GovGithubAgent", "GitGithubAgent"}:
+    if name in {"GovGithubAgent", "GovGitWorkflowAgent"}:
         required = {"github/*", "read", "search", "execute"}
         return required, required
     required = IMPLEMENTATION_TOOLS | ({"github/*"} if name == "InfraCIDiagnostics" else set())
@@ -322,8 +340,47 @@ def check_reachability(files, registry, stems, router_agents, orchestrator_agent
                                             f"(missing file or name mismatch)")
 
 
-def load_catalog():
-    return json.loads(CATALOG_PATH.read_text(encoding="utf-8"))
+def load_catalog(text=None):
+    if text is None:
+        text = CATALOG_PATH.read_text(encoding="utf-8")
+    groups = {}
+    for domain, advisor, parent in routing_table_rows(text, "Embedded Ownership", ("Domain", "Advisor", "Parent")):
+        if advisor in groups:
+            raise ValueError(f"Duplicate ownership advisor: {advisor}")
+        groups[advisor] = {
+            "domain": domain, "advisor": advisor, "parent": parent,
+            "routes": {}, "children": [],
+        }
+    for group in groups.values():
+        parent = group["parent"]
+        if parent in groups:
+            groups[parent]["children"].append(group["advisor"])
+    for cue, worker, advisor in routing_table_rows(text, "Embedded Routing Index", ("Selection Cue", "Worker", "Optional Advisor")):
+        if advisor not in groups:
+            raise ValueError(f"Unknown routing advisor: {advisor}")
+        group = groups[advisor]
+        if cue in group["routes"]:
+            raise ValueError(f"Duplicate selection cue for {advisor}: {cue}")
+        group["routes"][cue] = worker
+        if worker not in group["children"]:
+            group["children"].append(worker)
+    return {"schema_version": 1, "dispatcher": "Orchestrator", "domains": list(groups.values())}
+
+
+def routing_table_rows(text, heading, headers):
+    rows = []
+    for line in readme_section(text, heading).splitlines():
+        if not line.strip().startswith("|"):
+            continue
+        cells = tuple(cell.strip() for cell in line.strip().strip("|").split("|"))
+        if all(re.fullmatch(r":?-+:?", cell) for cell in cells):
+            continue
+        if len(cells) != len(headers) or not all(cells):
+            raise ValueError(f"Malformed row in {heading}: {line}")
+        rows.append(cells)
+    if len(rows) < 2 or rows[0] != headers:
+        raise ValueError(f"Missing or invalid {heading} table")
+    return rows[1:]
 
 
 def readme_section(readme, heading):
@@ -371,6 +428,7 @@ def check_topology(files, registry, report, readme=None, catalog=None):
     adjacency = {"Orchestrator": []}
     declarations = {}
     route_targets = set()
+    expected_routes = Counter()
     domain_names = set()
     for group in groups:
         if not isinstance(group, dict):
@@ -399,6 +457,11 @@ def check_topology(files, registry, report, readme=None, catalog=None):
         for child in children:
             if child not in registry:
                 report.add("CAT-1", CATALOG_PATH, f"Unresolved owned agent: {child}")
+            if child.endswith("Advisor") or NAMING_EXCEPTIONS.get(child) == advisor:
+                continue
+            prefix = DOMAIN_PREFIXES.get(advisor)
+            if not prefix or not re.fullmatch(prefix + r"[A-Z][A-Za-z0-9]*", child) or not child.endswith(WORKER_SUFFIXES):
+                report.add("NAM-1", CATALOG_PATH, f"Worker {child!r} must use the {advisor} domain prefix and a documented role suffix")
         if not isinstance(routes, dict):
             report.add("CAT-1", CATALOG_PATH, f"{advisor} routes must be a label-to-worker object")
             continue
@@ -407,6 +470,7 @@ def check_topology(files, registry, report, readme=None, catalog=None):
                 report.add("CAT-1", CATALOG_PATH, f"Invalid worker route in {advisor}: {label!r} -> {target!r}")
             else:
                 route_targets.add(target)
+                expected_routes[(label, target, advisor)] += 1
 
     advisors = {name for name in registry if name.endswith("Advisor")}
     workers = set(registry) - advisors - {"Orchestrator"}
@@ -470,6 +534,20 @@ def check_topology(files, registry, report, readme=None, catalog=None):
 
     if readme is None:
         readme = README_PATH.read_text(encoding="utf-8")
+    index_names = Counter(re.findall(
+        r"^\|\s*\*\*([A-Za-z]\w*)\*\*\s*\|",
+        readme_section(readme, "Agent Index"), re.MULTILINE,
+    ))
+    if index_names != Counter(registry.keys()):
+        report.add("DOC-1", README_PATH, "Agent Index must list every canonical agent exactly once, with no unknown entries")
+    dispatcher = next((entry for entry in files if entry["name"] == "Orchestrator"), {})
+    embedded_routes = Counter()
+    for line in readme_section(dispatcher.get("text", ""), "Embedded Routing Index").splitlines():
+        cells = tuple(cell.strip() for cell in line.strip().strip("|").split("|"))
+        if line.startswith("| ") and len(cells) == 3 and cells[0] != "Selection Cue":
+            embedded_routes[cells] += 1
+    if embedded_routes != expected_routes:
+        report.add("DOC-1", registry.get("Orchestrator", README_PATH), "Embedded Routing Index must match catalog selection cues, workers, and advisors exactly once")
     diagram_edges = []
     for diagram in re.findall(r"```mermaid\s*\n(.*?)```", readme_section(readme, "Domain Organization"), re.DOTALL):
         diagram_edges.extend(
@@ -503,7 +581,7 @@ def build_report(report, files, registry, readme_refs):
     lines.append("")
 
     # Summary.
-    checks = ("DEF-1", "DEF-2", "DEF-3", "DEF-4", "RST-1", "RST-2", "RST-3", "RST-4", "RST-5", "RST-6", "RST-7", "CAT-1", "TOOL-1")
+    checks = ("DEF-1", "DEF-2", "DEF-3", "DEF-4", "RST-1", "RST-2", "RST-3", "RST-4", "RST-5", "RST-6", "RST-7", "CAT-1", "TOOL-1", "NAM-1", "DOC-1")
     passed = all(v == 0 for v in report.check_counts.values())
     total_issues = sum(report.check_counts.values())
     if passed:
@@ -532,6 +610,8 @@ def build_report(report, files, registry, readme_refs):
             "RST-7": "Documented ownership tiers and reachability",
             "CAT-1": "Catalog structure and worker route coverage",
             "TOOL-1": "Role-specific required and allowed tools",
+            "NAM-1": "Domain naming convention and explicit exceptions",
+            "DOC-1": "Complete README index and embedded routing parity",
         }[check]
         lines.append(f"| {check} | {purpose} | {report.check_counts.get(check, 0)} |")
     lines.append("")

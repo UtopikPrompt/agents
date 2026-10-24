@@ -5,7 +5,9 @@ from pathlib import Path
 from unittest.mock import patch
 
 
-VALIDATOR = runpy.run_path(str(Path(__file__).with_name("agent-roster-validator.py")))
+VALIDATOR = runpy.run_path(
+    str(Path(__file__).resolve().parent.parent / "tools" / "agent-roster-validator.py")
+)
 
 
 class RosterValidatorTests(unittest.TestCase):
@@ -44,6 +46,82 @@ class RosterValidatorTests(unittest.TestCase):
 
     def test_current_roster_passes(self):
         self.assertEqual(self.validate().findings, [])
+
+    def test_current_names_and_documentation_follow_policy(self):
+        findings = [finding for finding in self.validate().findings if finding["check"] in {"NAM-1", "DOC-1"}]
+        self.assertEqual(findings, [])
+
+    def test_routing_loads_only_orchestrator_definition(self):
+        definition = self.agent("Orchestrator")["text"]
+        with patch.object(Path, "read_text", return_value=definition) as read_text:
+            self.assertEqual(VALIDATOR["load_catalog"](), self.catalog)
+        read_text.assert_called_once_with(encoding="utf-8")
+        self.assertEqual(VALIDATOR["CATALOG_PATH"].name, "Orchestrator.agent.md")
+
+    def test_embedded_routing_requires_both_tables(self):
+        definition = self.agent("Orchestrator")["text"]
+        for heading in ("Embedded Ownership", "Embedded Routing Index"):
+            with self.subTest(heading=heading):
+                with self.assertRaises(ValueError):
+                    VALIDATOR["load_catalog"](definition.replace("## " + heading, "## Missing Section"))
+
+    def test_embedded_routing_rejects_malformed_rows(self):
+        definition = self.agent("Orchestrator")["text"].replace(
+            "| CODE_ | CodeDomainAdvisor | Orchestrator |", "| CODE_ | CodeDomainAdvisor |",
+        )
+        with self.assertRaisesRegex(ValueError, "Malformed row"):
+            VALIDATOR["load_catalog"](definition)
+
+    def test_embedded_routing_rejects_duplicate_cues(self):
+        definition = self.agent("Orchestrator")["text"]
+        row = "| generic coding with no specialist match | CodeGeneralist | CodeDomainAdvisor |"
+        with self.assertRaisesRegex(ValueError, "Duplicate selection cue"):
+            VALIDATOR["load_catalog"](definition.replace(row, row + "\n" + row))
+
+    def test_embedded_routing_rejects_unknown_advisors(self):
+        definition = self.agent("Orchestrator")["text"].replace(
+            "| CodeGeneralist | CodeDomainAdvisor |", "| CodeGeneralist | MissingAdvisor |",
+        )
+        with self.assertRaisesRegex(ValueError, "Unknown routing advisor"):
+            VALIDATOR["load_catalog"](definition)
+
+    def test_agent_names_reject_separators_lowercase_and_non_ascii(self):
+        for name in ("codeExampleAgent", "Code_ExampleAgent", "Code-ExampleAgent", "CodeEx\u00e4mpleAgent"):
+            with self.subTest(name=name):
+                self.files = copy.deepcopy(self.baseline)
+                self.agent("CodeGeneralist")["name"] = name
+                self.assert_check("NAM-1")
+
+    def test_worker_name_must_match_owning_domain(self):
+        self.domain("CodeDomainAdvisor")["children"].append("GovGitWorkflowAgent")
+        self.assert_check("NAM-1")
+
+    def test_worker_name_requires_role_suffix(self):
+        registry = dict(self.registry)
+        registry["CodeWidget"] = Path("CodeWidget.agent.md")
+        self.domain("CodeDomainAdvisor")["children"].append("CodeWidget")
+        report = VALIDATOR["Report"]()
+        VALIDATOR["check_topology"](self.files, registry, report, self.readme, self.catalog)
+        self.assertIn("NAM-1", report.check_counts)
+
+    def test_new_utility_name_requires_explicit_exception(self):
+        self.domain("UtilityAdvisor")["children"].append("GovGitWorkflowAgent")
+        self.assert_check("NAM-1")
+
+    def test_every_agent_needs_readme_index_entry(self):
+        self.readme = "\n".join(line for line in self.readme.splitlines() if not line.startswith("| **GovGitWorkflowAgent** |"))
+        self.assert_check("DOC-1")
+
+    def test_readme_index_rejects_duplicate_entries(self):
+        row = next(line for line in self.readme.splitlines() if line.startswith("| **GovGitWorkflowAgent** |"))
+        self.readme = self.readme.replace(row, row + "\n" + row)
+        self.assert_check("DOC-1")
+
+    def test_embedded_routes_must_match_catalog(self):
+        self.agent("Orchestrator")["text"] = self.agent("Orchestrator")["text"].replace(
+            "| Git branches, staging, commits, pushes or PR lifecycle |", "| obsolete selection cue |",
+        )
+        self.assert_check("DOC-1")
 
     def test_unknown_backtick_agent_is_rejected(self):
         self.readme += "\nRoute to `MissingAgent`.\n"
@@ -288,7 +366,7 @@ class RosterValidatorTests(unittest.TestCase):
         self.assert_check("TOOL-1")
 
     def test_github_worker_cannot_edit_source_files(self):
-        for name in ("GovGithubAgent", "GitGithubAgent"):
+        for name in ("GovGithubAgent", "GovGitWorkflowAgent"):
             with self.subTest(agent=name):
                 self.files = copy.deepcopy(self.baseline)
                 self.agent(name)["fm"]["tools"].append("edit")
@@ -296,27 +374,27 @@ class RosterValidatorTests(unittest.TestCase):
 
     def test_git_worker_has_exact_tool_profile(self):
         expected = {"read", "search", "execute", "github/*"}
-        self.assertEqual(VALIDATOR["tool_profile"]("GitGithubAgent"), (expected, expected))
-        self.assertEqual(set(self.agent("GitGithubAgent")["fm"]["tools"]), expected)
+        self.assertEqual(VALIDATOR["tool_profile"]("GovGitWorkflowAgent"), (expected, expected))
+        self.assertEqual(set(self.agent("GovGitWorkflowAgent")["fm"]["tools"]), expected)
 
     def test_git_worker_requires_workflow_tools(self):
         for tool in ("read", "search", "execute", "github/*"):
             with self.subTest(tool=tool):
                 self.files = copy.deepcopy(self.baseline)
-                self.agent("GitGithubAgent")["fm"]["tools"].remove(tool)
+                self.agent("GovGitWorkflowAgent")["fm"]["tools"].remove(tool)
                 self.assert_check("TOOL-1")
 
     def test_git_worker_is_user_invocable_and_routed(self):
-        worker = self.agent("GitGithubAgent")
+        worker = self.agent("GovGitWorkflowAgent")
         self.assertIs(worker["fm"]["user-invocable"], True)
         self.assertEqual(worker["fm"]["agents"], [])
         domain = self.domain("DocsGovernanceAdvisor")
-        self.assertIn("GitGithubAgent", domain["children"])
+        self.assertIn("GovGitWorkflowAgent", domain["children"])
         self.assertEqual(
             domain["routes"]["Git branches, staging, commits, pushes or PR lifecycle"],
-            "GitGithubAgent",
+            "GovGitWorkflowAgent",
         )
-        self.assertEqual(self.agent("Orchestrator")["fm"]["agents"].count("GitGithubAgent"), 1)
+        self.assertEqual(self.agent("Orchestrator")["fm"]["agents"].count("GovGitWorkflowAgent"), 1)
 
     def test_tool_profile_rejects_duplicate_tools(self):
         self.agent("CodeGeneralist")["fm"]["tools"].append("read")

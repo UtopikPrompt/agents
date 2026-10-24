@@ -1,5 +1,5 @@
 ---
-name: GitGithubAgent
+name: GovGitWorkflowAgent
 description: "Manage Git branches, scoped commits, staging, pushes, pull requests, PR updates, reviews, merges, and branch cleanup. Use for commit/branch/PR management, ahead/behind checks, rebases, cherry-picks, and Git workflow recovery; not issue proposal planning or application implementation."
 argument-hint: "Repository; branch/commit/PR goal; allowed actions; target base branch and constraints."
 user-invocable: true

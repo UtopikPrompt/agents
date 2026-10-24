@@ -6,7 +6,7 @@ file is a self-contained prompt that governs one agent's behavior, tools, and tr
 ## Architecture
 
 Execution and ownership are separate. **Orchestrator is the only dispatcher**
-and directly invokes the selected worker. The compact routing catalog contains
+and directly invokes the selected worker. Its embedded routing and ownership tables contain
 names, ownership, and selection cues, not every specialist's full instructions.
 The six former domain routers are now tool-free **advisors**. Clear tasks skip
 them; ambiguous tasks consult at most one advisor, which returns a decision to
@@ -26,9 +26,10 @@ manually loaded into the dispatcher just to select a worker.
 
 Orchestrator embeds the compact worker selection index in its definition, so
 ordinary dispatch does not need access to this folder or a local Windows path
-from remote read/search tools. The JSON catalog remains the maintenance source;
-update the embedded index alongside it when routes change. Do not search the
-remote host for a catalog stored on the client. The selected worker must still
+from remote read/search tools. Its Embedded Routing Index and Embedded Ownership
+tables are the only routing source of truth; no separate JSON catalog is needed.
+Never search the remote host or client profile for routing files. Advisors receive
+the relevant rows directly from Orchestrator. The selected worker must still
 be exposed by the runtime agent tool; otherwise Orchestrator reports BLOCKED.
 
 ## Execution
@@ -58,7 +59,8 @@ Each arrow places the right-hand agent in the left-hand group: read it as
 "belongs to," not "invokes." Advisors do not supervise, approve, or invoke their
 grouped specialists. Actual calls are shown separately in the Execution diagram.
 
-The source of truth is [routing-catalog.json](routing-catalog.json). Each non-root
+The source of truth is the embedded routing and ownership tables in
+[Orchestrator.agent.md](Orchestrator.agent.md). Each non-root
 agent has exactly one organizational owner. CodeGeneralist is the coding fallback
 worker; advisors return selection advice and never implement changes.
 
@@ -101,7 +103,7 @@ flowchart LR
     DocsGovernanceAdvisor --> GovArchitectureRecordsExpert["GovArchitectureRecordsExpert"]
     DocsGovernanceAdvisor --> GovDocumentationSuiteGenerator["GovDocumentationSuiteGenerator"]
     DocsGovernanceAdvisor --> GovGithubAgent["GovGithubAgent"]
-    DocsGovernanceAdvisor --> GitGithubAgent["GitGithubAgent"]
+    DocsGovernanceAdvisor --> GovGitWorkflowAgent["GovGitWorkflowAgent"]
 
     UtilityAdvisor --> AgentOptimizer["AgentOptimizer"]
     UtilityAdvisor --> Brainstorm["Brainstorm"]
@@ -117,7 +119,7 @@ flowchart LR
     class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor domainAdvisor;
     class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
     class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist frameworkWorker;
-    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GitGithubAgent worker;
+    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent worker;
 ```
 
 
@@ -148,7 +150,7 @@ flowchart LR
 | **InfraPerformanceProfiler** | worker | no | CPU/memory profiling for Python (Tachyon, Memray) and Node.js |
 | **InfraReleaseManager** | worker | no | Version bumping, changelogs, Git tagging, publishing |
 | **GovGithubAgent** | worker | no | Issue triage, GitHub Projects, agent capability proposal filing |
-| **GitGithubAgent** | worker | yes | Local branches, scoped staging/commits, pushes, PR creation/updates/reviews/merges and authorized cleanup |
+| **GovGitWorkflowAgent** | worker | yes | Local branches, scoped staging/commits, pushes, PR creation/updates/reviews/merges and authorized cleanup |
 | **InfraCIDiagnostics** | worker | no | Root-cause diagnosis of failing CI/Actions jobs & PR errors, then suggests fixes |
 | **CodeNextJsSpecialist** | worker | no | Next.js architecture: App Router, Server Components, ISR |
 | **CodeSpringBootSpecialist** | worker | no | Java/Spring Boot backend scaffolding |
@@ -167,9 +169,9 @@ flowchart LR
 ## Routing Rules (Orchestrator)
 
 1. Answer trivial factual questions directly. For work, choose the most-specific
-    worker from the compact catalog; do not read every specialist definition.
+    worker from the embedded index; do not read every specialist definition.
 2. Clear tasks go directly to one worker. Ambiguous tasks may consult one advisor
-    with only the task, constraints, and relevant candidate catalog slice.
+    with only the task, constraints, and relevant candidate routing rows.
 3. Advisors return JSON with `status`, `agent`, `reason`, and `missing_context`.
     Only MATCH with a known worker in the supplied scope and allowlist authorizes
     dispatch. NEEDS_INPUT requires clarification; NO_MATCH requires reassessment.
@@ -205,7 +207,7 @@ must not present unverified changes as fully validated.
 | CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
 | CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist |
 | INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
-| GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GitGithubAgent |
+| GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GovGitWorkflowAgent |
 | Miscellaneous | UtilityAdvisor | AgentOptimizer, Brainstorm, ContextSummarizer |
 
 ## Tool Policy
@@ -224,7 +226,7 @@ be worked around through terminal writes.
 | ContextSummarizer | `read` | No editing, execution, or runtime compaction |
 | AgentOptimizer and documentation/governance writers | `read`, `search`, `edit` | `todo` optional for GovDocumentationSuiteGenerator; no terminal access |
 | GovGithubAgent | `read`, `search`, `execute`, `github/*` | Terminal limited by instructions to read-only repository inspection; no source editing |
-| GitGithubAgent | `read`, `search`, `execute`, `github/*` | Scoped Git mutations only when requested, plus validation; no application source editing or delegation |
+| GovGitWorkflowAgent | `read`, `search`, `execute`, `github/*` | Scoped Git mutations only when requested, plus validation; no application source editing or delegation |
 
 Tool availability is not authorization. Review/diagnosis stays read-only even for
 a worker that can edit. CI fixes require an explicit request; deployment, commit,
@@ -247,11 +249,18 @@ authentication, editor tool discovery, command safety, or measured context savin
 
 ## Git Workflow
 
-Select **GitGithubAgent** directly or let Orchestrator route branch, commit, push,
+Select **GovGitWorkflowAgent** directly or let Orchestrator route branch, commit, push,
 and PR tasks to it. It is user-level and follows the current repository's branch,
 commit, validation, and PR-template conventions. GovGithubAgent remains responsible
 for issue proposals; InfraReleaseManager owns releases and InfraCIDiagnostics owns
 CI diagnosis.
+
+PR creation prefers authenticated GitHub CLI (`gh pr create`), with GitHub tools
+as fallback if the CLI is unusable. Other remote operations prefer GitHub tools
+and check `gh` if the needed tool is unavailable. The agent checks installation
+and host authentication before declaring a blocker, and checks for an existing
+PR before retrying an ambiguous creation failure. Fallbacks do not expand write
+authorization or permit automatic tool installation or authentication changes.
 
 Read-only preparation is the default. Explicit requests authorize the named
 operation, not subsequent publication or cleanup. For example, "commit these
@@ -308,9 +317,58 @@ Evaluation gate:
      Keep the baseline when evidence is inconclusive and repeat the comparison
      after a model or harness change. Existing roster tests are not model benchmarks.
 
-Model choice does not itself reduce the payload. The compact catalog, minimal
+Model choice does not itself reduce the payload. The embedded index, minimal
 task context, local worker inspection, and concise results remain the context
 controls. No candidate-model comparison or cheaper advisor pin is claimed here.
+
+## Naming Convention
+
+Canonical names use ASCII PascalCase (acronyms such as API, CI, MCP, and ORM are
+allowed), without spaces, underscores, or hyphens. The filename is exactly
+`<Name>.agent.md` and frontmatter `name` must equal `<Name>`.
+
+Domain workers use `<Domain><Capability><Role>`:
+
+| Owner | Prefix | Example |
+|---|---|---|
+| CodeDomainAdvisor, CodeFrontendAdvisor, CodeBackendAdvisor | Code | CodeReactViteSpecialist |
+| InfraDevOpsAdvisor | Infra | InfraReleaseManager |
+| DocsGovernanceAdvisor | Gov | GovGitWorkflowAgent |
+
+Worker role suffixes are `Agent`, `Specialist`, `Expert`, `Generator`, `Manager`,
+`Builder`, `Diagnostician`, `Diagnostics`, `Generalist`, `Engineer`, or `Profiler`.
+Prefer `Specialist` for new framework specialists, `Manager` for lifecycle ownership, and `Agent` for
+workflow roles. Describe the capability rather than adding framework/version
+numbers or long implementation inventories to the name.
+
+Selection advisors end in `Advisor`; the current six advisor names and dispatcher
+name Orchestrator are reserved architectural roles. Existing explicit exceptions
+are MultiLanguageBuilder under CodeDomainAdvisor, and AgentOptimizer, Brainstorm,
+and ContextSummarizer under UtilityAdvisor. New unprefixed names require an
+explicit policy and validator update; these exceptions are not a general fallback.
+Do not rename unrelated existing agents merely to standardize role suffixes.
+
+## Agent Checklist
+
+Every new or renamed agent must include all of the following in the same change:
+
+1. A matching definition filename/frontmatter name, meaningful description,
+    invocation settings, and a role-appropriate validated tool profile.
+2. One embedded owner, a worker selection cue where applicable, Orchestrator
+    allowlist membership, and a matching embedded routing row. Keep the owning
+    advisor's selection cues synchronized; no worker or advisor delegates.
+3. A README Agent Index row, Domain Organization diagram entry, and Domain Map
+    membership. Update affected Tool Policy and workflow sections, including tool
+    preference/fallback behavior. Record renames in Name Migration without keeping
+    obsolete operational aliases.
+4. Static validator and regression-suite results. Naming, index completeness,
+    embedded-route parity, ownership docs, and tool profiles are required checks.
+    Report pre-existing failures and unavailable checks explicitly.
+
+AGENTS.md applies these requirements to repository maintenance. Static checks
+enforce names and structural documentation coverage, not prose accuracy or live
+agent discovery; review behavioral documentation and smoke-test changed workflows
+when the required runtime is available.
 
 ## Name Migration
 
@@ -331,6 +389,7 @@ CodeNextjsGenerator                      -> CodeNextJsSpecialist
 CodePythonFastAPIBuilder                 -> CodeFastApiSpecialist
 CodeNodeJsExpressGenerator               -> CodeExpressSpecialist
 CodeSpringBootGenerator                  -> CodeSpringBootSpecialist
+GitGithubAgent                           -> GovGitWorkflowAgent
 ```
 
 ## Notes
@@ -340,7 +399,7 @@ CodeSpringBootGenerator                  -> CodeSpringBootSpecialist
     when the editor has not refreshed its agent discovery list.
 - Orchestrator's `agents:` is the direct invocation allowlist, not ownership.
     Advisors have `tools: []` and `agents: []`; workers have no delegation tool.
-- The catalog controls ownership and selection cues; update it, the allowlist,
+- Orchestrator's embedded tables control ownership and selection cues; update them, the allowlist,
     and ownership documentation together when adding or renaming an agent.
 
 ## Validation
@@ -348,15 +407,18 @@ CodeSpringBootGenerator                  -> CodeSpringBootSpecialist
 Run the static validator and its in-memory regression suite from this directory:
 
 ```powershell
-python agent-roster-validator.py
-python -m unittest -v test_agent_roster_validator
+python tools/agent-roster-validator.py
+python -m unittest discover -s tests -v
 ```
 
 Python and PyYAML are required. Validation checks two distinct contracts: flat
-runtime invocation from Orchestrator, and the catalog's single-parent ownership
-tree with domain nesting and documentation parity. Catalog targets must resolve to
+runtime invocation from Orchestrator, and its embedded single-parent ownership
+tree with domain nesting and documentation parity. Indexed targets must resolve to
 real workers, advisors must be tool-free, and role-specific required/allowed
-tool profiles must match. Passing static checks does not
+tool profiles must match. NAM-1 enforces the naming convention; DOC-1 requires
+exact README Agent Index coverage and embedded-route/model parity. The validator
+derives its in-memory model from Orchestrator's embedded tables, not an external
+routing file. Passing static checks does not
 prove output quality, token savings, or runtime agent discovery.
 
 ## Runtime Verification
