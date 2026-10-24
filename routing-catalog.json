@@ -93,12 +93,14 @@
             "routes": {
                 "ADRs, RFCs and architecture governance": "GovArchitectureRecordsExpert",
                 "README, API documentation or user documentation": "GovDocumentationSuiteGenerator",
-                "GitHub issues, PRs, triage or agent capability proposals": "GovGithubAgent"
+                "Git branches, staging, commits, pushes or PR lifecycle": "GitGithubAgent",
+                "GitHub issues, triage or agent capability proposals": "GovGithubAgent"
             },
             "children": [
                 "GovArchitectureRecordsExpert",
                 "GovDocumentationSuiteGenerator",
-                "GovGithubAgent"
+                "GovGithubAgent",
+                "GitGithubAgent"
             ]
         },
         {

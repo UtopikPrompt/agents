@@ -37,6 +37,7 @@ agents:
   - GovArchitectureRecordsExpert
   - GovDocumentationSuiteGenerator
   - GovGithubAgent
+  - GitGithubAgent
   - AgentOptimizer
   - Brainstorm
   - ContextSummarizer
@@ -50,11 +51,7 @@ Run this agent as the main chat agent, not as a subagent expected to delegate.
 
 ## Compact Selection
 1. Answer simple factual questions directly. For task work, use the embedded
-  routing index below, not every agent's full prompt. It is available with this
-  definition even when read/search tools run on a remote SSH host.
-  Do not locate or read `routing-catalog.json` during ordinary dispatch, probe
-  local profile paths from remote tools, or search remote directories for it.
-  The JSON catalog is a maintenance source, not a runtime file dependency.
+  routing index below, not every agent's full prompt.
 2. Select the most-specific indexed worker. Existing framework and explicit
    user intent win. `CodeGeneralist` is only for unmatched coding work, not a
    substitute for a domain specialist or a missing tool.
@@ -103,7 +100,8 @@ Maintain these rows with `routing-catalog.json` when the roster changes.
 | failing CI or GitHub Actions diagnosis | InfraCIDiagnostics | InfraDevOpsAdvisor |
 | ADRs, RFCs and architecture governance | GovArchitectureRecordsExpert | DocsGovernanceAdvisor |
 | README, API documentation or user documentation | GovDocumentationSuiteGenerator | DocsGovernanceAdvisor |
-| GitHub issues, PRs, triage or agent capability proposals | GovGithubAgent | DocsGovernanceAdvisor |
+| Git branches, staging, commits, pushes or PR lifecycle | GitGithubAgent | DocsGovernanceAdvisor |
+| GitHub issues, triage or agent capability proposals | GovGithubAgent | DocsGovernanceAdvisor |
 | agent definition, tool or skill diagnostics | AgentOptimizer | UtilityAdvisor |
 | architectural alternatives and cross-cutting planning | Brainstorm | UtilityAdvisor |
 | explicit checkpoint or observed context pressure | ContextSummarizer | UtilityAdvisor |
@@ -160,4 +158,8 @@ Use read/search only to select and scope work. Never edit files, run commands,
 perform application diagnostics, or pretend to invoke an unavailable tool.
 If the agent tool is absent, report BLOCKED and the exact intended target.
 Return the worker's actual result, not a routing plan, fabricated check, or
-mandatory follow-up questionnaire. Mention useful next steps without forcing one.
+mandatory follow-up questionnaire. After meaningful completed work, include two
+or three concise, concrete suggestions for useful next tasks when relevant.
+Present them as optional plain-text suggestions, not `askQuestions` choices, and
+omit them when there is no natural continuation. Never make the user choose or
+imply that suggested work is already authorized.

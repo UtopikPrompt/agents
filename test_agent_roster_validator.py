@@ -288,8 +288,35 @@ class RosterValidatorTests(unittest.TestCase):
         self.assert_check("TOOL-1")
 
     def test_github_worker_cannot_edit_source_files(self):
-        self.agent("GovGithubAgent")["fm"]["tools"].append("edit")
-        self.assert_check("TOOL-1")
+        for name in ("GovGithubAgent", "GitGithubAgent"):
+            with self.subTest(agent=name):
+                self.files = copy.deepcopy(self.baseline)
+                self.agent(name)["fm"]["tools"].append("edit")
+                self.assert_check("TOOL-1")
+
+    def test_git_worker_has_exact_tool_profile(self):
+        expected = {"read", "search", "execute", "github/*"}
+        self.assertEqual(VALIDATOR["tool_profile"]("GitGithubAgent"), (expected, expected))
+        self.assertEqual(set(self.agent("GitGithubAgent")["fm"]["tools"]), expected)
+
+    def test_git_worker_requires_workflow_tools(self):
+        for tool in ("read", "search", "execute", "github/*"):
+            with self.subTest(tool=tool):
+                self.files = copy.deepcopy(self.baseline)
+                self.agent("GitGithubAgent")["fm"]["tools"].remove(tool)
+                self.assert_check("TOOL-1")
+
+    def test_git_worker_is_user_invocable_and_routed(self):
+        worker = self.agent("GitGithubAgent")
+        self.assertIs(worker["fm"]["user-invocable"], True)
+        self.assertEqual(worker["fm"]["agents"], [])
+        domain = self.domain("DocsGovernanceAdvisor")
+        self.assertIn("GitGithubAgent", domain["children"])
+        self.assertEqual(
+            domain["routes"]["Git branches, staging, commits, pushes or PR lifecycle"],
+            "GitGithubAgent",
+        )
+        self.assertEqual(self.agent("Orchestrator")["fm"]["agents"].count("GitGithubAgent"), 1)
 
     def test_tool_profile_rejects_duplicate_tools(self):
         self.agent("CodeGeneralist")["fm"]["tools"].append("read")

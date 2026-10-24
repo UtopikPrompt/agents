@@ -256,7 +256,7 @@ def tool_profile(name):
         required = {"read", "search", "edit"}
         optional = {"todo"} if name == "GovDocumentationSuiteGenerator" else set()
         return required, required | optional
-    if name == "GovGithubAgent":
+    if name in {"GovGithubAgent", "GitGithubAgent"}:
         required = {"github/*", "read", "search", "execute"}
         return required, required
     required = IMPLEMENTATION_TOOLS | ({"github/*"} if name == "InfraCIDiagnostics" else set())

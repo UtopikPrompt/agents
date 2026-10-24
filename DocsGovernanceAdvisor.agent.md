@@ -14,7 +14,8 @@ invoke another agent. Keep proposals distinct from user-approved decisions.
 
 - ADR/RFC or architecture governance -> `GovArchitectureRecordsExpert`.
 - API/user documentation or README -> `GovDocumentationSuiteGenerator`.
-- GitHub PR/issues/triage or filing a capability proposal -> `GovGithubAgent`.
+- Git branches, staging, commits, pushes or PR lifecycle -> `GitGithubAgent`.
+- GitHub issues/triage or filing a capability proposal -> `GovGithubAgent`.
 - Agent-definition/tool diagnostics belong to the utility domain, not GitHub
   governance. Return NO_MATCH rather than borrowing another domain's worker.
 

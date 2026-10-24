@@ -101,6 +101,7 @@ flowchart LR
     DocsGovernanceAdvisor --> GovArchitectureRecordsExpert["GovArchitectureRecordsExpert"]
     DocsGovernanceAdvisor --> GovDocumentationSuiteGenerator["GovDocumentationSuiteGenerator"]
     DocsGovernanceAdvisor --> GovGithubAgent["GovGithubAgent"]
+    DocsGovernanceAdvisor --> GitGithubAgent["GitGithubAgent"]
 
     UtilityAdvisor --> AgentOptimizer["AgentOptimizer"]
     UtilityAdvisor --> Brainstorm["Brainstorm"]
@@ -116,7 +117,7 @@ flowchart LR
     class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor domainAdvisor;
     class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
     class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist frameworkWorker;
-    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent worker;
+    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GitGithubAgent worker;
 ```
 
 
@@ -146,7 +147,8 @@ flowchart LR
 | **GovDocumentationSuiteGenerator** | worker | no | ADRs, API docs, READMEs, user documentation |
 | **InfraPerformanceProfiler** | worker | no | CPU/memory profiling for Python (Tachyon, Memray) and Node.js |
 | **InfraReleaseManager** | worker | no | Version bumping, changelogs, Git tagging, publishing |
-| **GovGithubAgent** | worker | no | PR/issue/code-search review, triage, GitHub Projects, agent capability filing |
+| **GovGithubAgent** | worker | no | Issue triage, GitHub Projects, agent capability proposal filing |
+| **GitGithubAgent** | worker | yes | Local branches, scoped staging/commits, pushes, PR creation/updates/reviews/merges and authorized cleanup |
 | **InfraCIDiagnostics** | worker | no | Root-cause diagnosis of failing CI/Actions jobs & PR errors, then suggests fixes |
 | **CodeNextJsSpecialist** | worker | no | Next.js architecture: App Router, Server Components, ISR |
 | **CodeSpringBootSpecialist** | worker | no | Java/Spring Boot backend scaffolding |
@@ -203,7 +205,7 @@ must not present unverified changes as fully validated.
 | CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
 | CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist |
 | INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
-| GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent |
+| GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GitGithubAgent |
 | Miscellaneous | UtilityAdvisor | AgentOptimizer, Brainstorm, ContextSummarizer |
 
 ## Tool Policy
@@ -222,13 +224,14 @@ be worked around through terminal writes.
 | ContextSummarizer | `read` | No editing, execution, or runtime compaction |
 | AgentOptimizer and documentation/governance writers | `read`, `search`, `edit` | `todo` optional for GovDocumentationSuiteGenerator; no terminal access |
 | GovGithubAgent | `read`, `search`, `execute`, `github/*` | Terminal limited by instructions to read-only repository inspection; no source editing |
+| GitGithubAgent | `read`, `search`, `execute`, `github/*` | Scoped Git mutations only when requested, plus validation; no application source editing or delegation |
 
 Tool availability is not authorization. Review/diagnosis stays read-only even for
 a worker that can edit. CI fixes require an explicit request; deployment, commit,
 publication, or data changes still require the relevant approval. Broad terminal
 access is not a sandbox that technically enforces read-only command behavior.
 
-GitHub's provider group is retained only for the two GitHub-facing workers;
+GitHub's provider group is retained only for the three GitHub-facing workers;
 provider-specific operation identifiers must be verified at runtime before
 narrowing that group. CI diagnostics uses GitHub for read-only evidence, not
 automatic repository mutations. No other agent receives this service group.
@@ -241,6 +244,22 @@ from merely reading a command or configuration file.
 
 These are statically checked role profiles, not proof of live MCP registration,
 authentication, editor tool discovery, command safety, or measured context savings.
+
+## Git Workflow
+
+Select **GitGithubAgent** directly or let Orchestrator route branch, commit, push,
+and PR tasks to it. It is user-level and follows the current repository's branch,
+commit, validation, and PR-template conventions. GovGithubAgent remains responsible
+for issue proposals; InfraReleaseManager owns releases and InfraCIDiagnostics owns
+CI diagnosis.
+
+Read-only preparation is the default. Explicit requests authorize the named
+operation, not subsequent publication or cleanup. For example, "commit these
+changes" does not authorize pushing or opening a PR; "push this branch and open
+a draft PR against develop" does. The agent preserves unrelated work and staging,
+checks the final staged diff, and reports validation evidence. Rewrites, force
+pushes, merges, and branch deletions require explicit authorization for the target.
+These are behavioral instructions, not a technical command sandbox.
 
 ## Model Policy
 
