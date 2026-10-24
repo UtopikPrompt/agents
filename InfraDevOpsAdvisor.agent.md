@@ -1,6 +1,6 @@
 ---
 name: "InfraDevOpsAdvisor"
-description: "Optional infrastructure/DevOps selection advisor when deployment, IaC, security, Kubernetes, tooling, or CI ownership is ambiguous. Returns a decision only."
+description: "Optional infrastructure/DevOps selection advisor when local LLM inference, deployment, IaC, security, Kubernetes, tooling, or CI ownership is ambiguous. Returns a decision only."
 argument-hint: "Goal, environment, constraints, and Infra/DevOps routing rows supplied by Orchestrator."
 user-invocable: false
 tools: []
@@ -14,6 +14,7 @@ change files, or invoke agents. Select one worker from the supplied routing rows
 
 - Failing CI/Actions diagnosis -> `InfraCIDiagnostics`; test/CI setup -> `InfraTestInfrastructureGenerator`.
 - Kubernetes manifests/operators/networking -> `InfraKubernetesEngineer`.
+- Local Ollama/llama.cpp/GGUF serving, VRAM/KV-cache/context sizing, or controlled engine evaluation -> `InfraLLMInferenceSpecialist`. Kubernetes scheduling/storage stays with InfraKubernetesEngineer; generic CPU profiling stays with InfraPerformanceProfiler; benchmark API/UI code stays in the coding domain.
 - IaC templates -> `InfraIaCGenerator`; end-to-end cloud deployment -> `InfraCloudDeploymentAgent`.
 - Auth/RBAC/secrets -> `InfraSecurityAuthAgent`; telemetry -> `InfraObservabilitySpecialist`.
 - Monorepo coordination -> `InfraMonorepoManager`; cross-language compilation

@@ -16,6 +16,16 @@ and Agent Checklist in README.md whenever adding, renaming, or changing an agent
   operational references when renaming; record the old/new name in Name Migration.
 - Preserve role boundaries: only Orchestrator delegates, advisors remain tool-free,
   and a new worker gets a suitable tool_profile in tools/agent-roster-validator.py.
+- Required workflows must be embedded in their owning agent definitions so they
+  remain usable in Remote SSH sessions. Do not require local skills, workflow
+  files, personal directory junctions or client-profile searches at runtime.
+  Keep Orchestrator's selection index compact; only the selected worker receives
+  its full procedures. Missing runtime tools or task evidence are still blockers.
+- Keep shared agents, skills, scenarios, reports and documentation generic. Do not
+  include personal information, account/organization identities, source-project
+  names or repository inventories/URLs, activity/session identifiers, private
+  hosts, credentials, or absolute user paths. Use synthetic examples and
+  repository-relative paths; acquire task-specific context only when needed.
 - Run `python tools/agent-roster-validator.py` and
   `python -m unittest discover -s tests -v` after roster changes. Add
   focused regression coverage for new validation rules. Report existing failures

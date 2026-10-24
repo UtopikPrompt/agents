@@ -575,7 +575,7 @@ def build_report(report, files, registry, readme_refs):
     lines = []
     lines.append("# Agent Roster Validation Report")
     lines.append("")
-    lines.append(f"Workspace: `{PROMPTS_DIR}`")
+    lines.append("Workspace: repository root (paths are relative)")
     lines.append(f"Agent files: `{len(files)}`")
     lines.append(f"Canonical agents: `{len(registry)}`")
     lines.append("")
@@ -625,7 +625,13 @@ def build_report(report, files, registry, readme_refs):
         lines.append("| Check | File | Issue |")
         lines.append("|---|---|---|")
         for finding in report.findings:
-            lines.append(f"| {finding['check']} | `{finding['path']}` | {finding['message']} |")
+            finding_path = Path(finding["path"])
+            try:
+                display_path = finding_path.relative_to(PROMPTS_DIR).as_posix()
+            except ValueError:
+                display_path = finding_path.name if finding_path.is_absolute() else finding_path.as_posix()
+            message = finding["message"].replace(str(PROMPTS_DIR), ".").replace(PROMPTS_DIR.as_posix(), ".")
+            lines.append(f"| {finding['check']} | `{display_path}` | {message} |")
     lines.append("")
 
     # Roster health.

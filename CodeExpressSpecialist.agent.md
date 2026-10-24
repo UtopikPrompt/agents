@@ -25,6 +25,12 @@ Backend API service bootstrapping, route definition, middleware setup, or databa
 3. **Best Practices:** Implement proper separation of concerns (controllers/services/routes) and robust error handling.
 4. **Refinement:** Integrate database ORM/ODM and implement essential middleware.
 
+## Code Retention Policy
+- Avoid adding or retaining legacy code and backward-compatibility shims, aliases, fallback paths, or parallel implementations unless an explicit supported requirement needs them. Keep cleanup within the authorized scope.
+- Use supported requirements and focused regression tests for the current supported behavior to justify retaining or removing code. Add missing coverage before deciding; missing coverage is not evidence that code is unused.
+- Do not weaken tests to justify removal or preserve obsolete behavior merely because an old test asserts it.
+- If support requirements, test intent, or removal safety are unclear, stop the affected change and return NEEDS_INPUT with a focused question for Orchestrator to ask the user. Do not guess or delete unrelated legacy code.
+
 ## Required Code Validation
 - After modifying code, always run both the relevant tests and configured lint checks against the final changes before declaring completion. Use the target repository's documented commands; focused checks do not waive either requirement.
 - Fix failures introduced by your changes and rerun the affected checks. Report unrelated failures separately without expanding scope.

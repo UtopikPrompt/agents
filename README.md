@@ -3,6 +3,13 @@
 This folder holds the definitions of every agent available for routing. Each `.agent.md`
 file is a self-contained prompt that governs one agent's behavior, tools, and triggers.
 
+Keep shared artifacts generic: no personal information, account/organization
+identities, external repository inventories/URLs, activity/session identifiers,
+private host details, credentials or absolute user paths. Use synthetic examples
+and repository-relative paths. Gather task-specific context at runtime instead
+of embedding it in reusable agents, skills, scenarios or reports. See the
+[generic improvements summary](agent-roster-improvements.md).
+
 ## Architecture
 
 Execution and ownership are separate. **Orchestrator is the only dispatcher**
@@ -31,6 +38,12 @@ tables are the only routing source of truth; no separate JSON catalog is needed.
 Never search the remote host or client profile for routing files. Advisors receive
 the relevant rows directly from Orchestrator. The selected worker must still
 be exposed by the runtime agent tool; otherwise Orchestrator reports BLOCKED.
+
+Required workflows must be embedded in their owning agent definitions. Local
+skills and client-profile files are not assumed accessible from Remote SSH.
+Do not load an external workflow or copy all worker procedures into the dispatcher;
+the runtime supplies the selected worker's self-contained definition. Missing
+tools, model metadata or task-specific evidence remain explicit blockers.
 
 ## Execution
 
@@ -96,6 +109,7 @@ flowchart LR
     InfraDevOpsAdvisor --> InfraSecurityAuthAgent["InfraSecurityAuthAgent"]
     InfraDevOpsAdvisor --> InfraIaCGenerator["InfraIaCGenerator"]
     InfraDevOpsAdvisor --> InfraPerformanceProfiler["InfraPerformanceProfiler"]
+    InfraDevOpsAdvisor --> InfraLLMInferenceSpecialist["InfraLLMInferenceSpecialist"]
     InfraDevOpsAdvisor --> InfraTestInfrastructureGenerator["InfraTestInfrastructureGenerator"]
     InfraDevOpsAdvisor --> InfraReleaseManager["InfraReleaseManager"]
     InfraDevOpsAdvisor --> InfraCIDiagnostics["InfraCIDiagnostics"]
@@ -119,7 +133,7 @@ flowchart LR
     class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor domainAdvisor;
     class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
     class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist frameworkWorker;
-    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent worker;
+    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraLLMInferenceSpecialist,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent worker;
 ```
 
 
@@ -134,7 +148,7 @@ flowchart LR
 | **InfraDevOpsAdvisor** | advisor | no | Optional infrastructure/DevOps specialist selection; never executes |
 | **UtilityAdvisor** | advisor | no | Optional utility specialist selection; never executes |
 | **AgentOptimizer** | worker | yes | Diagnostics & optimization of a VS Code agent's definition, tools, and instructions |
-| **GovArchitectureRecordsExpert** | worker | no | Manages ADRs and architectural alignments inside `./docs` |
+| **GovArchitectureRecordsExpert** | worker | no | Repository-native ADRs/RFCs; preserves human approval and documentation-only boundaries |
 | **Brainstorm** | worker | no | Divergent thinking: generates low-token architectural alternatives & edge cases |
 | **CodeDomainAdvisor** | advisor | no | Optional cross-stack coding specialist selection; never executes |
 | **CodeGeneralist** | worker | no | Generic implementation, review, debugging, and refactoring when no specialist fits |
@@ -147,8 +161,9 @@ flowchart LR
 | **InfraMonorepoManager** | worker | no | Multi-package workspace coordination & version synchronization |
 | **InfraTestInfrastructureGenerator** | worker | no | Test suites across frameworks + CI/CD pipeline configuration |
 | **GovDocumentationSuiteGenerator** | worker | no | ADRs, API docs, READMEs, user documentation |
-| **InfraPerformanceProfiler** | worker | no | CPU/memory profiling for Python (Tachyon, Memray) and Node.js |
-| **InfraReleaseManager** | worker | no | Version bumping, changelogs, Git tagging, publishing |
+| **InfraPerformanceProfiler** | worker | no | Python/Node CPU/memory profiling with verified OS/runtime/profiler APIs |
+| **InfraLLMInferenceSpecialist** | worker | no | Ollama/llama.cpp/GGUF serving, VRAM/KV-cache/context estimates and controlled engine evaluation |
+| **InfraReleaseManager** | worker | no | Release preparation and authorized publication; Git mutations go to GovGitWorkflowAgent through Orchestrator |
 | **GovGithubAgent** | worker | no | Issue triage, GitHub Projects, agent capability proposal filing |
 | **GovGitWorkflowAgent** | worker | yes | Local branches, scoped staging/commits, pushes, PR creation/updates/reviews/merges and authorized cleanup |
 | **InfraCIDiagnostics** | worker | no | Root-cause diagnosis of failing CI/Actions jobs & PR errors, then suggests fixes |
@@ -160,9 +175,9 @@ flowchart LR
 | **CodeGraphQLTRPCAgent** | worker | no | GraphQL API & tRPC scaffolding: schema, resolvers, codegen (Apollo, Hasura, tRPC) |
 | **CodeExpressSpecialist** | worker | no | Node.js/Express REST API generation & bootstrapping |
 | **InfraCloudDeploymentAgent** | worker | no | Cross-cloud deployment & provisioning: cloud-init, pipelines, container orchestration (Azure DevOps, GitHub Actions) |
-| **InfraIaCGenerator** | worker | no | Infrastructure-as-code generation: Bicep/ARM, Terraform, Pulumi |
+| **InfraIaCGenerator** | worker | no | Provider-native Bicep/ARM, Terraform or Pulumi; state and apply authorization boundaries |
 | **InfraKubernetesEngineer** | worker | no | Kubernetes cluster engineering: Helm/Kustomize manifests, networking, RBAC |
-| **InfraSecurityAuthAgent** | worker | no | Security hardening & authentication: RBAC, secrets, JWT/OAuth2/OpenID, compliance |
+| **InfraSecurityAuthAgent** | worker | no | Provider-neutral identity, RBAC/secrets, GitHub App/OIDC and application/cloud trust isolation |
 | **InfraObservabilitySpecialist** | worker | no | Observability engineering: error monitoring, tracing (OpenTelemetry), metrics, alerting |
 | **CodeFrameworkDiagnostician** | worker | no | Local error parser & dependency validation for complex framework bugs |
 
@@ -183,10 +198,30 @@ flowchart LR
     focused retry; escalate a real definition defect to AgentOptimizer once.
 7. No advisor or worker delegates. No runtime compaction is promised. Do not force
     a checkpoint or questionnaire after each task.
+8. TypeScript or a framework's internal Vite builder does not imply React.
+    Unmatched Angular/.NET/Go/VS Code extension implementation goes to
+    CodeGeneralist, preserving the existing stack. Domain-specific CI, Git,
+    infrastructure and shared component tasks retain their own worker.
+
+## Code Retention Policy
+
+Orchestrator and all 23 implementation workers avoid adding or retaining legacy
+code and backward-compatibility shims, aliases, fallback paths, or parallel
+implementations unless an explicit supported requirement needs them. Cleanup
+stays within the authorized scope; this is not permission for unrelated deletion.
+
+Supported requirements and focused regression tests for the current supported
+behavior determine whether code is kept or removed. Add missing coverage before
+deciding; absent tests do not prove code is unused. Do not weaken tests to justify
+removal or treat an old test as automatic justification for obsolete behavior.
+If support requirements, test intent, or removal safety are unclear, the worker
+stops the affected change and returns `NEEDS_INPUT` with a focused question.
+Orchestrator asks the user before that change proceeds. No tools, permissions,
+agent roles, ownership, or routing entries change under this policy.
 
 ## Code Validation Policy
 
-This is a roster rule embedded in Orchestrator and all 22 implementation workers,
+This is a roster rule embedded in Orchestrator and all 23 implementation workers,
 not a project instruction. It follows these agent definitions into target projects.
 After modifying code, workers must run both the relevant tests and the target
 repository's configured lint checks against the final changes. Focused validation
@@ -206,7 +241,7 @@ must not present unverified changes as fully validated.
 | CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist |
 | CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
 | CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist |
-| INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
+| INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraLLMInferenceSpecialist, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
 | GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GovGitWorkflowAgent |
 | Miscellaneous | UtilityAdvisor | AgentOptimizer, Brainstorm, ContextSummarizer |
 
@@ -247,7 +282,71 @@ from merely reading a command or configuration file.
 These are statically checked role profiles, not proof of live MCP registration,
 authentication, editor tool discovery, command safety, or measured context savings.
 
+## Self-Contained Agent Workflows
+
+InfraLLMInferenceSpecialist owns local serving, model metadata, capacity estimates,
+and controlled engine comparisons. Kubernetes ownership, generic CPU profiling,
+and benchmark application code remain with their existing workers. Its standard
+implementation tool profile grants no GitHub access or delegation. Predictions
+must state memory units, architecture, cache representation, concurrency, offload,
+and uncertainty; an estimate is not evidence a model loaded successfully.
+
+Each owning worker carries the full relevant procedure, not a short fallback or
+a pointer to a local skill. Where two workers need the same knowledge, retain
+the bounded procedure in both definitions and check it for drift. This intentional
+duplication supports Remote SSH without making the dispatcher load every worker.
+The roster's former external workflow skill files are no longer required.
+
+Security/IaC/deployment guidance discovers the actual provider and repository
+layout. Profiling verifies OS, runtime and installed APIs before instrumentation;
+example tools are not assumed installed, Windows-compatible, or executed.
+
+| Embedded Procedure | Owning Workers | Scope |
+|---|---|---|
+| Controlled engine evaluation | InfraLLMInferenceSpecialist | Fixed artifacts/settings, trials, timings and quality limitations |
+| Identity failure isolation | InfraCIDiagnostics, InfraSecurityAuthAgent | Six identity layers, first failure, sanitized evidence and discriminating checks |
+| Release contract preflight | InfraReleaseManager, InfraKubernetesEngineer, InfraCloudDeploymentAgent, InfraIaCGenerator | Exact artifacts/overlays, digest/provenance policy, storage, stage gates and bounded readiness |
+| AWS platform safety | InfraIaCGenerator | AFT/bootstrap/account/state boundaries, plans and mutation gates |
+| Secure development bootstrap | InfraDevContainerSpecialist, MultiLanguageBuilder | Codespaces/dotfiles/SSH setup and host/container boundaries |
+| Container display operations | InfraDevContainerSpecialist, CodeGeneralist | Display access, schedule cases, explicit device-operation approval |
+| Specification to code handoff | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator | Accepted-spec evidence, scoped prompts and documentation-only boundaries |
+| Go contract validation | CodeGeneralist, MultiLanguageBuilder | Provider-neutral interfaces, cancellation, callers and configured Go checks |
+
+These procedures grant no additional tools or authorization. CI may acquire
+read-only GitHub evidence; security requests sanitized evidence when its tools
+cannot. Publication, deployment, storage changes, provider mutation and load
+tests retain their separate gates. Unit tests check embedded procedure structure,
+policy clauses and absence of external workflow discovery requirements. Actual
+remote agent registration and tool availability still need runtime verification.
+
+## Routing Evaluation
+
+[tests/roster-scenarios.yaml](tests/roster-scenarios.yaml) contains 26 reviewable
+cases: 18 calibration and eight held-out. Expected workers and behavior cover
+six identity layers, inference units/metadata/cache/concurrency, evaluation,
+release/storage/authorization, framework preservation, Git and direct answers.
+Unit tests validate fixture integrity and definition contracts, not live routing.
+
+For an explicitly commissioned live evaluation, run the current Orchestrator as
+the main agent with equal scoped payloads and registered workers. Record actual
+selection, hops/retries, tool blockers, safety outcomes and validation evidence;
+compare held-out results without relabeling failures. Target at least 90% correct
+routes and zero framework-switching or unauthorized-mutation cases. No live score,
+latency/cost improvement or successful Remote SSH registration is claimed by the
+static suite. Reload/discover updated agents before a runtime test.
+
 ## Git Workflow
+
+Architecture records follow the target repository's own paths and RFC/ADR
+lifecycle. Only the user or its documented human authority accepts decisions;
+drafting or implementing a proposal never automatically approves it. Documentation
+workers return sibling-code handoffs rather than implementing application code.
+
+Release preparation, Git mutations, publication, and deployment are distinct
+authorization stages. InfraReleaseManager prepares artifacts and performs only
+explicitly authorized publication. It returns commit/tag/push requirements to
+Orchestrator for GovGitWorkflowAgent; no worker delegates. Preparation does not
+authorize publication, and publication does not authorize deployment.
 
 Select **GovGitWorkflowAgent** directly or let Orchestrator route branch, commit, push,
 and PR tasks to it. It is user-level and follows the current repository's branch,
