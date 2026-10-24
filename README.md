@@ -193,7 +193,9 @@ flowchart LR
 4. The dispatcher sends only goal/mode, relevant paths, constraints/approvals,
     acceptance checks, and essential verified evidence. Workers inspect local code.
 5. Workers report concise findings/changes, artifact references, validation
-    actually run, and blockers. Proposals do not become decisions without approval.
+    actually run, and blockers. Orchestrator presents every user-facing answer
+    as a numbered list, without unordered bullets or unnumbered prose. Proposals
+    do not become decisions without approval.
 6. Fan out only disjoint independent work. Sequence overlapping edits. Allow one
     focused retry; escalate a real definition defect to AgentOptimizer once.
 7. No advisor or worker delegates. No runtime compaction is promised. Do not force
@@ -419,6 +421,18 @@ Evaluation gate:
 Model choice does not itself reduce the payload. The embedded index, minimal
 task context, local worker inspection, and concise results remain the context
 controls. No candidate-model comparison or cheaper advisor pin is claimed here.
+
+## Existing Edit Protection
+
+Orchestrator includes existing-edit protection in every worker payload. Workers
+that can edit files or run commands also embed the rule for direct invocation:
+preserve existing edits, including changes discovered during a task. Before
+restoring, reverting, resetting, overwriting, or otherwise discarding those edits,
+ask the user for explicit approval naming the affected files and proposed
+restoration. General task authorization is not approval to discard edits.
+Without approval, preserve the edits and return NEEDS_INPUT through Orchestrator,
+or ask the user directly when running as the main agent. Read-only roles remain
+read-only; this safeguard grants no new tools or permissions.
 
 ## Naming Convention
 

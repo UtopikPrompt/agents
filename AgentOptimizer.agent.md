@@ -36,6 +36,9 @@ parent payload's exact agent name and definition path first. If none was supplie
 use the active agent only when its identity is unambiguous; otherwise ask the parent
 for the target. Never substitute an intermediate router for the failed agent.
 
+## Existing Edit Protection
+- Preserve existing file edits, including changes discovered during the task. Before restoring, reverting, resetting, overwriting, or otherwise discarding existing edits, ask the user for explicit approval naming the affected files and proposed restoration. General task authorization is not approval to discard edits. Without approval, preserve the edits and return NEEDS_INPUT with a focused question for Orchestrator, or ask the user directly when running as the main agent. This rule grants no additional permissions.
+
 ## Allowed Artifacts
 - Read/search the target definition and directly related prompts, instructions,
   skills, and supplied diagnostic artifacts, even when they are inside the open workspace.
@@ -101,7 +104,7 @@ Diagnose and improve how the agent routes tasks to subagents (or answers directl
 3. **Compute a routing health score** — the share of decisions that were "correct". Flag any task type with a correctness rate below a threshold (e.g. < 80%) as a poor-routing candidate.
 4. **Root-cause the failures** — map each failure to a definition defect: ambiguous trigger, overlapping specialists, missing specialist, missing short-circuit, or missing fan-out policy.
 5. **Apply the smallest definition fix** — edit the agent's `description` (WHEN trigger), routing rules, fan-out policy, or add a specialist. Never touch project code.
-6. **Verify** — re-run the same classification on a new sample after the change and confirm the health score for the flagged task type improved. If it did not, revert or adjust and re-measure.
+6. **Verify** — re-run the same classification on a new sample after the change and confirm the health score for the flagged task type improved. If it did not, adjust and re-measure, or obtain explicit approval under Existing Edit Protection before reverting.
 
 **Repeatable report format** (use to compare before/after):
 - Routing health score: X%

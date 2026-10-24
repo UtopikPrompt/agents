@@ -47,6 +47,41 @@ class RosterValidatorTests(unittest.TestCase):
     def test_current_roster_passes(self):
         self.assertEqual(self.validate().findings, [])
 
+    def test_dispatcher_requires_approval_before_discarding_existing_edits(self):
+        dispatcher = self.agent("Orchestrator")["text"]
+        payload = dispatcher.split("## Worker Payload\n", 1)[1].split("\n## ", 1)[0]
+        for clause in (
+            "Preserve existing file edits",
+            "restoring, reverting, resetting, overwriting",
+            "ask the user for explicit approval naming the affected files",
+            "General task authorization is not approval",
+            "preserve the edits and return NEEDS_INPUT",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, payload)
+
+    def test_edit_and_command_workers_require_restoration_approval(self):
+        for entry in self.baseline:
+            if not {"edit", "execute"}.intersection(entry["fm"].get("tools", [])):
+                continue
+            with self.subTest(agent=entry["name"]):
+                self.assertEqual(entry["text"].count("## Existing Edit Protection\n"), 1)
+                section = entry["text"].split("## Existing Edit Protection\n", 1)[1].split("\n## ", 1)[0]
+                for clause in (
+                    "including changes discovered during the task",
+                    "restoring, reverting, resetting, overwriting",
+                    "ask the user for explicit approval naming the affected files and proposed restoration",
+                    "General task authorization is not approval to discard edits",
+                    "Without approval, preserve the edits and return NEEDS_INPUT",
+                    "ask the user directly when running as the main agent",
+                    "This rule grants no additional permissions",
+                ):
+                    self.assertIn(clause, section)
+
+    def test_existing_edit_protection_is_documented(self):
+        self.assertIn("## Existing Edit Protection", self.readme)
+        self.assertIn("General task authorization is not approval to discard edits", self.readme)
+
     def test_current_names_and_documentation_follow_policy(self):
         findings = [finding for finding in self.validate().findings if finding["check"] in {"NAM-1", "DOC-1"}]
         self.assertEqual(findings, [])
@@ -224,6 +259,12 @@ class RosterValidatorTests(unittest.TestCase):
         ):
             with self.subTest(clause=clause):
                 self.assertIn(clause, payload)
+
+    def test_orchestrator_requires_numbered_user_facing_answers(self):
+        delivery = self.agent("Orchestrator")["text"].split("## Boundaries and Delivery\n", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("every user-facing answer as a numbered enumeration using an ordered list", delivery)
+        self.assertIn("Do not use unordered bullets, standalone unnumbered prose, or unnumbered headings", delivery)
+        self.assertIn("Number suggestions and follow-up items as part of the same enumeration", delivery)
 
     def test_routing_loads_only_orchestrator_definition(self):
         definition = self.agent("Orchestrator")["text"]

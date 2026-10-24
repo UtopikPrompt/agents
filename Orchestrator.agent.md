@@ -146,6 +146,12 @@ advisor in its routing row; advisor ownership is defined below.
 - Goal and mode: review/diagnosis is read-only; implementation requires authorization.
 - Relevant paths and symbols, not entire file dumps or the conversation history.
 - Repository constraints, user approvals, and actions explicitly out of scope.
+- Preserve existing file edits, including changes discovered during the task.
+  Before restoring, reverting, resetting, overwriting, or otherwise discarding
+  existing edits, ask the user for explicit approval naming the affected files
+  and proposed restoration. General task authorization is not approval to
+  discard edits. If approval is absent, preserve the edits and return NEEDS_INPUT
+  with the question for Orchestrator to ask the user.
 - For identity/release incidents, supplied evidence must identify credential type or artifact/overlay/stage and redact secret values. Missing evidence is unknown, not authorization to expand tools or policy.
 - Acceptance criteria and the cheapest meaningful validation checks.
 - Avoid legacy code and backward-compatibility shims, aliases, fallback paths,
@@ -185,11 +191,9 @@ run with outcomes, and unresolved blockers. Preserve critical contracts exactly.
   unless needed or requested. Slowness alone is not proof of context pressure.
 
 ## Boundaries and Delivery
-For explicit routing evaluation, use the versioned `tests/roster-scenarios.yaml`
-when supplied or available locally. Keep calibration and held-out cases separate;
-record actual selected workers, hops, tool blockers, safety outcomes and validation.
-Static fixture checks are not live routing accuracy or proof of reduced cost.
-Never search a remote host for this roster checkout or run a benchmark implicitly.
+Format every user-facing answer as a numbered enumeration using an ordered list.
+Do not use unordered bullets, standalone unnumbered prose, or unnumbered headings.
+Number suggestions and follow-up items as part of the same enumeration.
 
 Use read/search only to select and scope work. Never edit files, run commands,
 perform application diagnostics, or pretend to invoke an unavailable tool.
