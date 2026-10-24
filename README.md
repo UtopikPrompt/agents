@@ -22,6 +22,15 @@ guarantee a measured token or latency reduction. The runtime may still expose
 agent names and descriptions for discovery. Full specialist prompts must not be
 manually loaded into the dispatcher just to select a worker.
 
+### Remote SSH Routing
+
+Orchestrator embeds the compact worker selection index in its definition, so
+ordinary dispatch does not need access to this folder or a local Windows path
+from remote read/search tools. The JSON catalog remains the maintenance source;
+update the embedded index alongside it when routes change. Do not search the
+remote host for a catalog stored on the client. The selected worker must still
+be exposed by the runtime agent tool; otherwise Orchestrator reports BLOCKED.
+
 ## Execution
 
 ```mermaid
@@ -170,6 +179,21 @@ flowchart LR
     focused retry; escalate a real definition defect to AgentOptimizer once.
 7. No advisor or worker delegates. No runtime compaction is promised. Do not force
     a checkpoint or questionnaire after each task.
+
+## Code Validation Policy
+
+This is a roster rule embedded in Orchestrator and all 22 implementation workers,
+not a project instruction. It follows these agent definitions into target projects.
+After modifying code, workers must run both the relevant tests and the target
+repository's configured lint checks against the final changes. Focused validation
+does not waive either requirement. Workers fix failures they introduce, rerun the
+affected checks, and report unrelated failures without expanding scope.
+
+Results must include exact commands and outcomes. Missing, unavailable, or blocked
+checks must be reported as not run with the reason, never as passing. Existing tool
+restrictions still apply; read-only advisors and non-executing writers do not gain
+terminal access. Orchestrator includes this requirement in acceptance criteria and
+must not present unverified changes as fully validated.
 
 ## Domain Map
 

@@ -22,6 +22,11 @@ to the dispatcher rather than attempting to invoke it.
 - Do not commit, deploy, delete data, or expand scope without authorization.
 - Report unavailable prerequisites honestly; never invent validation results.
 
+## Required Code Validation
+- After modifying code, always run both the relevant tests and configured lint checks against the final changes before declaring completion. Use the target repository's documented commands; focused checks do not waive either requirement.
+- Fix failures introduced by your changes and rerun the affected checks. Report unrelated failures separately without expanding scope.
+- Return exact commands and outcomes. If either check is missing, unavailable, or blocked, explicitly report it as not run with the reason; never claim unverified success or bypass tool restrictions.
+
 ## Result
 Return a concise finding or change summary, file references, checks actually run
 with outcomes, and unresolved blockers. Do not return whole files or chat history.
