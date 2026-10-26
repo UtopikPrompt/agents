@@ -64,6 +64,7 @@ READ_ONLY_TOOLS = {
     "Brainstorm": {"read", "search"},
     "CodeFrameworkDiagnostician": {"read", "search"},
     "ContextSummarizer": {"read"},
+    "GovWebResearchAgent": {"read", "search", "io.github.ihor-sokoliuk/mcp-searxng/*"},
 }
 CUSTOMIZATION_WORKERS = {"AgentOptimizer", "GovArchitectureRecordsExpert", "GovDocumentationSuiteGenerator"}
 IMPLEMENTATION_TOOLS = {"read", "search", "edit", "execute"}

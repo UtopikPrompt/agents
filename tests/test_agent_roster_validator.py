@@ -621,6 +621,69 @@ class RosterValidatorTests(unittest.TestCase):
         self.assertEqual(VALIDATOR["tool_profile"]("GovGitWorkflowAgent"), (expected, expected))
         self.assertEqual(set(self.agent("GovGitWorkflowAgent")["fm"]["tools"]), expected)
 
+    def test_web_research_has_exact_read_only_profile(self):
+        expected = {"read", "search", "io.github.ihor-sokoliuk/mcp-searxng/*"}
+        self.assertEqual(VALIDATOR["tool_profile"]("GovWebResearchAgent"), (expected, expected))
+        worker = self.agent("GovWebResearchAgent")
+        self.assertEqual(set(worker["fm"]["tools"]), expected)
+        self.assertEqual(worker["fm"]["agents"], [])
+        self.assertIs(worker["fm"]["user-invocable"], True)
+
+    def test_web_research_rejects_mutation_and_delegation_tools(self):
+        for tool in ("edit", "execute", "agent", "github/*"):
+            with self.subTest(tool=tool):
+                self.files = copy.deepcopy(self.baseline)
+                self.agent("GovWebResearchAgent")["fm"]["tools"].append(tool)
+                report = VALIDATOR["Report"]()
+                VALIDATOR["check_tool_profiles"](self.files, report)
+                self.assertTrue(any(
+                    finding["check"] == "TOOL-1" and "GovWebResearchAgent" in finding["path"]
+                    for finding in report.findings
+                ))
+
+    def test_web_research_embeds_evidence_and_safety_procedure(self):
+        definition = self.agent("GovWebResearchAgent")["text"]
+        for clause in (
+            "without loading local skills", "untrusted evidence", "generic queries",
+            "searxng_web_search", "web_url_read", "searxng_instance_info",
+            "version applicability", "mark it unverified", "Return BLOCKED",
+            "Orchestrator alone", "source titles and URLs",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+
+    def test_web_research_requires_all_profile_tools(self):
+        required, _ = VALIDATOR["tool_profile"]("GovWebResearchAgent")
+        for tool in required:
+            with self.subTest(tool=tool):
+                self.files = copy.deepcopy(self.baseline)
+                self.agent("GovWebResearchAgent")["fm"]["tools"].remove(tool)
+                report = VALIDATOR["Report"]()
+                VALIDATOR["check_tool_profiles"](self.files, report)
+                self.assertTrue(any("GovWebResearchAgent" in finding["path"] for finding in report.findings))
+
+    def test_web_research_is_routed_through_dispatcher(self):
+        domain = self.domain("DocsGovernanceAdvisor")
+        self.assertIn("GovWebResearchAgent", domain["children"])
+        self.assertEqual(
+            domain["routes"]["internet research, current documentation, source verification or web comparisons"],
+            "GovWebResearchAgent",
+        )
+        dispatcher = self.agent("Orchestrator")
+        self.assertEqual(dispatcher["fm"]["agents"].count("GovWebResearchAgent"), 1)
+        self.assertNotIn("io.github.ihor-sokoliuk/mcp-searxng/*", dispatcher["fm"]["tools"])
+        self.assertIn("invoke research\n  first", dispatcher["text"])
+        self.assertIn("GovWebResearchAgent", self.agent("DocsGovernanceAdvisor")["text"])
+
+    def test_dispatcher_rejects_searxng_access(self):
+        self.agent("Orchestrator")["fm"]["tools"].append("io.github.ihor-sokoliuk/mcp-searxng/*")
+        self.assert_check("TOOL-1")
+
+    def test_web_research_source_procedure_is_read_only(self):
+        definition = self.agent("GovWebResearchAgent")["text"]
+        self.assertIn("do not edit files, execute commands", definition)
+        self.assertIn("not authorization to implement", definition)
+
     def test_git_worker_requires_workflow_tools(self):
         for tool in ("read", "search", "execute", "github/*"):
             with self.subTest(tool=tool):

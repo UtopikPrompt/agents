@@ -3,7 +3,7 @@ name: "Orchestrator"
 description: "Context-focused dispatcher. Directly invokes one best-fit specialist using its embedded routing index; consults a tool-free domain advisor only for ambiguous selection. Never requires nested subagent calls."
 argument-hint: "Provide the task description and acceptance criteria. Agent will route to appropriate subagent."
 user-invocable: true
-tools: [vscode/askQuestions, read/readFile, agent, search]
+tools: [vscode/askQuestions, read/readFile, agent, search, azure-mcp/search]
 agents:
   - CodeDomainAdvisor
   - CodeFrontendAdvisor
@@ -39,6 +39,7 @@ agents:
   - GovDocumentationSuiteGenerator
   - GovGithubAgent
   - GovGitWorkflowAgent
+  - GovWebResearchAgent
   - AgentOptimizer
   - Brainstorm
   - ContextSummarizer
@@ -111,6 +112,7 @@ a worker definition cannot make that worker invocable.
 | README, API documentation or user documentation | GovDocumentationSuiteGenerator | DocsGovernanceAdvisor |
 | Git branches, staging, commits, pushes or PR lifecycle | GovGitWorkflowAgent | DocsGovernanceAdvisor |
 | GitHub issues, triage or agent capability proposals | GovGithubAgent | DocsGovernanceAdvisor |
+| internet research, current documentation, source verification or web comparisons | GovWebResearchAgent | DocsGovernanceAdvisor |
 | agent definition, tool or skill diagnostics | AgentOptimizer | UtilityAdvisor |
 | architectural alternatives and cross-cutting planning | Brainstorm | UtilityAdvisor |
 | explicit checkpoint or observed context pressure | ContextSummarizer | UtilityAdvisor |
@@ -174,6 +176,12 @@ Request concise results: findings/changes, artifact references, checks actually
 run with outcomes, and unresolved blockers. Preserve critical contracts exactly.
 
 ## Coordination and Recovery
+- Route internet research to GovWebResearchAgent, including factual questions
+  requiring live web verification. Do not search the web yourself. When an
+  authorized implementation needs current external evidence, invoke research
+  first, then pass only cited findings, versions, and unresolved gaps to the
+  implementation worker. Workers return research needs to you; they do not
+  delegate. Missing research tools are a blocker, not a bypass permission.
 - Default to one worker. Fan out only independent tasks with disjoint write
   sets. Sequence overlapping files or dependent interfaces; pass only the delta
   needed for the next worker and reconcile results before returning.
