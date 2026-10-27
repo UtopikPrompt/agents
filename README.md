@@ -399,23 +399,25 @@ These are behavioral instructions, not a technical command sandbox.
 
 ## Model Policy
 
-Start with the model selected in VS Code. Agent definitions currently omit both
-`model` and `reasoning-effort`; the runtime resolves those defaults. Do not pin
-a separate model for every framework or agent. This is the inherited baseline,
-not automatic model switching or a claim that every available model is suitable.
+Most agents inherit the model selected in VS Code; the runtime resolves that
+default when `model` is omitted. Orchestrator and the six routing advisors have
+a user-requested provisional `Claude Haiku 5.5` pin. It has not been benchmarked
+in this Copilot setup and is not a claim that it is optimal. Do not pin a separate
+model for every framework or agent.
 
-| Role | Baseline | Candidate Override After Evaluation |
+| Role | Baseline | Current assignment |
 |---|---|---|
-| Orchestrator | Inherited model with reliable reasoning and tool use | Prioritize correct dispatch and evidence handling over raw speed |
-| Domain advisors | Inherited model | Fast, inexpensive model with reliable JSON and specialist selection |
-| Implementation specialists and CodeGeneralist | Same inherited coding baseline | Strong coding model when focused task results justify it |
-| Security, architecture, and complex diagnostics | Inherited model | Stronger reasoning for demonstrated difficult cases |
-| ContextSummarizer | Inherited model | Accurate summarization with sufficient input capacity and state preservation |
+| Orchestrator | Inherited model with reliable reasoning and tool use | Claude Haiku 5.5 (provisional; evaluate dispatch and tool use) |
+| Domain advisors | Inherited model | Claude Haiku 5.5 (provisional; evaluate selection and structured responses) |
+| Implementation specialists and CodeGeneralist | Same inherited coding baseline | Keep inherited unless a focused comparison justifies an override |
+| Security, architecture, and complex diagnostics | Inherited model | Keep inherited unless task-specific evidence justifies an override |
+| ContextSummarizer | Inherited model | Keep inherited; evaluate constraint and state preservation before overriding |
 
 Override rules:
 
-- First evaluate a cheaper advisor model; do not assume low price means adequate
-    selection accuracy. Keep the inherited baseline until the candidate passes.
+- A user may explicitly request a provisional pin before evaluation. Label it
+    unbenchmarked and do not describe it as optimal; otherwise keep the inherited
+    baseline until the candidate passes.
 - Use exact model identifiers available in the user's model picker and supported
     by the active harness. Confirm tool use, structured output, context capacity,
     and organization policy before adding frontmatter overrides.
@@ -440,13 +442,15 @@ Evaluation gate:
 4. Record exact model identifiers, task outcomes, retries, elapsed time, and usage
      or cost when exposed. Compare total cost per successful task, including failed
      attempts and retries, not just the first call. Do not invent missing telemetry.
-5. Pin only roles with demonstrated benefit without unacceptable quality loss.
-     Keep the baseline when evidence is inconclusive and repeat the comparison
-     after a model or harness change. Existing roster tests are not model benchmarks.
+5. Treat provisional pins as unverified until they demonstrate benefit without
+    unacceptable quality loss. Keep the baseline when evidence is inconclusive
+    and repeat comparisons after a model or harness change. Existing roster tests
+    are not model benchmarks.
 
 Model choice does not itself reduce the payload. The embedded index, minimal
 task context, local worker inspection, and concise results remain the context
-controls. No candidate-model comparison or cheaper advisor pin is claimed here.
+controls. Claude Haiku 5.5 is provisionally pinned for Orchestrator and the six
+advisors at the user's request; no candidate-model comparison has been performed.
 
 ## Existing Edit Protection
 

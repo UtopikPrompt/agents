@@ -2,6 +2,7 @@
 name: "Orchestrator"
 description: "Context-focused dispatcher. Directly invokes one best-fit specialist using its embedded routing index; consults a tool-free domain advisor only for ambiguous selection. Never requires nested subagent calls."
 argument-hint: "Provide the task description and acceptance criteria. Agent will route to appropriate subagent."
+model: "Claude Haiku 5.5"
 user-invocable: true
 tools: [vscode/askQuestions, read/readFile, agent, search, azure-mcp/search]
 agents:

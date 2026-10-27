@@ -2,6 +2,7 @@
 name: "CodeBackendAdvisor"
 description: "Optional backend selection advisor for ambiguous API, framework, GraphQL/tRPC, and database work. Returns a decision only; never implements or delegates."
 argument-hint: "Goal, language/framework, constraints, and backend candidate names."
+model: "Claude Haiku 5.5"
 user-invocable: false
 tools: []
 agents: []
