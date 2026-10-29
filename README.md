@@ -21,8 +21,8 @@ the dispatcher rather than invoking a worker.
 
 Run Orchestrator as the main chat agent. Workers inspect relevant implementation
 locally and return concise evidence. Do not copy whole prompts, chat history, or
-unrelated file dumps into their payloads. Independent tasks may use separate
-workers, but overlapping edits and dependent interfaces must be sequenced.
+unrelated file dumps into their payloads. Independent tasks with disjoint write sets may use separate workers concurrently;
+overlapping edits and dependent interfaces must be sequenced.
 
 This reduces required routing hops and intentional context copying; it does not
 guarantee a measured token or latency reduction. The runtime may still expose
@@ -55,15 +55,19 @@ flowchart TD
     Q -->|No| A["One tool-free domain advisor"]
     A --> J["Routing decision only"]
     J --> D
-    P --> S["Direct specialist invocation"]
+    P -->|One task| S["One direct specialist"]
+    P -->|Independent tasks| M["Concurrent direct specialists"]
     S --> V["Focused validation"]
+    M --> V
     V --> R["Concise result and evidence"]
     R --> D
     D --> F["User-facing answer"]
 ```
 
-The advisor and worker are separate calls from the main dispatcher. No subagent
-needs to invoke another subagent. An advisor decision is not an execution receipt.
+The advisor and worker are separate calls from the main dispatcher. Independent
+workers may run concurrently only when their write sets are disjoint; Orchestrator
+waits for their results and reconciles them before responding. No subagent needs
+to invoke another subagent. An advisor decision is not an execution receipt.
 
 ## Domain Organization
 
@@ -79,7 +83,7 @@ worker; advisors return selection advice and never implement changes.
 
 ```mermaid
 flowchart LR
-    O["Orchestrator<br/>(Dispatcher; roster root)"]
+    O["Orchestrator<br/>(Dispatcher; parallel independent work)"]
     O --> CodeDomainAdvisor["CodeDomainAdvisor<br/>(Coding domain)"]
     O --> InfraDevOpsAdvisor["InfraDevOpsAdvisor<br/>(Infrastructure domain)"]
     O --> DocsGovernanceAdvisor["DocsGovernanceAdvisor<br/>(Documentation and governance)"]
@@ -143,7 +147,7 @@ flowchart LR
 
 | Agent | Role | User-invocable | Key Focus |
 |---|---|---|---|
-| **Orchestrator** | dispatcher | yes | Direct specialist dispatch, scoped payloads, concise synthesis |
+| **Orchestrator** | dispatcher | yes | Direct specialist dispatch, concurrent independent fan-out, scoped payloads, concise synthesis |
 | **CodeBackendAdvisor** | advisor | no | Optional backend specialist selection; never executes |
 | **DocsGovernanceAdvisor** | advisor | no | Optional docs/governance specialist selection; never executes |
 | **InfraDevOpsAdvisor** | advisor | no | Optional infrastructure/DevOps specialist selection; never executes |
@@ -198,8 +202,10 @@ flowchart LR
     actually run, and blockers. Orchestrator presents every user-facing answer
     as a numbered list, without unordered bullets or unnumbered prose. Proposals
     do not become decisions without approval.
-6. Fan out only disjoint independent work. Sequence overlapping edits. Allow one
-    focused retry; escalate a real definition defect to AgentOptimizer once.
+6. Invoke workers concurrently only for independent work with disjoint write
+    sets; wait for all results and reconcile them. Sequence overlapping edits or
+    dependent interfaces. Allow one focused retry; escalate a real definition
+    defect to AgentOptimizer once.
 7. No advisor or worker delegates. No runtime compaction is promised. Do not force
     a checkpoint or questionnaire after each task.
 8. TypeScript or a framework's internal Vite builder does not imply React.
@@ -262,6 +268,9 @@ terminal access. Orchestrator includes this requirement in acceptance criteria a
 must not present unverified changes as fully validated.
 
 ## Domain Map
+
+Orchestrator is the sole dispatcher and invokes independent workers concurrently
+only when their write sets are disjoint.
 
 | Domain Prefix | Advisor | Owned Agents |
 |---|---|---|
@@ -338,6 +347,7 @@ example tools are not assumed installed, Windows-compatible, or executed.
 | Secure development bootstrap | InfraDevContainerSpecialist, MultiLanguageBuilder | Codespaces/dotfiles/SSH setup and host/container boundaries |
 | Container display operations | InfraDevContainerSpecialist, CodeGeneralist | Display access, schedule cases, explicit device-operation approval |
 | Specification to code handoff | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator | Accepted-spec evidence, scoped prompts and documentation-only boundaries |
+| Runtime symptom diagnosis | AgentOptimizer | Compare supplied run evidence across configuration, context, model, tools, UI and services; no direct log or terminal access |
 | Go contract validation | CodeGeneralist, MultiLanguageBuilder | Provider-neutral interfaces, cancellation, callers and configured Go checks |
 
 These procedures grant no additional tools or authorization. CI may acquire
@@ -346,6 +356,9 @@ cannot. Publication, deployment, storage changes, provider mutation and load
 tests retain their separate gates. Unit tests check embedded procedure structure,
 policy clauses and absence of external workflow discovery requirements. Actual
 remote agent registration and tool availability still need runtime verification.
+AgentOptimizer's runtime diagnosis relies on bounded evidence supplied by the user
+or dispatcher; it cannot inspect external session logs, execute checks, or establish
+a root cause from a screenshot or symptom description alone.
 
 ## Routing Evaluation
 
