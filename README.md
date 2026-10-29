@@ -198,10 +198,14 @@ flowchart LR
     dispatch. NEEDS_INPUT requires clarification; NO_MATCH requires reassessment.
 4. The dispatcher sends only goal/mode, relevant paths, constraints/approvals,
     acceptance checks, and essential verified evidence. Workers inspect local code.
-5. Workers report concise findings/changes, artifact references, validation
-    actually run, and blockers. Orchestrator presents every user-facing answer
-    as a numbered list, without unordered bullets or unnumbered prose. Proposals
-    do not become decisions without approval.
+5. For diagnosis, review, or unexpected failures, workers report an evidence-based
+    root cause, distinguish confirmed facts from hypotheses, identify unknowns,
+    recommend a solution, and state the concrete work they can do to apply it
+    plus any authorization or evidence needed. They must not imply a proposal is
+    completed work. For all tasks, report changes, artifact references, checks
+    actually run, and blockers. Orchestrator presents every user-facing answer as
+    a numbered list, without unordered bullets or unnumbered prose. Proposals do
+    not become decisions without approval.
 6. Invoke workers concurrently only for independent work with disjoint write
     sets; wait for all results and reconcile them. Sequence overlapping edits or
     dependent interfaces. Allow one focused retry; escalate a real definition

@@ -60,6 +60,21 @@ class RosterValidatorTests(unittest.TestCase):
             with self.subTest(clause=clause):
                 self.assertIn(clause, payload)
 
+    def test_dispatcher_requires_root_cause_and_implementation_offer(self):
+        dispatcher = self.agent("Orchestrator")["text"]
+        payload = dispatcher.split("## Worker Payload\n", 1)[1].split("\n## ", 1)[0]
+        for clause in (
+            "evidence-based\n  root cause",
+            "confirmed facts from hypotheses",
+            "stating what remains\n  unknown",
+            "recommended solution",
+            "concrete work the worker can\n  take to apply it",
+            "authorization or evidence still needed",
+            "Do not\n  present a proposed solution or implementation offer as completed work",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, payload)
+
     def test_edit_and_command_workers_require_restoration_approval(self):
         for entry in self.baseline:
             if not {"edit", "execute"}.intersection(entry["fm"].get("tools", [])):

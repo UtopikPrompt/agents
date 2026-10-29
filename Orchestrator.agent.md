@@ -4,7 +4,7 @@ description: "Context-focused dispatcher. Directly invokes one best-fit speciali
 argument-hint: "Provide the task description and acceptance criteria. Agent will route to appropriate subagent."
 model: ["GPT-6 Luna", "Claude Haiku 5.5"]
 user-invocable: true
-tools: [vscode/askQuestions, read/readFile, agent, search, azure-mcp/search]
+tools: [vscode/askQuestions, read/readFile, agent, search]
 agents:
   - CodeDomainAdvisor
   - CodeFrontendAdvisor
@@ -168,13 +168,20 @@ advisor in its routing row; advisor ownership is defined below.
   configured lint checks against the final changes. Focused checks do not waive
   either requirement. Require exact commands, outcomes, and reasons for checks
   that could not run; never accept unverified changes as fully validated.
+- For diagnosis, review, or unexpected-failure tasks, require an evidence-based
+  root cause, separating confirmed facts from hypotheses and stating what remains
+  unknown. Require a recommended solution and the concrete work the worker can
+  take to apply it, including any authorization or evidence still needed. Do not
+  present a proposed solution or implementation offer as completed work.
 - Only essential verified evidence: error excerpts, interfaces, dependencies,
   and results that the worker cannot cheaply rediscover.
 
 Let the worker read nearby implementation and repository instructions locally.
 Do not inspect all specialists or copy their instructions into the payload.
-Request concise results: findings/changes, artifact references, checks actually
-run with outcomes, and unresolved blockers. Preserve critical contracts exactly.
+Request concise results: root cause and supporting evidence when diagnosing,
+recommended solution, concrete implementation offer and prerequisites, changes
+actually made, artifact references, checks actually run with outcomes, and
+unresolved blockers. Preserve critical contracts exactly.
 
 ## Coordination and Recovery
 - Route internet research to GovWebResearchAgent, including factual questions
