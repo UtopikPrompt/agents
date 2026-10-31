@@ -334,6 +334,23 @@ from merely reading a command or configuration file.
 These are statically checked role profiles, not proof of live MCP registration,
 authentication, editor tool discovery, command safety, or measured context savings.
 
+## Mermaid Output
+
+The nine diagram-producing workers embed the same Mermaid safety contract.
+Use diagrams only when they clarify relationships, not instead of every list.
+Default to vertical `flowchart TD`; horizontal flow requires an explicit request.
+Use simple ASCII IDs, quoted node labels, separate node and edge statements,
+and short labels without HTML or Markdown formatting. Avoid lowercase `end`
+as an ID and renderer-specific styling or syntax unless requested and supported.
+
+Orchestrator passes this preference and validation requirement in its worker
+payload. Workers review syntax and parse or render with the target Mermaid
+version when available within existing tool permissions. Markdown lint is not
+Mermaid validation. Without rendering evidence, report "syntax reviewed,
+rendering unverified" and return the exact validation needed if blocked.
+The regression tests check policy coverage and drift, not live rendering or
+a measured reduction in agent errors. No tool permissions are expanded.
+
 ## Self-Contained Agent Workflows
 
 InfraLLMInferenceSpecialist owns local serving, model metadata, capacity estimates,

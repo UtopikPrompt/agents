@@ -47,6 +47,54 @@ class RosterValidatorTests(unittest.TestCase):
     def test_current_roster_passes(self):
         self.assertEqual(self.validate().findings, [])
 
+    def test_mermaid_workers_embed_consistent_vertical_safety_contract(self):
+        owners = {
+            "GovArchitectureRecordsExpert", "GovDocumentationSuiteGenerator",
+            "GovGithubAgent", "InfraCIDiagnostics", "InfraMCPServerGenerator",
+            "InfraMonorepoManager", "InfraPerformanceProfiler",
+            "InfraReleaseManager", "InfraTestInfrastructureGenerator",
+        }
+        sections = []
+        for entry in self.baseline:
+            with self.subTest(agent=entry["name"]):
+                self.assertNotIn("Prefer Mermaid diagrams over bulleted lists", entry["text"])
+                if entry["name"] not in owners:
+                    continue
+                self.assertEqual(entry["text"].count("## Mermaid Diagrams\n"), 1)
+                section = entry["text"].split("## Mermaid Diagrams\n", 1)[1].split("\n## ", 1)[0]
+                sections.append(section.strip())
+                for clause in (
+                    "Use diagrams only when they clarify relationships",
+                    "Use fenced `mermaid` blocks",
+                    "Default to vertical `flowchart TD`",
+                    "use horizontal flow only when explicitly requested",
+                    "supported by the target renderer",
+                    "simple ASCII node IDs",
+                    "never use lowercase `end` as an ID",
+                    "Quote all node labels",
+                    "Define nodes separately from edges, one statement per line",
+                    "avoid HTML, Markdown formatting, literal quotes inside labels",
+                    "Avoid custom styling, icons, and initialization directives",
+                    "review IDs, label quotes, balanced delimiters, and edge references",
+                    "within your tool permissions",
+                    "Markdown lint is not Mermaid validation",
+                    'report "syntax reviewed, rendering unverified"',
+                    "return the exact validation needed if blocked",
+                    "Never claim a rendering check ran when it did not",
+                ):
+                    self.assertIn(clause, section)
+        self.assertEqual(len(sections), len(owners))
+        self.assertEqual(len(set(sections)), 1)
+
+    def test_mermaid_dispatch_and_documentation_require_vertical_flow(self):
+        payload = self.agent("Orchestrator")["text"].split("## Worker Payload\n", 1)[1].split("\n## ", 1)[0]
+        self.assertIn("vertical `flowchart TD` by default", payload)
+        self.assertIn('require "syntax reviewed, rendering unverified"', payload)
+        self.assertIn("do not expand tool permissions", payload)
+        self.assertIn("## Mermaid Output", self.readme)
+        self.assertIn("Default to vertical `flowchart TD`", self.readme)
+        self.assertIn("Markdown lint is not\nMermaid validation", self.readme)
+
     def test_dispatcher_routes_around_its_own_tool_limits(self):
         dispatcher = self.agent("Orchestrator")["text"]
         for clause in (

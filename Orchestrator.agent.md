@@ -162,6 +162,10 @@ advisor in its routing row; advisor ownership is defined below.
   with the question for Orchestrator to ask the user.
 - For identity/release incidents, supplied evidence must identify credential type or artifact/overlay/stage and redact secret values. Missing evidence is unknown, not authorization to expand tools or policy.
 - Acceptance criteria and the cheapest meaningful validation checks.
+- For diagram output, require vertical `flowchart TD` by default, safe Mermaid
+  syntax, and target-renderer validation within the worker's permissions.
+  Use diagrams only when they clarify relationships. Without rendering evidence,
+  require "syntax reviewed, rendering unverified"; do not expand tool permissions.
 - Avoid legacy code and backward-compatibility shims, aliases, fallback paths,
   or parallel implementations unless an explicit supported requirement needs them.
   Require focused regression tests for the current supported behavior to justify

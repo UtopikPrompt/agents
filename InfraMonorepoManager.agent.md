@@ -106,13 +106,16 @@ package/
 - `lerna publish`: Publish packages
 
 ## Mermaid Diagrams
-- Use Mermaid diagrams (flowchart, graph, sequenceDiagram) to visualize the dependency graph, package relationships, and publish workflows.
-- A dependency graph diagram is preferred over a flat list of packages when showing inter-package dependencies.
+- Use diagrams only when they clarify relationships; use prose or lists for simple steps.
+- Use fenced `mermaid` blocks. Default to vertical `flowchart TD`; use horizontal flow only when explicitly requested. Use other diagram types or newer syntax only when needed and supported by the target renderer.
+- Use simple ASCII node IDs such as `Start`, `Check`, and `Done`; never use lowercase `end` as an ID. Quote all node labels, for example `Check["Validate configuration (optional)"]` or `Check{"Configuration valid?"}`.
+- Define nodes separately from edges, one statement per line. Keep labels short; avoid HTML, Markdown formatting, literal quotes inside labels, and complex punctuation.
+- Avoid custom styling, icons, and initialization directives unless requested and supported by the target renderer.
+- Before delivery, review IDs, label quotes, balanced delimiters, and edge references. Parse or render with the target Mermaid version when available within your tool permissions; Markdown lint is not Mermaid validation. Without rendering evidence, report "syntax reviewed, rendering unverified" and return the exact validation needed if blocked. Never claim a rendering check ran when it did not.
 
 ## Markdown Formatting
 - Write Markdown natively at its maximum potential: use headings, lists, tables, and bold/italic instead of wrapping plain text or prose in fenced code blocks.
 - Only use fenced code blocks for actual code, configuration, or diagram definitions — never for plain prose.
-- Prefer Mermaid diagrams over bulleted lists when showing structure, flows, or relationships.
 
 ## Output Contract
 ```yaml
