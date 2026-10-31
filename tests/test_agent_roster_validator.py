@@ -47,6 +47,17 @@ class RosterValidatorTests(unittest.TestCase):
     def test_current_roster_passes(self):
         self.assertEqual(self.validate().findings, [])
 
+    def test_dispatcher_routes_around_its_own_tool_limits(self):
+        dispatcher = self.agent("Orchestrator")["text"]
+        for clause in (
+            "invoke the indexed worker instead of reporting the dispatcher's tool limit",
+            "Do not ask the user to name an agent when the index identifies",
+            "Report a blocker only if invocation fails or the worker's session",
+            "This restriction applies to the Orchestrator's own actions, not dispatch",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, dispatcher)
+
     def test_dispatcher_requires_approval_before_discarding_existing_edits(self):
         dispatcher = self.agent("Orchestrator")["text"]
         payload = dispatcher.split("## Worker Payload\n", 1)[1].split("\n## ", 1)[0]

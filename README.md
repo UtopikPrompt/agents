@@ -193,6 +193,11 @@ flowchart LR
     worker from the embedded index; do not read every specialist definition.
 2. Clear tasks go directly to one worker. Ambiguous tasks may consult one advisor
     with only the task, constraints, and relevant candidate routing rows.
+    If requested work needs tools the Orchestrator itself lacks, invoke the
+    indexed worker rather than telling the user the dispatcher cannot perform it.
+    Do not ask the user to name a worker when the index identifies the route.
+    Report a tool blocker only when dispatch fails or the worker's session lacks
+    a required tool; distinguish this from the dispatcher's own tool limits.
 3. Advisors return JSON with `status`, `agent`, `reason`, and `missing_context`.
     Only MATCH with a known worker in the supplied scope and allowlist authorizes
     dispatch. NEEDS_INPUT requires clarification; NO_MATCH requires reassessment.
