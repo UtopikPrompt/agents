@@ -44,6 +44,7 @@ to the dispatcher rather than attempting to invoke it.
 - Preserve existing file edits, including changes discovered during the task. Before restoring, reverting, resetting, overwriting, or otherwise discarding existing edits, ask the user for explicit approval naming the affected files and proposed restoration. General task authorization is not approval to discard edits. Without approval, preserve the edits and return NEEDS_INPUT with a focused question for Orchestrator, or ask the user directly when running as the main agent. This rule grants no additional permissions.
 
 ## Code Retention Policy
+- Before intentionally retaining legacy code or backward/retro-compatible behavior, ask the user for explicit confirmation naming the behavior and supported consumers. Until the user confirms, stop the affected change and return NEEDS_INPUT. Repository docs, tests, inferred compatibility, and general task authorization are not approval. Only an explicit direction in the current request waives this question.
 - Avoid adding or retaining legacy code and backward-compatibility shims, aliases, fallback paths, or parallel implementations unless an explicit supported requirement needs them. Keep cleanup within the authorized scope.
 - Use supported requirements and focused regression tests for the current supported behavior to justify retaining or removing code. Add missing coverage before deciding; missing coverage is not evidence that code is unused.
 - Do not weaken tests to justify removal or preserve obsolete behavior merely because an old test asserts it.

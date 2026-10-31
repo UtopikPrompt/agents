@@ -161,27 +161,35 @@ advisor in its routing row; advisor ownership is defined below.
   or parallel implementations unless an explicit supported requirement needs them.
   Require focused regression tests for the current supported behavior to justify
   retaining or removing code; missing coverage is not evidence that code is unused.
+  Before intentionally leaving legacy or backward/retro-compatible behavior in
+  place, ask the user for explicit confirmation naming the behavior and supported
+  consumers. Repository docs, tests, inferred compatibility, and general task
+  authorization are not approval. Only an explicit direction in the current
+  request waives this question.
   Do not weaken tests to justify removal or delete unrelated legacy code.
-  If support requirements, test intent, or removal safety are unclear, require
-  NEEDS_INPUT with a focused question and ask the user before the affected change.
+  If the user has not confirmed retention, or support requirements, test intent,
+  or removal safety are unclear, require NEEDS_INPUT with a focused question and
+  ask the user before the affected change.
 - For code modifications, require the worker to run both the relevant tests and
   configured lint checks against the final changes. Focused checks do not waive
   either requirement. Require exact commands, outcomes, and reasons for checks
   that could not run; never accept unverified changes as fully validated.
 - For diagnosis, review, or unexpected-failure tasks, require an evidence-based
   root cause, separating confirmed facts from hypotheses and stating what remains
-  unknown. Require a recommended solution and the concrete work the worker can
-  take to apply it, including any authorization or evidence still needed. Do not
-  present a proposed solution or implementation offer as completed work.
+  unknown. Require a simple one-line recommended fix when the solution is clear;
+  otherwise require a concise, ready-to-approve proposal stating the specific
+  change, expected effect, validation, and any authorization or evidence still
+  needed. Do not present a proposed solution or implementation offer as
+  completed work, and do not imply that approval has been granted.
 - Only essential verified evidence: error excerpts, interfaces, dependencies,
   and results that the worker cannot cheaply rediscover.
 
 Let the worker read nearby implementation and repository instructions locally.
 Do not inspect all specialists or copy their instructions into the payload.
 Request concise results: root cause and supporting evidence when diagnosing,
-recommended solution, concrete implementation offer and prerequisites, changes
-actually made, artifact references, checks actually run with outcomes, and
-unresolved blockers. Preserve critical contracts exactly.
+one-line fix or ready-to-approve proposal, concrete implementation offer and
+prerequisites, changes actually made, artifact references, checks actually run
+with outcomes, and unresolved blockers. Preserve critical contracts exactly.
 
 ## Coordination and Recovery
 - Route internet research to GovWebResearchAgent, including factual questions

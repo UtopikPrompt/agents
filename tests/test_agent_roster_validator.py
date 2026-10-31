@@ -67,10 +67,12 @@ class RosterValidatorTests(unittest.TestCase):
             "evidence-based\n  root cause",
             "confirmed facts from hypotheses",
             "stating what remains\n  unknown",
-            "recommended solution",
-            "concrete work the worker can\n  take to apply it",
-            "authorization or evidence still needed",
-            "Do not\n  present a proposed solution or implementation offer as completed work",
+            "simple one-line recommended fix",
+            "concise, ready-to-approve proposal",
+            "specific\n  change, expected effect, validation",
+            "authorization or evidence still\n  needed",
+            "Do not present a proposed solution or implementation offer as\n  completed work",
+            "do not imply that approval has been granted",
         ):
             with self.subTest(clause=clause):
                 self.assertIn(clause, payload)
@@ -242,6 +244,11 @@ class RosterValidatorTests(unittest.TestCase):
         self.assertEqual(len(workers), 23)
         required_clauses = (
             "legacy code and backward-compatibility shims",
+            "Before intentionally retaining legacy code or backward/retro-compatible behavior",
+            "ask the user for explicit confirmation",
+            "Until the user confirms, stop the affected change and return NEEDS_INPUT",
+            "Repository docs, tests, inferred compatibility, and general task authorization are not approval",
+            "Only an explicit direction in the current request waives this question",
             "unless an explicit supported requirement needs them",
             "Keep cleanup within the authorized scope",
             "focused regression tests for the current supported behavior",
@@ -266,6 +273,10 @@ class RosterValidatorTests(unittest.TestCase):
         payload = " ".join(payload.split())
         for clause in (
             "Avoid legacy code and backward-compatibility shims",
+            "Before intentionally leaving legacy or backward/retro-compatible behavior in place",
+            "ask the user for explicit confirmation",
+            "Repository docs, tests, inferred compatibility, and general task authorization are not approval",
+            "Only an explicit direction in the current request waives this question",
             "unless an explicit supported requirement needs them",
             "focused regression tests for the current supported behavior",
             "missing coverage is not evidence that code is unused",

@@ -200,10 +200,11 @@ flowchart LR
     acceptance checks, and essential verified evidence. Workers inspect local code.
 5. For diagnosis, review, or unexpected failures, workers report an evidence-based
     root cause, distinguish confirmed facts from hypotheses, identify unknowns,
-    recommend a solution, and state the concrete work they can do to apply it
-    plus any authorization or evidence needed. They must not imply a proposal is
-    completed work. For all tasks, report changes, artifact references, checks
-    actually run, and blockers. Orchestrator presents every user-facing answer as
+    give a simple one-line fix when clear, or a concise, ready-to-approve proposal
+    with the specific change, expected effect, validation, and any authorization
+    or evidence needed. They must not imply a proposal is completed work or that
+    approval has been granted. For all tasks, report changes, artifact references,
+    checks actually run, and blockers. Orchestrator presents every user-facing answer as
     a numbered list, without unordered bullets or unnumbered prose. Proposals do
     not become decisions without approval.
 6. Invoke workers concurrently only for independent work with disjoint write
@@ -251,10 +252,15 @@ Supported requirements and focused regression tests for the current supported
 behavior determine whether code is kept or removed. Add missing coverage before
 deciding; absent tests do not prove code is unused. Do not weaken tests to justify
 removal or treat an old test as automatic justification for obsolete behavior.
-If support requirements, test intent, or removal safety are unclear, the worker
-stops the affected change and returns `NEEDS_INPUT` with a focused question.
-Orchestrator asks the user before that change proceeds. No tools, permissions,
-agent roles, ownership, or routing entries change under this policy.
+Before intentionally leaving legacy or backward/retro-compatible behavior in
+place, the worker asks the user for explicit confirmation naming the behavior
+and supported consumers. Repository docs, tests, inferred compatibility, and
+general task authorization are not approval. Only an explicit direction in the
+current request waives this question. Until confirmed, the worker stops the
+affected change and returns `NEEDS_INPUT` with a focused question for Orchestrator
+to ask. If support requirements, test intent, or removal safety are unclear, the
+worker likewise stops and asks. No tools, permissions, agent roles, ownership,
+or routing entries change under this policy.
 
 ## Code Validation Policy
 

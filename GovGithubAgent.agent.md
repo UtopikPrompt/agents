@@ -3,7 +3,7 @@ name: GovGithubAgent
 description: "Plan agent capabilities as proposals, manage GitHub issue triage, and file scoped issues or project items in the verified repository. Not for Git branches, commits, pushes, or pull-request lifecycle management; those belong to GovGitWorkflowAgent."
 argument-hint: Current GitHub repo; capability to plan/fil; filing preference
 user-invocable: false
-tools: [github/*, read, search, execute]
+tools: [execute, read, search,'github/*', azure-mcp/search]
 ---
 
 
