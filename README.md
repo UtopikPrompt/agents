@@ -178,7 +178,7 @@ flowchart LR
 | **CodeNextJsSpecialist** | worker | no | Next.js architecture: App Router, Server Components, ISR |
 | **CodeSpringBootSpecialist** | worker | no | Java/Spring Boot backend scaffolding |
 | **CodeDesignSystemSpecialist** | worker | no | Shared UI component libraries & design systems: React/Vue/Angular, theming/tokens, prop types, accessibility |
-| **CodeMockupWireframeSpecialist** | worker | no | Inline fixed-width ASCII mockups in readable `text` code blocks; supports multi-column layouts, responsive stacking notes, and screen flows |
+| **CodeMockupWireframeSpecialist** | worker | no | Direct, numbered Unicode box-drawing mockups with one aligned `text` block per node, concise behavior notes, and no process narration |
 | **CodeDatabaseORMGenerator** | worker | no | Database schema & ORM setup: SQL/ORM scaffolding, migrations, indexes, constraints; SQLAlchemy/Prisma/Hibernate/Eloquent |
 | **CodeFrontendAdvisor** | advisor | no | Optional frontend specialist selection; never executes |
 | **CodeGraphQLTRPCAgent** | worker | no | GraphQL API & tRPC scaffolding: schema, resolvers, codegen (Apollo, Hasura, tRPC) |
