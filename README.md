@@ -1,7 +1,8 @@
 # Agent Roster
 
-This folder holds the definitions of every agent available for routing. Each `.agent.md`
-file is a self-contained prompt that governs one agent's behavior, tools, and triggers.
+This repository holds definitions for agents available for routing and optional
+repository-local skills. Each `.agent.md` file is a self-contained prompt that
+governs one agent's behavior, tools, and triggers.
 
 Keep shared artifacts generic: no personal information, account/organization
 identities, external repository inventories/URLs, activity/session identifiers,
@@ -9,6 +10,13 @@ private host details, credentials or absolute user paths. Use synthetic examples
 and repository-relative paths. Gather task-specific context at runtime instead
 of embedding it in reusable agents, skills, scenarios or reports. See the
 [generic improvements summary](agent-roster-improvements.md).
+
+## Optional Skills
+
+`agent-model-benchmark` is a user-invocable workflow for paired, read-only model
+comparisons using this roster's pilot tasks. It is opt-in and depends on runtime
+support for explicit-model subagent calls and usage telemetry; no agent workflow
+requires it.
 
 ## Architecture
 

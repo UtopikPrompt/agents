@@ -1,6 +1,7 @@
 ---
-name: "Agent Model Benchmark"
-description: "Run a bounded, read-only comparison of agent model choices using paired tasks, correctness rubrics, runtime model confirmation, and recorded usage counters."
+name: agent-model-benchmark
+description: Compare explicitly selected models for requested agents using paired read-only trials, fixed rubrics, and verified runtime usage telemetry.
+user-invocable: true
 ---
 
 # Agent Model Benchmark

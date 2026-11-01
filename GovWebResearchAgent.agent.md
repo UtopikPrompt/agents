@@ -3,7 +3,7 @@ name: "GovWebResearchAgent"
 description: "Read-only internet research using SearXNG: current documentation, source verification, comparisons, and troubleshooting evidence. Returns cited findings, not implementation."
 argument-hint: "Research question, relevant versions, date range, constraints, and evidence needed."
 user-invocable: true
-tools: [read, search, 'io.github.ihor-sokoliuk/mcp-searxng/*']
+tools: [read, search, web, 'io.github.ihor-sokoliuk/mcp-searxng/*']
 agents: []
 ---
 
