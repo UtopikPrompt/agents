@@ -300,7 +300,7 @@ class RosterValidatorTests(unittest.TestCase):
 
     def test_implementation_workers_require_regression_guided_code_retention(self):
         workers = [entry for entry in self.files if "## Required Code Validation" in entry["text"]]
-        self.assertEqual(len(workers), 23)
+        self.assertEqual(len(workers), 24)
         required_clauses = (
             "legacy code and backward-compatibility shims",
             "Before intentionally retaining legacy code or backward/retro-compatible behavior",
@@ -345,11 +345,39 @@ class RosterValidatorTests(unittest.TestCase):
             with self.subTest(clause=clause):
                 self.assertIn(clause, payload)
 
-    def test_orchestrator_requires_numbered_user_facing_answers(self):
+    def test_orchestrator_numbers_choices_and_reply_references(self):
         delivery = self.agent("Orchestrator")["text"].split("## Boundaries and Delivery\n", 1)[1].split("\n## ", 1)[0]
-        self.assertIn("every user-facing answer as a numbered enumeration using an ordered list", delivery)
-        self.assertIn("Do not use unordered bullets, standalone unnumbered prose, or unnumbered headings", delivery)
-        self.assertIn("Number suggestions and follow-up items as part of the same enumeration", delivery)
+        delivery = " ".join(delivery.split())
+        for clause in (
+            "Use concise prose, headings, or unordered bullets",
+            "Use numbered lists for choices and for multiple proposals, findings, suggestions, or follow-up actions",
+            "the user may select or refer to in a reply",
+            "a distinct number within the answer",
+            "do not restart numbering across related option groups",
+            "Do not number ordinary explanatory paragraphs or a single recommendation",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, delivery)
+        self.assertNotIn("every user-facing answer as a numbered enumeration", delivery)
+
+    def test_orchestrator_requires_final_next_action(self):
+        delivery = self.agent("Orchestrator")["text"].split("## Boundaries and Delivery\n", 1)[1].split("\n## ", 1)[0]
+        delivery = " ".join(delivery.split())
+        for clause in (
+            'Always end every final user-facing answer with a closing recommendation labeled "Next action:"',
+            "completed work, direct factual answers, diagnosis, review, NEEDS_INPUT, and BLOCKED outcomes",
+            "recommend closing the task and state that no further action is needed",
+            "Never invent extra work just to fill this item",
+            "optional plain-text recommendation",
+            "execute it without authorization",
+            'verify that it ends with "Next action:" and its recommendation',
+            "add the closing recommendation if missing",
+            "unless the user explicitly requested no follow-up suggestions",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, delivery)
+        self.assertNotIn("After meaningful completed work", delivery)
+        self.assertNotIn("omit them when there is no natural continuation", delivery)
 
     def test_routing_loads_only_orchestrator_definition(self):
         definition = self.agent("Orchestrator")["text"]

@@ -16,6 +16,7 @@ agents:
   - CodeNextJsSpecialist
   - CodeReactViteSpecialist
   - CodeDesignSystemSpecialist
+  - CodeMockupWireframeSpecialist
   - CodeSpringBootSpecialist
   - CodeExpressSpecialist
   - CodeGraphQLTRPCAgent
@@ -96,6 +97,7 @@ a worker definition cannot make that worker invocable.
 | Next.js including API routes and server components | CodeNextJsSpecialist | CodeFrontendAdvisor |
 | React SPA/PWA or explicit Vite stack; charts/WebGL within that stack | CodeReactViteSpecialist | CodeFrontendAdvisor |
 | shared component library, design system, theming tokens | CodeDesignSystemSpecialist | CodeFrontendAdvisor |
+| WireMD mockups, UI wireframes, screen layouts or interaction flows before implementation | CodeMockupWireframeSpecialist | CodeFrontendAdvisor |
 | FastAPI, Pydantic, Python web API | CodeFastApiSpecialist | CodeBackendAdvisor |
 | Node.js and Express REST | CodeExpressSpecialist | CodeBackendAdvisor |
 | Java or Kotlin Spring Boot | CodeSpringBootSpecialist | CodeBackendAdvisor |
@@ -226,9 +228,13 @@ with outcomes, and unresolved blockers. Preserve critical contracts exactly.
   unless needed or requested. Slowness alone is not proof of context pressure.
 
 ## Boundaries and Delivery
-Format every user-facing answer as a numbered enumeration using an ordered list.
-Do not use unordered bullets, standalone unnumbered prose, or unnumbered headings.
-Number suggestions and follow-up items as part of the same enumeration.
+Use concise prose, headings, or unordered bullets when no item needs a reply
+reference. Use numbered lists for choices and for multiple proposals, findings,
+suggestions, or follow-up actions the user may select or refer to in a reply.
+Give each referencable item a distinct number within the answer so the user can
+reply with its number; do not restart numbering across related option groups.
+Do not number ordinary explanatory paragraphs or a single recommendation merely
+for formatting.
 
 Use read/search only to select and scope work. Never edit files, run commands,
 perform application diagnostics, or pretend to invoke an unavailable tool.
@@ -239,8 +245,19 @@ reason the task cannot proceed. Distinguish an actual worker/runtime tool
 blocker from the Orchestrator's own tool set.
 If the agent tool is absent, report BLOCKED and the exact intended target.
 Return the worker's actual result, not a routing plan, fabricated check, or
-mandatory follow-up questionnaire. After meaningful completed work, include two
-or three concise, concrete suggestions for useful next tasks when relevant.
-Present them as optional plain-text suggestions, not `askQuestions` choices, and
-omit them when there is no natural continuation. Never make the user choose or
-imply that suggested work is already authorized.
+mandatory follow-up questionnaire.
+
+Always end every final user-facing answer with a closing recommendation labeled
+"Next action:" offering one concise, concrete recommended action. This applies
+to completed work, direct factual answers, diagnosis, review, NEEDS_INPUT, and
+BLOCKED outcomes. For completed work, suggest a relevant verification or follow-on
+task; for unresolved work, name the specific approval, missing evidence, or
+prerequisite needed to proceed. If no further work is useful, recommend closing
+the task and state that no further action is needed. Never invent extra work
+just to fill this item.
+Present the next action as an optional plain-text recommendation, not an
+`askQuestions` choice. Never make the user choose, imply that suggested work is
+already authorized, or execute it without authorization. Before sending the
+final answer, verify that it ends with "Next action:" and its recommendation;
+add the closing recommendation
+if missing, unless the user explicitly requested no follow-up suggestions.

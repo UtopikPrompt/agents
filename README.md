@@ -97,6 +97,7 @@ flowchart LR
     CodeFrontendAdvisor --> CodeNextJsSpecialist["CodeNextJsSpecialist"]
     CodeFrontendAdvisor --> CodeReactViteSpecialist["CodeReactViteSpecialist"]
     CodeFrontendAdvisor --> CodeDesignSystemSpecialist["CodeDesignSystemSpecialist"]
+    CodeFrontendAdvisor --> CodeMockupWireframeSpecialist["CodeMockupWireframeSpecialist"]
 
     CodeBackendAdvisor --> CodeSpringBootSpecialist["CodeSpringBootSpecialist"]
     CodeBackendAdvisor --> CodeExpressSpecialist["CodeExpressSpecialist"]
@@ -138,6 +139,7 @@ flowchart LR
     class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor domainAdvisor;
     class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
     class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist frameworkWorker;
+    class CodeMockupWireframeSpecialist worker;
     class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraLLMInferenceSpecialist,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent,GovWebResearchAgent worker;
 ```
 
@@ -176,6 +178,7 @@ flowchart LR
 | **CodeNextJsSpecialist** | worker | no | Next.js architecture: App Router, Server Components, ISR |
 | **CodeSpringBootSpecialist** | worker | no | Java/Spring Boot backend scaffolding |
 | **CodeDesignSystemSpecialist** | worker | no | Shared UI component libraries & design systems: React/Vue/Angular, theming/tokens, prop types, accessibility |
+| **CodeMockupWireframeSpecialist** | worker | no | WireMD Markdown mockups, screen layouts and interaction flows; uses existing live preview or CLI, without installing dependencies |
 | **CodeDatabaseORMGenerator** | worker | no | Database schema & ORM setup: SQL/ORM scaffolding, migrations, indexes, constraints; SQLAlchemy/Prisma/Hibernate/Eloquent |
 | **CodeFrontendAdvisor** | advisor | no | Optional frontend specialist selection; never executes |
 | **CodeGraphQLTRPCAgent** | worker | no | GraphQL API & tRPC scaffolding: schema, resolvers, codegen (Apollo, Hasura, tRPC) |
@@ -209,9 +212,19 @@ flowchart LR
     with the specific change, expected effect, validation, and any authorization
     or evidence needed. They must not imply a proposal is completed work or that
     approval has been granted. For all tasks, report changes, artifact references,
-    checks actually run, and blockers. Orchestrator presents every user-facing answer as
-    a numbered list, without unordered bullets or unnumbered prose. Proposals do
-    not become decisions without approval.
+    checks actually run, and blockers. Orchestrator permits concise prose,
+    headings and unordered bullets, but requires numbered choices and multiple
+    proposals, findings, suggestions or follow-up actions the user may select or
+    reference in a reply. Use distinct numbers across related option groups;
+    ordinary explanations and single recommendations need no numbering. Every final
+    answer ends with a "Next action:" recommendation, including direct
+    answers, reviews and blocked outcomes, unless the user explicitly requests
+    no follow-up suggestions. Recommend verification or follow-on work when
+    complete, the specific approval/evidence/prerequisite when unresolved, or
+    closing the task when nothing remains. Check that the item is present before
+    sending; do not invent work or require a follow-up questionnaire. Suggestions
+    are optional and do not authorize execution. Proposals do not become decisions
+    without approval.
 6. Invoke workers concurrently only for independent work with disjoint write
     sets; wait for all results and reconcile them. Sequence overlapping edits or
     dependent interfaces. Allow one focused retry; escalate a real definition
@@ -291,7 +304,7 @@ only when their write sets are disjoint.
 |---|---|---|
 | CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist |
 | CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
-| CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist |
+| CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist, CodeMockupWireframeSpecialist |
 | INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraLLMInferenceSpecialist, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
 | GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GovGitWorkflowAgent, GovWebResearchAgent |
 | Miscellaneous | UtilityAdvisor | AgentOptimizer, Brainstorm, ContextSummarizer |
