@@ -97,7 +97,7 @@ a worker definition cannot make that worker invocable.
 | Next.js including API routes and server components | CodeNextJsSpecialist | CodeFrontendAdvisor |
 | React SPA/PWA or explicit Vite stack; charts/WebGL within that stack | CodeReactViteSpecialist | CodeFrontendAdvisor |
 | shared component library, design system, theming tokens | CodeDesignSystemSpecialist | CodeFrontendAdvisor |
-| WireMD mockups, UI wireframes, screen layouts or interaction flows before implementation | CodeMockupWireframeSpecialist | CodeFrontendAdvisor |
+| Inline ASCII mockups, UI wireframes, multi-column screen layouts or interaction flows before implementation | CodeMockupWireframeSpecialist | CodeFrontendAdvisor |
 | FastAPI, Pydantic, Python web API | CodeFastApiSpecialist | CodeBackendAdvisor |
 | Node.js and Express REST | CodeExpressSpecialist | CodeBackendAdvisor |
 | Java or Kotlin Spring Boot | CodeSpringBootSpecialist | CodeBackendAdvisor |

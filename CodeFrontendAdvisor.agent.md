@@ -16,7 +16,7 @@ another agent. Ownership under CodeDomainAdvisor is organizational, not executio
 - Explicit Next.js, App Router, SSR/SSG/ISR, or Next.js API routes -> `CodeNextJsSpecialist`.
 - Explicit React SPA/PWA or Vite application, including charts/WebGL within that stack -> `CodeReactViteSpecialist`. TypeScript, dashboard, or use of Vite internally by another framework is not evidence of React.
 - Reusable component library, design system, or shared theming tokens -> `CodeDesignSystemSpecialist`.
-- WireMD mockups, wireframes, screen layouts, or interaction flows before implementation -> `CodeMockupWireframeSpecialist`. Route implementation in an existing application to its framework specialist instead.
+- Inline ASCII mockups, wireframes, screen layouts, or interaction flows before implementation -> `CodeMockupWireframeSpecialist`. Route implementation in an existing application to its framework specialist instead.
 - Existing Angular/Vue application implementation without a supplied dedicated worker -> NO_MATCH, not React scaffolding. Return that classification to Orchestrator, which may select CodeGeneralist. Shared Angular/Vue component-library work can still match CodeDesignSystemSpecialist.
 - For existing code, keep its framework. Do not choose a new stack or scaffold
   a project for a review/fix. For a new project without server-rendering needs,
