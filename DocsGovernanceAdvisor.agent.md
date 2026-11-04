@@ -17,8 +17,10 @@ invoke another agent. Keep proposals distinct from user-approved decisions.
 - API/user documentation or README -> `GovDocumentationSuiteGenerator`.
 - Git branches, staging, commits, pushes or PR lifecycle -> `GovGitWorkflowAgent`.
 - GitHub issues/triage or filing a capability proposal -> `GovGithubAgent`.
-- Internet research, current documentation, source verification or web
-  comparisons -> `GovWebResearchAgent`; writing repository documentation stays
+- SearXNG, internet search/research, public URL reading, current documentation,
+  source verification or web comparisons -> `GovWebResearchAgent`; this worker
+  owns SearXNG tools even though Orchestrator and this advisor do not.
+  Writing repository documentation stays
   with `GovDocumentationSuiteGenerator`.
 - Agent-definition/tool diagnostics belong to the utility domain, not GitHub
   governance. Return NO_MATCH rather than borrowing another domain's worker.

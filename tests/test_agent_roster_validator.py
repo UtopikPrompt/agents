@@ -47,6 +47,36 @@ class RosterValidatorTests(unittest.TestCase):
     def test_current_roster_passes(self):
         self.assertEqual(self.validate().findings, [])
 
+    def test_comfyui_worker_is_user_invocable_and_routed(self):
+        worker = self.agent("CodeComfyUICustomNodeSpecialist")
+        self.assertIs(worker["fm"]["user-invocable"], True)
+        self.assertEqual(worker["fm"]["tools"], ["read", "search", "edit", "execute"])
+        self.assertEqual(worker["fm"]["agents"], [])
+        domain = self.domain("CodeDomainAdvisor")
+        self.assertIn(worker["name"], domain["children"])
+        self.assertEqual(
+            domain["routes"]["ComfyUI custom node implementation, review, debugging or tests"],
+            worker["name"],
+        )
+        self.assertEqual(self.agent("Orchestrator")["fm"]["agents"].count(worker["name"]), 1)
+
+    def test_comfyui_worker_embeds_version_and_execution_safeguards(self):
+        definition = self.agent("CodeComfyUICustomNodeSpecialist")["text"]
+        for clause in (
+            "classic V1 API or the newer V3 schema/extension API",
+            "NODE_CLASS_MAPPINGS",
+            "BHWC",
+            "MASK tensors BHW",
+            "do not assume every tensor is an image",
+            "Do not hardcode CUDA",
+            "WEB_DIRECTORY",
+            "CPU-capable, offline, and free of model downloads",
+            "Never report skipped GPU/UI integration as passing",
+            "do not search client profiles or require local skills",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause.lower(), definition.lower())
+
     def test_mermaid_workers_embed_consistent_vertical_safety_contract(self):
         owners = {
             "GovArchitectureRecordsExpert", "GovDocumentationSuiteGenerator",
@@ -300,7 +330,7 @@ class RosterValidatorTests(unittest.TestCase):
 
     def test_implementation_workers_require_regression_guided_code_retention(self):
         workers = [entry for entry in self.files if "## Required Code Validation" in entry["text"]]
-        self.assertEqual(len(workers), 24)
+        self.assertEqual(len(workers), 25)
         required_clauses = (
             "legacy code and backward-compatibility shims",
             "Before intentionally retaining legacy code or backward/retro-compatible behavior",
@@ -779,7 +809,7 @@ class RosterValidatorTests(unittest.TestCase):
         domain = self.domain("DocsGovernanceAdvisor")
         self.assertIn("GovWebResearchAgent", domain["children"])
         self.assertEqual(
-            domain["routes"]["internet research, current documentation, source verification or web comparisons"],
+            domain["routes"]["SearXNG, internet search/research, public URL reading, current documentation, source verification or web comparisons"],
             "GovWebResearchAgent",
         )
         dispatcher = self.agent("Orchestrator")
@@ -787,6 +817,23 @@ class RosterValidatorTests(unittest.TestCase):
         self.assertNotIn("io.github.ihor-sokoliuk/mcp-searxng/*", dispatcher["fm"]["tools"])
         self.assertIn("invoke research\n  first", dispatcher["text"])
         self.assertIn("GovWebResearchAgent", self.agent("DocsGovernanceAdvisor")["text"])
+
+    def test_web_research_dispatch_precedes_factual_shortcut_and_tool_blocker(self):
+        definition = self.agent("Orchestrator")["text"]
+        self.assertLess(
+            definition.index("Route SearXNG"),
+            definition.index("Answer simple factual questions directly only"),
+        )
+        for clause in (
+            "searxng_web_search", "web_url_read",
+            "Invoke the worker before declaring web research unavailable",
+            "discover/load its deferred", "runtime-exposed tool names",
+            "report BLOCKED only after an invocation failure",
+            "worker reports missing tools or a service error",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+        self.assertIn("owns SearXNG tools", self.agent("DocsGovernanceAdvisor")["text"])
 
     def test_dispatcher_rejects_searxng_access(self):
         self.agent("Orchestrator")["fm"]["tools"].append("io.github.ihor-sokoliuk/mcp-searxng/*")

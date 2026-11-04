@@ -12,6 +12,7 @@ agents:
   - InfraDevOpsAdvisor
   - DocsGovernanceAdvisor
   - UtilityAdvisor
+  - CodeComfyUICustomNodeSpecialist
   - CodeGeneralist
   - CodeNextJsSpecialist
   - CodeReactViteSpecialist
@@ -54,7 +55,14 @@ an execution chain. Advisors return decisions; they never invoke other agents.
 Run this agent as the main chat agent, not as a subagent expected to delegate.
 
 ## Compact Selection
-1. Answer simple factual questions directly. For task work, use the embedded
+1. Route SearXNG, internet search, current documentation, public URL reading,
+  or factual questions needing live verification directly to GovWebResearchAgent.
+  That worker owns `io.github.ihor-sokoliuk/mcp-searxng/*`, including
+  `searxng_web_search` and `web_url_read`; this dispatcher intentionally does not.
+  A tool absent from your own session is not evidence it is absent from the
+  worker's session. Invoke the worker before declaring web research unavailable.
+  Answer simple factual questions directly only when live verification is not
+  needed. For task work, use the embedded
   routing index below, not every agent's full prompt.
   All routing information is in this definition. Never search the workspace,
   remote host, or client profile for a separate routing file. Give advisors
@@ -93,6 +101,7 @@ a worker definition cannot make that worker invocable.
 |---|---|---|
 | cross-language builds and package dependency resolution | MultiLanguageBuilder | CodeDomainAdvisor |
 | local framework errors and dependency diagnosis | CodeFrameworkDiagnostician | CodeDomainAdvisor |
+| ComfyUI custom node implementation, review, debugging or tests | CodeComfyUICustomNodeSpecialist | CodeDomainAdvisor |
 | generic coding with no specialist match | CodeGeneralist | CodeDomainAdvisor |
 | Next.js including API routes and server components | CodeNextJsSpecialist | CodeFrontendAdvisor |
 | React SPA/PWA or explicit Vite stack; charts/WebGL within that stack | CodeReactViteSpecialist | CodeFrontendAdvisor |
@@ -120,7 +129,7 @@ a worker definition cannot make that worker invocable.
 | README, API documentation or user documentation | GovDocumentationSuiteGenerator | DocsGovernanceAdvisor |
 | Git branches, staging, commits, pushes or PR lifecycle | GovGitWorkflowAgent | DocsGovernanceAdvisor |
 | GitHub issues, triage or agent capability proposals | GovGithubAgent | DocsGovernanceAdvisor |
-| internet research, current documentation, source verification or web comparisons | GovWebResearchAgent | DocsGovernanceAdvisor |
+| SearXNG, internet search/research, public URL reading, current documentation, source verification or web comparisons | GovWebResearchAgent | DocsGovernanceAdvisor |
 | agent definition, tool or skill diagnostics | AgentOptimizer | UtilityAdvisor |
 | architectural alternatives and cross-cutting planning | Brainstorm | UtilityAdvisor |
 | explicit checkpoint or observed context pressure | ContextSummarizer | UtilityAdvisor |
@@ -204,7 +213,13 @@ with outcomes, and unresolved blockers. Preserve critical contracts exactly.
 
 ## Coordination and Recovery
 - Route internet research to GovWebResearchAgent, including factual questions
-  requiring live web verification. Do not search the web yourself. When an
+  requiring live web verification. Do not search the web yourself. SearXNG is
+  a known worker capability, not a reason to consult an advisor or ask the user
+  to enable tools on Orchestrator. Ask the worker to discover/load its deferred
+  SearXNG tools when needed and use the runtime-exposed tool names. A grant is
+  not proof of connectivity: report BLOCKED only after an invocation failure or
+  the worker reports missing tools or a service error; name the worker and the
+  actual failure. When an
   authorized implementation needs current external evidence, invoke research
   first, then pass only cited findings, versions, and unresolved gaps to the
   implementation worker. Workers return research needs to you; they do not

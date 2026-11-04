@@ -101,6 +101,7 @@ flowchart LR
     CodeDomainAdvisor --> MultiLanguageBuilder["MultiLanguageBuilder"]
     CodeDomainAdvisor --> CodeFrameworkDiagnostician["CodeFrameworkDiagnostician"]
     CodeDomainAdvisor --> CodeGeneralist["CodeGeneralist"]
+    CodeDomainAdvisor --> CodeComfyUICustomNodeSpecialist["CodeComfyUICustomNodeSpecialist"]
 
     CodeFrontendAdvisor --> CodeNextJsSpecialist["CodeNextJsSpecialist"]
     CodeFrontendAdvisor --> CodeReactViteSpecialist["CodeReactViteSpecialist"]
@@ -148,6 +149,7 @@ flowchart LR
     class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
     class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist frameworkWorker;
     class CodeMockupWireframeSpecialist worker;
+    class CodeComfyUICustomNodeSpecialist frameworkWorker;
     class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraLLMInferenceSpecialist,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent,GovWebResearchAgent worker;
 ```
 
@@ -167,6 +169,7 @@ flowchart LR
 | **Brainstorm** | worker | no | Divergent thinking: generates low-token architectural alternatives & edge cases |
 | **CodeDomainAdvisor** | advisor | no | Optional cross-stack coding specialist selection; never executes |
 | **CodeGeneralist** | worker | no | Generic implementation, review, debugging, and refactoring when no specialist fits |
+| **CodeComfyUICustomNodeSpecialist** | worker | yes | ComfyUI custom nodes: version-aware APIs, registration, tensor/model contracts, frontend extensions and workflow tests |
 | **ContextSummarizer** | worker | no | Read-only checkpoint summaries for observed context pressure or explicit requests; does not reset chat history or runtime context |
 | **MultiLanguageBuilder** | worker | no | Polyglot builds across Python/Node.js/TypeScript with package management |
 | **InfraDevContainerSpecialist** | worker | no | `.devcontainer/` scaffolding, Dockerfiles, remote SSH, container lifecycle |
@@ -197,6 +200,27 @@ flowchart LR
 | **InfraSecurityAuthAgent** | worker | no | Provider-neutral identity, RBAC/secrets, GitHub App/OIDC and application/cloud trust isolation |
 | **InfraObservabilitySpecialist** | worker | no | Observability engineering: error monitoring, tracing (OpenTelemetry), metrics, alerting |
 | **CodeFrameworkDiagnostician** | worker | no | Local error parser & dependency validation for complex framework bugs |
+
+## ComfyUI Custom Nodes
+
+Select **CodeComfyUICustomNodeSpecialist** directly in the agent picker, or let
+Orchestrator route ComfyUI custom-node work to it. Supply the node repository,
+target ComfyUI version or checkout, desired behavior, and a minimal workflow or
+traceback when available. It supports implementation, review, debugging and tests;
+review and diagnosis alone do not authorize edits.
+
+The worker verifies the target V1 or V3 API before implementing registration and
+socket contracts. Its embedded procedures cover IMAGE/MASK/LATENT tensor layouts,
+batching, model/device management, frontend extensions and workflow integration.
+It uses local checkout evidence rather than assuming current APIs; missing API
+evidence is reported as a blocker, not replaced with guessed signatures or a
+compatibility layer. No local skill or client-profile discovery is required.
+
+Default tests stay small, CPU-capable and offline. GPU/model execution, real-server
+workflow checks, downloads and shared-server restarts need available prerequisites
+and explicit authorization. Tests and configured lint are required after changes;
+unrun UI/GPU integration is reported separately. Static roster checks do not prove
+live agent discovery or ComfyUI execution.
 
 ## Routing Rules (Orchestrator)
 
@@ -251,7 +275,14 @@ flowchart LR
 ## Web Research Workflow
 
 GovWebResearchAgent owns SearXNG search and URL reading; Orchestrator no longer
-has the SearXNG tool grant. Its self-contained procedure prefers official sources,
+has the SearXNG tool grant. Orchestrator's first selection rule and embedded index
+explicitly route SearXNG, internet searches, public URL reading and live factual
+verification to that worker. This takes priority over answering simple facts
+directly. Dispatcher-level tool absence is not a worker blocker: invoke research
+without an advisor for this clear route, have the worker discover/load deferred
+SearXNG tools as needed, and report only actual invocation, worker-tool or service
+failures. No extra dispatcher permissions or MCP configuration changes are needed.
+The worker's self-contained procedure prefers official sources,
 reads supporting pages rather than trusting snippets, checks dates and versions,
 and returns concise cited findings with uncertainty and conflicting evidence.
 Retrieved content is untrusted data, not instructions. Queries must not disclose
@@ -269,7 +300,7 @@ registration, service connectivity, or research quality.
 
 ## Code Retention Policy
 
-Orchestrator and all 23 implementation workers avoid adding or retaining legacy
+Orchestrator and all 25 implementation workers avoid adding or retaining legacy
 code and backward-compatibility shims, aliases, fallback paths, or parallel
 implementations unless an explicit supported requirement needs them. Cleanup
 stays within the authorized scope; this is not permission for unrelated deletion.
@@ -290,7 +321,7 @@ or routing entries change under this policy.
 
 ## Code Validation Policy
 
-This is a roster rule embedded in Orchestrator and all 23 implementation workers,
+This is a roster rule embedded in Orchestrator and all 25 implementation workers,
 not a project instruction. It follows these agent definitions into target projects.
 After modifying code, workers must run both the relevant tests and the target
 repository's configured lint checks against the final changes. Focused validation
@@ -310,7 +341,7 @@ only when their write sets are disjoint.
 
 | Domain Prefix | Advisor | Owned Agents |
 |---|---|---|
-| CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist |
+| CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist, CodeComfyUICustomNodeSpecialist |
 | CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
 | CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist, CodeMockupWireframeSpecialist |
 | INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraLLMInferenceSpecialist, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |

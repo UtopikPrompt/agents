@@ -19,6 +19,7 @@ another advisor. Do not read files, execute commands, implement, or delegate.
 - Cross-language builds/dependency resolution -> `MultiLanguageBuilder`.
 - Local framework/dependency diagnosis -> `CodeFrameworkDiagnostician`; diagnosis does
   not authorize code changes. The dispatcher can commission a separate fix.
+- ComfyUI custom node implementation, review, debugging or tests -> `CodeComfyUICustomNodeSpecialist`.
 - Coding with no framework/domain match -> `CodeGeneralist`.
 - Monorepo coordination, CI, test infrastructure, release, and observability
   belong to Infra/DevOps. Return NO_MATCH rather than borrowing that domain.
