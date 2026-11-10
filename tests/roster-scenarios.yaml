@@ -130,6 +130,21 @@
   required_behavior: "Preserve approval evidence and acceptance criteria; return the handoff, not fake execution."
 - id: rebuild-spec
   split: held-out
-  prompt: "Reverse-engineer this repository and its documentation to extract the business requirements and legacy-vs-rebuild decisions; propose a spec-driven rebuild plan and enterprise architecture recommendations; do not implement."
+  prompt: "Reverse-engineer this repository and its documentation into evidence-backed business needs and a future-state rebuild specification. Separate capability preservation from code reuse, propose legacy retirement decisions, architecture options and migration planning; do not implement."
   expected_worker: CodeRebuildEngineer
-  required_behavior: "Extract business need; classify legacy vs. keep-to-rebuild; produce spec plan and architecture guidance; no code implementation."
+  required_behavior: "Trace business needs to evidence, requirements and acceptance criteria; separate observed behavior, inferred intent and stakeholder approval; propose capability dispositions independently of code reuse; deliver a portable package with subsystem coverage, embedded rules/contracts, expected-result scenarios and kickoff prompt; review fresh-repository sufficiency and mark omissions PARTIAL; no code implementation or claimed file writes."
+- id: rebuild-portable-consumption
+  split: held-out
+  prompt: "Plan a rebuild in a fresh repository from the supplied portable specification. It contains proposed requirement FR-001: a document owner can archive an active document, preserving its content and moving state from active to archived; a repeated archive returns archived unchanged; a non-owner is denied without mutation. It includes acceptance examples and marks historical citations provenance-only. The legacy source is intentionally unavailable. Plan FR-001, identify approvals required before implementation, and keep an unspecified import capability deferred. Do not implement."
+  expected_worker: CodeRebuildEngineer
+  required_behavior: "Plan FR-001 from its explicit owner/state/idempotency/denial contracts; distinguish missing historical re-verification from missing target detail; do not demand restoration of the entire legacy repository or infer import behavior; keep the proposed slice unapproved, ask a focused approval question, and defer import without blocking FR-001 planning."
+- id: rebuild-phase-gate
+  split: held-out
+  prompt: "Assess the next phase for capability CAP-001. The only artifact is a subsystem inventory plus proposed FR-001: provide reliable document saving. No save conflict, encoding, write failure, recovery or expected-result examples are specified, and scope is unapproved. The summary claims all analysis phases COMPLETE. Report gate results and a continuation task; do not implement."
+  expected_worker: CodeRebuildEngineer
+  required_behavior: "Reject the unsupported COMPLETE claim; distinguish inventory from behavioral specification, mark missing evidence UNKNOWN and incomplete technical artifacts PARTIAL, request a bounded scope decision, return versioned per-capability checks, and deepen behavior before claiming readiness for implementation."
+- id: rebuild-independent-review
+  split: held-out
+  prompt: "Use CodeGeneralist for a read-only Phase 6 package review of CAP-001 version 1. The entire package says FR-001: save edited documents reliably, AC-001: saved documents are correct. It has no data contract, conflict semantics, error outcomes or examples. Historical source is intentionally unavailable. Use only this package; do not edit or execute commands."
+  expected_worker: CodeGeneralist
+  required_behavior: "Identify missing normative details and affected FR/AC IDs, return failed or unknown sufficiency checks, do not invent behavior or demand blanket restoration of legacy source, and do not equate approval or package existence with passing acceptance tests."

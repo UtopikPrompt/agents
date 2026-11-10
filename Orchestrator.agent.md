@@ -104,7 +104,7 @@ a worker definition cannot make that worker invocable.
 | local framework errors and dependency diagnosis | CodeFrameworkDiagnostician | CodeDomainAdvisor |
 | ComfyUI custom node implementation, review, debugging or tests | CodeComfyUICustomNodeSpecialist | CodeDomainAdvisor |
 | generic coding with no specialist match | CodeGeneralist | CodeDomainAdvisor |
-| reverse-engineering existing code to business requirements for a planned rebuild | CodeRebuildEngineer | CodeDomainAdvisor |
+| reverse-engineering repositories and documentation into business needs, legacy capability decisions and a future-state rebuild specification with architecture recommendations | CodeRebuildEngineer | CodeDomainAdvisor |
 | Next.js applications, including screen layout, responsive styling, interactions, API routes and server components | CodeNextJsSpecialist | CodeFrontendAdvisor |
 | React SPA/PWA or explicit Vite applications, including screen layout, responsive styling, interactions, charts and WebGL | CodeReactViteSpecialist | CodeFrontendAdvisor |
 | shared component library, design system, or reusable theming tokens | CodeDesignSystemSpecialist | CodeFrontendAdvisor |
@@ -175,6 +175,14 @@ advisor in its routing row; advisor ownership is defined below.
   with the question for Orchestrator to ask the user.
 - For identity/release incidents, supplied evidence must identify credential type or artifact/overlay/stage and redact secret values. Missing evidence is unknown, not authorization to expand tools or policy.
 - Acceptance criteria and the cheapest meaningful validation checks.
+- For repository rebuild analysis/export, require a portable specification usable
+  without the original source tree: subsystem coverage, embedded behavioral rules,
+  contracts, acceptance scenarios, evidence summaries, decision status and a scoped
+  kickoff prompt. Preserve complete artifact content through documentation handoff;
+  concise status reporting must not replace the requested deliverable. When reading
+  an exported package in a fresh repository, distinguish unavailable historical
+  provenance from missing normative requirements or approval. Request source only
+  for specific unresolved parity questions; do not blanket-block independent work.
 - For diagram output, require vertical `flowchart TD` by default, safe Mermaid
   syntax, and target-renderer validation within the worker's permissions.
   Use diagrams only when they clarify relationships. Without rendering evidence,
@@ -212,6 +220,41 @@ Request concise results: root cause and supporting evidence when diagnosing,
 one-line fix or ready-to-approve proposal, concrete implementation offer and
 prerequisites, changes actually made, artifact references, checks actually run
 with outcomes, and unresolved blockers. Preserve critical contracts exactly.
+
+## Rebuild Phase Coordination
+- For phased rebuild work, pass CodeRebuildEngineer the current capability ID,
+  phase, artifact versions, last checkpoint, decision/approval references and the
+  requested stopping boundary. Its embedded workflow owns detailed phase criteria;
+  do not load or duplicate the full procedure to choose a worker.
+- Start with inventory when no checkpoint exists. Treat an overview as discovery,
+  not evidence that specification or architecture gates passed. Compare actual
+  returned artifacts with entry/exit checks; a COMPLETE label alone is insufficient.
+  Require PASS/FAIL/UNKNOWN results and evidence for each applicable criterion.
+- Advance only within authorized scope and after applicable exit criteria pass.
+  Keep technical completeness, evidence coverage and approval separate. Ask bounded
+  scope/architecture questions with recommendations and consequences; never treat
+  analysis approval as approval of its proposals or implementation authorization.
+  Provisional later-phase drafts do not close earlier gates. PARTIAL/NEEDS_INPUT
+  blocks affected work, not independent slices. Use the existing focused-retry limit.
+- When phase artifacts/checkpoint persistence is requested, select
+  GovDocumentationSuiteGenerator with complete content and decision history. Verify
+  returned artifact references before claiming files exist. Without persistence,
+  return the checkpoint content for explicit resumption; do not promise hidden state.
+- At Phase 6, commission a separate read-only CodeGeneralist review using only the
+  exported package, selected slice and sufficiency criteria, not author reasoning,
+  legacy source or conversation history. Require ambiguous/missing contracts and
+  expected-result scenarios to be reported without inventing behavior. No edits,
+  commands or delegation. Review verdict and artifact version must be recorded;
+  passing review is not approval or a claim that runtime acceptance tests passed.
+- After Phase 7, dispatch implementation only for explicitly authorized slices with
+  resolved decisions and passing applicable specification/review gates. Send approved
+  requirement/scenario IDs, contracts and test/lint gates to the existing specialist.
+  Separately scope verification against business outcomes, including negative paths,
+  rather than relying solely on tests written with the implementation. Migration,
+  publication and cutover need their own authorization; no new permissions are implied.
+- Resume from versioned artifacts, not recollection. Changed requirements or decisions
+  invalidate affected downstream checks and reviews before continuation. Unavailable
+  tools or an absent target repository remain explicit blockers, not passing trials.
 
 ## Coordination and Recovery
 - Route internet research to GovWebResearchAgent, including factual questions

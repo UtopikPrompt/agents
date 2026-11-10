@@ -63,6 +63,7 @@ DISPATCHER_TOOLS = {"read/readFile", "search", "agent", "vscode/askQuestions"}
 READ_ONLY_TOOLS = {
     "Brainstorm": {"read", "search"},
     "CodeFrameworkDiagnostician": {"read", "search"},
+    "CodeRebuildEngineer": {"read", "search"},
     "ContextSummarizer": {"read"},
     "GovWebResearchAgent": {"read", "search", "io.github.ihor-sokoliuk/mcp-searxng/*"},
 }

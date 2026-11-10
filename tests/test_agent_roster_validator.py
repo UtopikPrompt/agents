@@ -313,10 +313,12 @@ class RosterValidatorTests(unittest.TestCase):
     def test_routing_scenarios_have_known_workers_and_held_out_cases(self):
         scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
         scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
-        self.assertEqual(len(scenarios), 26)
+        self.assertEqual(len(scenarios), 30)
         self.assertEqual(len({scenario["id"] for scenario in scenarios}), len(scenarios))
         self.assertEqual({scenario["split"] for scenario in scenarios}, {"calibration", "held-out"})
-        self.assertEqual(sum(scenario["split"] == "held-out" for scenario in scenarios), 8)
+        self.assertEqual(sum(scenario["split"] == "held-out" for scenario in scenarios), 12)
+        rebuild_scenario = next(scenario for scenario in scenarios if scenario["id"] == "rebuild-spec")
+        self.assertEqual(rebuild_scenario["expected_worker"], "CodeRebuildEngineer")
         for scenario in scenarios:
             with self.subTest(scenario=scenario["id"]):
                 self.assertGreater(len(scenario["prompt"]), 15)
@@ -743,6 +745,202 @@ class RosterValidatorTests(unittest.TestCase):
                 self.files = copy.deepcopy(self.baseline)
                 self.agent(name)["fm"]["tools"].append("edit")
                 self.assert_check("TOOL-1")
+
+    def test_rebuild_engineer_has_read_only_profile(self):
+        worker = copy.deepcopy(self.agent("CodeRebuildEngineer"))
+        expected = {"read", "search"}
+        required, allowed = VALIDATOR["tool_profile"](worker["name"])
+        self.assertEqual((required, allowed), (expected, expected))
+        self.assertEqual(set(worker["fm"]["tools"]), expected)
+
+        worker["fm"]["tools"].extend(["edit", "execute"])
+        report = VALIDATOR["Report"]()
+        VALIDATOR["check_tool_profiles"]([worker], report)
+        self.assertEqual(len(report.findings), 1)
+        self.assertEqual(report.findings[0]["check"], "TOOL-1")
+
+    def test_rebuild_spec_requires_evidence_and_decision_ready_deliverables(self):
+        definition = self.agent("CodeRebuildEngineer")["text"]
+        for clause in (
+            "## Evidence and Traceability",
+            "BN-001, BR-001, FR-001 and NFR-001",
+            "repository-relative source paths and symbols",
+            "observed behavior, inferred intent, stakeholder-confirmed need",
+            "existing behavior is not automatically an approved future requirement",
+            "stakeholders, actors, workflows, pain points, desired outcomes, success",
+            "testable\n  acceptance criteria with observable outcomes",
+            "## Migration and Planning Readiness",
+            "migration validation and reconciliation",
+            "cutover and rollback requirements",
+            "planning-readiness verdict of ready, conditional, or blocked",
+            "Never call an incomplete or unapproved specification implementation-ready",
+            "## Delivery",
+            "1. Executive business brief",
+            "8. Open questions, decision log",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+
+    def test_rebuild_spec_separates_capability_retention_from_implementation(self):
+        definition = self.agent("CodeRebuildEngineer")["text"]
+        for clause in (
+            "preserve, redesign, replace, retire, or needs decision",
+            "preserve the business capability, not reuse its implementation",
+            "reuse candidate, rewrite, remove candidate, or undecided",
+            "contractual and\n  regulatory obligations",
+            "All dispositions are proposals until explicitly approved by the user",
+            "Compare viable architecture options",
+            "do not default to microservices or enterprise tooling",
+            "identity, authorization, trust boundaries, auditability, data governance",
+            "privacy and retention, resilience, availability, observability, testing",
+            "deployment and operating cost",
+            "Return the specification content in the response",
+            "select GovDocumentationSuiteGenerator to persist the content",
+            "Never claim files were saved by this worker",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+        self.assertNotIn("add focused coverage first", definition)
+        self.assertIn("focused validation through Orchestrator", definition)
+
+    def test_rebuild_spec_routing_and_documentation_are_synchronized(self):
+        route = (
+            "reverse-engineering repositories and documentation into business needs, "
+            "legacy capability decisions and a future-state rebuild specification "
+            "with architecture recommendations"
+        )
+        self.assertEqual(
+            self.domain("CodeDomainAdvisor")["routes"][route], "CodeRebuildEngineer"
+        )
+        self.assertIn("`CodeRebuildEngineer`; not code implementation", self.agent("CodeDomainAdvisor")["text"])
+        self.assertIn("## Repository Rebuild Specifications", self.readme)
+        self.assertIn("Repository to rebuild specification | CodeRebuildEngineer", self.readme)
+
+    def test_rebuild_package_requires_portable_behavior_and_completeness_review(self):
+        definition = self.agent("CodeRebuildEngineer")["text"]
+        for clause in (
+            "## Portable Rebuild Specification",
+            "usable in a fresh repository without access to the",
+            "Citations establish provenance",
+            "analyzed,\n  deferred, excluded, or unknown",
+            "state transitions, business rules, validation, failure/recovery behavior",
+            "representative inputs and expected results",
+            "Carry concise evidence summaries",
+            "Include an implementation handoff",
+            "Include a downstream kickoff prompt",
+            "Audit the package as if only its delivered files existed",
+            "Return PARTIAL with the exact",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+
+    def test_rebuild_package_consumption_limits_blockers_to_affected_slices(self):
+        definition = self.agent("CodeRebuildEngineer")["text"]
+        for clause in (
+            "Identify the task phase",
+            "do not restart source discovery automatically",
+            "evidence coverage, specification completeness and approval status",
+            "Block only the affected decision or slice",
+            "not planning against explicit target contracts",
+            "Request original source only for a named unresolved parity question",
+            "entire legacy repository as a blanket prerequisite",
+            "Do not invent missing behavior",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+        scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
+        scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
+        scenario = next(item for item in scenarios if item["id"] == "rebuild-portable-consumption")
+        self.assertEqual(scenario["expected_worker"], "CodeRebuildEngineer")
+        self.assertEqual(scenario["split"], "held-out")
+        self.assertIn("legacy source is intentionally unavailable", scenario["prompt"])
+        self.assertIn("keep the proposed slice unapproved", scenario["required_behavior"])
+
+    def test_rebuild_package_export_preserves_full_content_across_handoffs(self):
+        writer = self.agent("GovDocumentationSuiteGenerator")["text"]
+        for clause in (
+            "## Portable Rebuild Package Export",
+            "preserve the complete specification",
+            "Historical source files need not exist in the fresh repository",
+            "Review sufficiency using only the exported package",
+            "PARTIAL with focused questions",
+            "concise status summary separate from the complete package content",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, writer)
+        dispatcher = self.agent("Orchestrator")["text"]
+        self.assertIn("Preserve complete artifact content through documentation handoff", dispatcher)
+        self.assertIn("do not blanket-block independent work", dispatcher)
+        self.assertIn("Use the exported package in a fresh repository", self.readme)
+
+    def test_rebuild_phase_workflow_requires_artifacts_and_explicit_gates(self):
+        definition = self.agent("CodeRebuildEngineer")["text"]
+        for phase in (
+            "1. Inventory", "2. Recover business knowledge", "3. Decide scope",
+            "4. Specify target behavior", "5. Recommend architecture",
+            "6. Review portable package", "7. Plan rebuild",
+        ):
+            with self.subTest(phase=phase):
+                self.assertIn(f"| {phase} |", definition)
+        for clause in (
+            "## Phase Checkpoint Contract",
+            "an inventory is not a behavioral specification",
+            "capability_id, phase, artifact_version",
+            "PASS/FAIL/UNKNOWN",
+            "Phase outcome is COMPLETE, PARTIAL, or NEEDS_INPUT",
+            "Missing evidence is UNKNOWN, not PASS",
+            "invalidate affected",
+            "Each atomic FR/BR/NFR",
+            "words such as reliable, secure and",
+            "Phases 8 (build) and 9 (verify/transition)",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause.lower(), definition.lower())
+
+    def test_rebuild_phase_dispatch_requires_independent_review_and_authorization(self):
+        dispatcher = self.agent("Orchestrator")["text"]
+        section = dispatcher.split("## Rebuild Phase Coordination\n", 1)[1].split("\n## ", 1)[0]
+        for clause in (
+            "COMPLETE label alone is insufficient",
+            "Provisional later-phase drafts do not close earlier gates",
+            "separate read-only CodeGeneralist review",
+            "exported package, selected slice and sufficiency criteria",
+            "No edits,\n  commands or delegation",
+            "passing review is not approval",
+            "explicitly authorized slices",
+            "rather than relying solely on tests written with the implementation",
+            "invalidate affected downstream checks",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, section)
+        self.assertIn("### Phased Rebuild Workflow", self.readme)
+        self.assertIn("These instructions guide behavior, not a workflow engine", self.readme)
+
+    def test_rebuild_phase_records_preserve_checkpoints_and_review_versions(self):
+        writer = self.agent("GovDocumentationSuiteGenerator")["text"]
+        section = writer.split("## Rebuild Phase Record Persistence\n", 1)[1].split("\n## ", 1)[0]
+        for clause in (
+            "capability_id, phase, artifact_version",
+            "PASS/FAIL/UNKNOWN",
+            "COMPLETE, PARTIAL and NEEDS_INPUT",
+            "separate-reader findings with the exact reviewed artifact",
+            "mark affected downstream gates/reviews stale",
+            "no authority or approval is inferred",
+            "File existence and link checks are not proof",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, section)
+        scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
+        scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
+        expected = {
+            "rebuild-phase-gate": "CodeRebuildEngineer",
+            "rebuild-independent-review": "CodeGeneralist",
+        }
+        for scenario_id, worker in expected.items():
+            with self.subTest(scenario=scenario_id):
+                scenario = next(item for item in scenarios if item["id"] == scenario_id)
+                self.assertEqual(scenario["expected_worker"], worker)
+                self.assertEqual(scenario["split"], "held-out")
 
     def test_unrelated_workers_reject_github_access(self):
         self.agent("CodeGeneralist")["fm"]["tools"].append("github/*")

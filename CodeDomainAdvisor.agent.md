@@ -20,6 +20,9 @@ another advisor. Do not read files, execute commands, implement, or delegate.
 - Local framework/dependency diagnosis -> `CodeFrameworkDiagnostician`; diagnosis does
   not authorize code changes. The dispatcher can commission a separate fix.
 - ComfyUI custom node implementation, review, debugging or tests -> `CodeComfyUICustomNodeSpecialist`.
+- Reverse-engineering repositories and documentation into business needs, legacy
+  capability decisions, a future-state rebuild specification and architecture
+  recommendations -> `CodeRebuildEngineer`; not code implementation.
 - Coding with no framework/domain match -> `CodeGeneralist`.
 - Monorepo coordination, CI, test infrastructure, release, and observability
   belong to Infra/DevOps. Return NO_MATCH rather than borrowing that domain.

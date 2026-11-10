@@ -148,7 +148,7 @@ flowchart LR
     class O hub;
     class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor domainAdvisor;
     class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
-    class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist,CodeRebuildArchitect frameworkWorker;
+    class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist,CodeRebuildEngineer frameworkWorker;
     class CodeMockupWireframeSpecialist worker;
     class CodeComfyUICustomNodeSpecialist frameworkWorker;
     class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraLLMInferenceSpecialist,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent,GovWebResearchAgent worker;
@@ -177,10 +177,10 @@ flowchart LR
 | **InfraMCPServerGenerator** | worker | no | Model Context Protocol servers, JSON-RPC, editor integration |
 | **CodeReactViteSpecialist** | worker | no | React/Vite application screens, responsive CSS, interactions, component architecture, and Vitest |
 | **CodeFastApiSpecialist** | worker | no | Backend API scaffolding: FastAPI, Pydantic, SQLAlchemy |
-| **CodeRebuildEngineer** | worker | no | Reverse-engineers existing code to business requirements for a planned rebuild; legacy-vs-keep decisions and enterprise architecture |
+| **CodeRebuildEngineer** | worker | no | Phase-gated business discovery and portable rebuild specifications; capability/code decisions, architecture, checkpoints and planning |
 | **InfraMonorepoManager** | worker | no | Multi-package workspace coordination & version synchronization |
 | **InfraTestInfrastructureGenerator** | worker | no | Test suites across frameworks + CI/CD pipeline configuration |
-| **GovDocumentationSuiteGenerator** | worker | no | ADRs, API docs, READMEs, user documentation |
+| **GovDocumentationSuiteGenerator** | worker | no | ADRs, API docs, READMEs, user documentation and versioned rebuild phase records |
 | **InfraPerformanceProfiler** | worker | no | Python/Node CPU/memory profiling with verified OS/runtime/profiler APIs |
 | **InfraLLMInferenceSpecialist** | worker | no | Ollama/llama.cpp/GGUF serving, VRAM/KV-cache/context estimates and controlled engine evaluation |
 | **InfraReleaseManager** | worker | no | Release preparation and authorized publication; Git mutations go to GovGitWorkflowAgent through Orchestrator |
@@ -202,6 +202,404 @@ flowchart LR
 | **InfraSecurityAuthAgent** | worker | no | Provider-neutral identity, RBAC/secrets, GitHub App/OIDC and application/cloud trust isolation |
 | **InfraObservabilitySpecialist** | worker | no | Observability engineering: error monitoring, tracing (OpenTelemetry), metrics, alerting |
 | **CodeFrameworkDiagnostician** | worker | no | Local error parser & dependency validation for complex framework bugs |
+
+## Prompt Examples
+
+Select **Orchestrator** as the main chat agent and use the examples below.
+Replace bracketed placeholders with real task context and use paths relative to
+the target repository. Naming a worker is optional: Orchestrator can select it
+from the goal. Selection advisors have no separate task examples because they
+only help Orchestrator choose a worker.
+
+For code changes, require relevant tests and configured lint, exact commands and
+outcomes, and explicit reasons for checks not run. Preserve existing edits.
+Review, diagnosis and planning prompts do not authorize implementation. Git,
+deployment, publication and data mutations require their own explicit scope.
+The examples are starting points, not evidence that tools or services are available.
+
+### Business Analysis and Application Development
+
+**CodeRebuildEngineer: reverse-engineer a project for a rebuild**
+
+> Analyze [repository path] and [documentation path] to recover the business
+> problem, stakeholders, business needs, workflows and domain rules. Produce an
+> evidence-linked future-state specification with requirement IDs and acceptance
+> criteria. Propose preserve/redesign/replace/retire decisions for capabilities,
+> separately from code reuse. Compare enterprise architecture options and recommend
+> a proportionate design with trade-offs. Include migration, cutover, open decisions
+> and per-slice planning readiness. Deliver a portable package usable in an empty
+> repository: manifest, subsystem coverage, embedded rules and contracts, acceptance
+> scenarios with expected results, evidence summaries, ordered work packages and a
+> downstream kickoff prompt. Audit it without following historical source links;
+> mark exact gaps as PARTIAL. Separate facts, inference and proposals. Do not implement.
+
+**Use the exported package in a fresh repository**
+
+> Read [package entry point] as the declared target specification, not as a request
+> to rediscover the legacy codebase. Plan the rebuild from its explicit requirements,
+> contracts and acceptance scenarios. Preserve proposal and approval status. Start
+> with [requirement IDs or first slice]; identify the exact decisions needed before
+> implementation. Historical source is intentionally absent: request it only for
+> specific unresolved parity questions, not as a blanket prerequisite. Do not implement.
+
+**CodeGeneralist: implement a scoped change in the existing stack**
+
+> Implement [behavior] in [module path], following the existing language and
+> architecture. Acceptance criteria: [observable outcomes]. Keep the change local,
+> add regression coverage, and run relevant tests and configured lint. Do not
+> switch frameworks, commit or modify unrelated code.
+
+**CodeFrameworkDiagnostician: diagnose a framework failure**
+
+> Diagnose [error] using [stack trace], [dependency manifest] and [relevant source
+> path]. Identify the evidence-backed root cause, remaining uncertainty and the
+> smallest recommended fix. Return validation steps; do not edit or run commands.
+
+**MultiLanguageBuilder: repair a cross-language build**
+
+> Fix the build failure between [Python package path] and [Node package path]
+> using [failing command and output]. Preserve package-manager and version
+> conventions. Limit changes to the failing build contract and run both affected
+> build/test checks and configured lint. Do not upgrade unrelated dependencies.
+
+**CodeNextJsSpecialist: build a Next.js workflow**
+
+> Implement [user workflow] in the existing Next.js app at [app path]. Use the
+> repository's routing, styling and data-access patterns. Include responsive
+> loading, empty and error states, accessible controls, and tests for [outcomes].
+> Preserve the existing authentication boundary.
+
+**CodeReactViteSpecialist: build a React/Vite screen**
+
+> Add [screen or workflow] to [React/Vite app path] using the existing components
+> and state conventions. Support desktop and mobile, keyboard navigation, loading
+> and failure states. Acceptance criteria: [outcomes]. Run relevant tests,
+> configured lint and the build.
+
+**CodeDesignSystemSpecialist: create reusable UI components**
+
+> Add shared [components] to [component library path] for [consumer workflows].
+> Follow existing tokens and theming; cover disabled, focus, error and loading
+> states. Include accessible APIs, component tests and usage documentation. Do not
+> redesign unrelated application screens.
+
+**CodeMockupWireframeSpecialist: sketch a workflow before implementation**
+
+> Mock up [workflow] for [audience] at [desktop/mobile viewport]. Include [required
+> controls, data and states]. Return numbered inline text wireframes with clear
+> navigation and concise behavior notes. Do not create files or implement the UI.
+
+**CodeFastApiSpecialist: add a FastAPI endpoint**
+
+> Implement [endpoint and behavior] in [FastAPI service path]. Follow existing
+> Pydantic, dependency-injection and database patterns. Specify authorization,
+> validation and error responses; update OpenAPI-facing schemas and endpoint tests.
+> Do not connect to production data.
+
+**CodeExpressSpecialist: add an Express API capability**
+
+> Implement [REST capability] in [Express service path]. Preserve the current
+> routing, middleware and persistence conventions. Cover request validation,
+> authorization and error handling with integration tests. Do not introduce a new
+> framework or change unrelated endpoints.
+
+**CodeSpringBootSpecialist: add a Spring Boot use case**
+
+> Implement [business use case] in [Spring Boot module path]. Follow the existing
+> controller/service/repository boundaries and transaction conventions. Include
+> validation, authorization, error mapping and focused tests. Preserve the current
+> Maven or Gradle setup.
+
+**CodeGraphQLTRPCAgent: extend a typed API contract**
+
+> Add [query/mutation/procedure] to [existing GraphQL or tRPC API path]. Preserve
+> the existing API technology. Define inputs, outputs, authorization and error
+> semantics; update affected consumers or generated types and add contract tests.
+
+**CodeDatabaseORMGenerator: prepare a schema change**
+
+> Prepare an ORM migration for [entities and relationships] in [schema path],
+> using the current database engine and ORM. Include constraints, indexes, data
+> preservation and rollback considerations. Validate with the repository's isolated
+> test database only; do not apply to a shared or production database.
+
+**CodeComfyUICustomNodeSpecialist: develop a custom node**
+
+> Add [node behavior] to [custom-node pack path] against [ComfyUI checkout/version].
+> Inputs and outputs: [tensor/socket contracts]. Follow the evidenced V1 or V3 API,
+> preserve device handling, and add offline CPU tests. Do not download models,
+> require a GPU or restart a shared server.
+
+### Infrastructure and Operations
+
+**InfraMonorepoManager: coordinate workspace packages**
+
+> Update [shared package contract] and its consumers in [workspace paths]. Map
+> affected dependencies, preserve workspace and lockfile conventions, and sequence
+> dependent changes. Run affected package tests, builds and configured lint. Do not
+> publish packages or bump unrelated versions.
+
+**InfraDevContainerSpecialist: configure a reproducible environment**
+
+> Update [devcontainer path] for [languages, tools and development workflow].
+> Preserve existing host/container boundaries and avoid embedding credentials.
+> Explain required privileges and validate available configuration checks. Do not
+> rebuild a running shared environment without approval.
+
+**InfraMCPServerGenerator: implement an MCP integration**
+
+> Build an MCP server in [target path] using [language] with [tools/resources].
+> Define input schemas, transport, configuration and error handling; reuse the
+> repository's SDK conventions. Add protocol tests and client setup documentation.
+> Keep secrets external and do not alter global client configuration.
+
+**InfraObservabilitySpecialist: instrument a service**
+
+> Add observability for [workflow] in [service path] using the existing telemetry
+> stack. Include structured logs, trace context, useful metrics and alert proposals.
+> Exclude sensitive payloads and control cardinality. Test locally; do not change
+> shared dashboards or alert policies without approval.
+
+**InfraCloudDeploymentAgent: prepare deployment configuration**
+
+> Prepare deployment configuration for [service] on [provider and environment].
+> Follow existing repository conventions and document identity, networking,
+> configuration, health checks and rollback. Validate locally where possible.
+> Do not provision resources, deploy or publish artifacts.
+
+**InfraKubernetesEngineer: diagnose a Kubernetes workload**
+
+> Diagnose [workload symptom] in [explicit cluster context and namespace] using
+> [manifests and sanitized events/logs]. Use read-only checks only. Identify the
+> failing boundary and propose a minimal fix with validation and rollback steps.
+> Do not apply manifests, restart pods or change permissions.
+
+**InfraSecurityAuthAgent: analyze an authorization failure**
+
+> Analyze [authentication/authorization failure] for [identity, provider and
+> resource scope] using [sanitized evidence]. Identify the first failing trust or
+> permission boundary and propose the least-privilege correction. Do not request
+> secrets, grant roles, rotate credentials or change policy.
+
+**InfraIaCGenerator: prepare infrastructure as code**
+
+> Prepare [Terraform/Pulumi/Bicep/ARM] changes for [resource requirements] in [IaC
+> path], preserving the evidenced provider, state ownership and environment scope.
+> Include least privilege, cost and destructive-change risks. Run available local
+> checks; do not initialize remote state, apply or provision resources.
+
+**InfraPerformanceProfiler: investigate an application bottleneck**
+
+> Profile [Python/Node application path] for [CPU or memory symptom] with [bounded
+> local workload]. Verify OS, runtime and installed profiler support first. Report
+> measured hotspots, limitations and a minimal optimization proposal. Do not
+> install tools, run production load or modify application code.
+
+**InfraLLMInferenceSpecialist: assess local inference capacity**
+
+> Assess whether [local model artifact and runtime] can support [context length
+> and concurrency] on [hardware evidence]. Account for weights, KV cache, runtime
+> overhead and offload. Separate estimates from observed results and recommend
+> settings. Do not download models or run load tests.
+
+**InfraTestInfrastructureGenerator: strengthen test coverage**
+
+> Add regression tests for [supported behavior] in [package path] using the
+> existing test framework and helpers. Cover [failure cases] with deterministic,
+> offline fixtures. Run focused tests and configured lint; report unrelated
+> failures without weakening assertions or broadening implementation scope.
+
+**InfraReleaseManager: prepare a release without publishing**
+
+> Prepare release [version] for [package path] using existing versioning and
+> changelog conventions. Check artifact contents, compatibility and required gates.
+> Return validation results and a publication checklist. Do not commit, tag, push,
+> publish or deploy.
+
+**InfraCIDiagnostics: explain a CI failure**
+
+> Diagnose the failing [workflow/job] using [run reference and sanitized logs].
+> Distinguish application, dependency, runner and permission failures. Return the
+> evidenced root cause, minimal proposed fix and rerun criteria. Do not edit files,
+> rerun jobs or change repository settings.
+
+### Documentation and Governance
+
+**GovArchitectureRecordsExpert: draft an architecture decision**
+
+> Draft an ADR for [decision] in [repository ADR directory]. Compare [options]
+> against [requirements and constraints], including consequences and migration
+> risks. Follow the repository template and mark the record proposed, not accepted.
+> Do not implement the decision.
+
+**GovDocumentationSuiteGenerator: persist a rebuild specification**
+
+> Turn [supplied rebuild analysis] into Markdown documents under [docs directory].
+> Preserve requirement IDs, evidence links, capability decisions, acceptance
+> criteria and unresolved questions. Keep proposals unapproved unless approval
+> evidence is supplied. Preserve the full portable package, manifest, behavioral
+> examples and kickoff prompt, not just a summary. Verify package-local links and
+> distinguish provenance-only references from missing requirements. Do not change
+> application code.
+
+**GovGithubAgent: triage issues without changing them**
+
+> Triage open issues in the explicitly supplied repository using [scope and
+> criteria]. Check for duplicates and propose labels, priorities and missing
+> acceptance criteria. Return recommendations only; do not create, close, assign
+> or edit issues or project items.
+
+**GovGitWorkflowAgent: create a scoped commit**
+
+> Commit only [explicit file list] with message [message]. Inspect the worktree,
+> preserve unrelated edits and staging, check the final staged diff, and report
+> validation evidence. Do not push, open a pull request, rewrite history or clean
+> up branches.
+
+**GovWebResearchAgent: compare documented technical options**
+
+> Research [technical question] for [versions and constraints] using current
+> official documentation. Compare [options], cite supporting URLs and distinguish
+> documented facts from recommendations. Report conflicting or unavailable
+> evidence. Do not disclose private repository content in searches.
+
+### Agent Utilities
+
+**AgentOptimizer: diagnose an agent definition**
+
+> Review [target agent definition path] for [routing, tool-use or instruction
+> symptom] using [supplied sanitized execution evidence]. Identify supported
+> causes, conflicts and missing evidence. Propose the smallest correction and a
+> validation plan. Do not edit definitions or expand permissions yet.
+
+**Brainstorm: explore alternatives before deciding**
+
+> Propose three approaches to [design problem] using [relevant paths and verified
+> constraints]. Compare complexity, risks and testability; recommend one and name
+> the evidence that could change the recommendation. Do not edit or run commands.
+
+**ContextSummarizer: create a handoff checkpoint**
+
+> Summarize the supplied conversation and [relevant task evidence] into a concise
+> checkpoint: goal, constraints, decisions, changed files, validation results,
+> blockers and next action. Preserve uncertainty and authorization limits. Do not
+> claim to reset history or trigger runtime compaction.
+
+## Repository Rebuild Specifications
+
+Ask Orchestrator to analyze the supplied repository and documentation with
+CodeRebuildEngineer. Supply known business goals, stakeholders, supported consumers
+and constraints when available. The worker reconstructs current behavior without
+treating it as an approved future requirement or the current stack as mandatory.
+
+The specification includes a business brief; current-state workflows, rules and
+evidence; future-state requirements with stable IDs, priorities and acceptance
+criteria; a capability disposition matrix; target data and interface contracts;
+architecture options; migration and cutover considerations; and a decision log with
+phased planning input and a ready, conditional, or blocked planning-readiness verdict.
+Traceability links needs, requirements, evidence, acceptance criteria and components.
+Observed behavior, inferred intent, stakeholder-confirmed needs and future proposals
+remain distinct. Missing evidence and approval are visible, not invented.
+
+Capability dispositions are preserve, redesign, replace, retire, or needs decision.
+Preserving a business capability does not mean reusing its code; code reuse is a
+separate recommendation. Retirement requires supported-consumer and obligation
+evidence plus stakeholder approval, not merely old technology or absent tests.
+Architecture recommendations compare viable options and address security, data
+governance, resilience, observability, delivery and operating cost in proportion
+to the requirements. A from-scratch rebuild still needs data and contract continuity.
+
+This worker has only read/search tools: no edits, commands, browsing or delegation.
+It returns specification content and requests missing validation through
+Orchestrator. For requested repository files, Orchestrator can select
+GovDocumentationSuiteGenerator to persist the draft with its evidence and approval
+status unchanged. No file write or runtime validation is implied by the analysis.
+The exported package must stand alone in a fresh repository. It includes a manifest,
+subsystem coverage, embedded business rules and contracts, acceptance examples with
+expected results, evidence summaries, ordered work packages and a kickoff prompt.
+The worker reviews completeness using only the package and reports PARTIAL with
+exact gaps if it cannot complete it; an executive proposal alone is not sufficient.
+
+Source discovery and downstream planning are different phases. In a fresh repository,
+historical paths are provenance, not mandatory local files. Their absence prevents
+independent verification of legacy claims, but does not prevent planning against
+explicit target requirements. Unknown behavior and approval still need resolution
+for affected slices. Report evidence coverage, specification completeness and
+approval status separately; do not block unrelated work or silently approve scope.
+After approving a slice, use the package's kickoff prompt with Orchestrator and
+explicitly authorize that implementation. A planning-only rebuild analysis does
+not implement the project or grant permission to scaffold it.
+The procedure is embedded for Remote SSH; static checks do not prove live routing
+or specification quality on a real repository.
+
+### Phased Rebuild Workflow
+
+Run the workflow per bounded capability. A report containing every section is not
+evidence that every phase is complete. Start with a product-wide inventory, then
+deepen a representative slice before attempting a full-product specification.
+
+| Phase | Responsible Role | Exit Gate |
+|---|---|---|
+| 1. Inventory | CodeRebuildEngineer | Capability/dependency/consumer map with explicit evidence depth and coverage gaps |
+| 2. Recover business knowledge | CodeRebuildEngineer | Workflows, rules, exceptions, ownership and confidence traced to docs, implementation and available test evidence |
+| 3. Decide scope | User decides; CodeRebuildEngineer prepares options | Recorded dispositions, priorities, exclusions, compatibility and applicable migration decisions |
+| 4. Specify target behavior | CodeRebuildEngineer | Atomic requirements, data/interface contracts, measurable quality criteria and expected-result acceptance scenarios |
+| 5. Recommend architecture | CodeRebuildEngineer; user decides | Proportionate component/interface/data-flow design with explicit decision status |
+| 6. Review portable package | CodeGeneralist, separate read-only invocation by Orchestrator | Package-only review finds no required behavior left for the implementer to invent |
+| 7. Plan rebuild | CodeRebuildEngineer | Requirement-linked work packages, dependencies, test/lint gates and observable completion criteria |
+| 8. Build incrementally | Existing implementation specialist selected by Orchestrator | Explicitly authorized slice implemented and relevant tests/configured lint reported |
+| 9. Verify and transition | Separately scoped testing/operations workers; user authorizes cutover | Business acceptance evidence and applicable migration/reconciliation/rollback checks |
+
+CodeRebuildEngineer owns analysis and planning, never execution of Phases 8 or 9.
+Orchestrator checks artifacts against gates and coordinates existing workers; it
+does not gain implementation permissions. GovDocumentationSuiteGenerator persists
+complete artifacts and checkpoint history only when requested. No new agents or
+tool grants are required. These instructions guide behavior, not a workflow engine
+that technically enforces approvals.
+
+Each slice returns a checkpoint containing capability ID, phase, artifact version,
+input/output references, entry/exit checks, evidence coverage, specification
+completeness, approval status, decision records, blockers and next action/phase.
+Checks have PASS/FAIL/UNKNOWN results with evidence; phase outcomes are COMPLETE,
+PARTIAL or NEEDS_INPUT. Missing evidence is not PASS. A recommended decision is not
+an approved one, and an approved vague requirement is still incomplete. Changed
+inputs invalidate affected downstream checks and independent reviews.
+
+Independent review receives only the exported package, selected slice and review
+criteria. It must name missing rules, ambiguous contracts, absent expected outcomes
+and affected requirements without looking up legacy source or inventing answers.
+Its verdict is not business approval or proof that acceptance tests ran. Keep the
+existing bounded correction/retry policy; report unresolved gaps instead of looping.
+
+Provisional design/planning may proceed when requested, but cannot close open
+approval gates or authorize implementation. Block only affected slices. In the
+original repository, prepare the evidence and portable package (Phases 1-6); plan
+and build in the fresh repository (Phases 7-9) without restarting source discovery
+unless a specific missing rule or parity contradiction requires it.
+
+**Start a phased analysis**
+
+> Analyze [repository and documentation paths] using the phased rebuild workflow.
+> Begin with Phase 1 inventory, report coverage depth and propose a representative
+> capability for Phase 2. Return phase artifacts, explicit exit checks and a
+> checkpoint. Stop before approving future scope or implementing anything. Persist
+> the artifacts and checkpoint under [documentation directory] using the
+> documentation worker; preserve all proposal and approval states.
+
+**Resume a capability**
+
+> Resume [capability ID] from [checkpoint and artifact paths/version]. Reconcile
+> changes and invalidate stale checks. Complete the next authorized analysis phase
+> only; report exact missing evidence or bounded approval choices. Do not treat
+> earlier summaries or approval of analysis as completed specification gates.
+
+**Independently review an exported slice**
+
+> Review [package entry point/version] for [capability and requirement IDs] in a
+> separate read-only CodeGeneralist invocation. Use only the exported package.
+> Identify where implementation would require guessing rules, fields, state changes,
+> failure behavior or expected outcomes. Return evidence-linked PASS/FAIL/UNKNOWN
+> checks and affected IDs. Do not use legacy source, invent behavior, edit or execute.
 
 ## ComfyUI Custom Nodes
 
@@ -342,9 +740,9 @@ Orchestrator is the sole dispatcher and invokes independent workers concurrently
 only when their write sets are disjoint.
 
 | Domain Prefix | Advisor | Owned Agents |
-|---|---|---|RebuildArchitect, Code
-| CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist, CodeComfyUICustomNodeSpecialist |
-| CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist, CodeRebuildEngineer |
+|---|---|---|
+| CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist, CodeComfyUICustomNodeSpecialist, CodeRebuildEngineer |
+| CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
 | CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist, CodeMockupWireframeSpecialist |
 | INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraLLMInferenceSpecialist, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
 | GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GovGitWorkflowAgent, GovWebResearchAgent |
@@ -433,6 +831,8 @@ example tools are not assumed installed, Windows-compatible, or executed.
 | Secure development bootstrap | InfraDevContainerSpecialist, MultiLanguageBuilder | Codespaces/dotfiles/SSH setup and host/container boundaries |
 | Container display operations | InfraDevContainerSpecialist, CodeGeneralist | Display access, schedule cases, explicit device-operation approval |
 | Specification to code handoff | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator | Accepted-spec evidence, scoped prompts and documentation-only boundaries |
+| Repository to rebuild specification | CodeRebuildEngineer | Capability-scoped phase gates/checkpoints, portable contracts, evidence, architecture, acceptance scenarios, migration and planning |
+| Rebuild phase coordination and records | Orchestrator, GovDocumentationSuiteGenerator | Gate checks, separate-reader review, authorized handoffs, versioned artifacts/decisions and stale-check invalidation |
 | Runtime symptom diagnosis | AgentOptimizer | Compare supplied run evidence across configuration, context, model, tools, UI and services; no direct log or terminal access |
 | Go contract validation | CodeGeneralist, MultiLanguageBuilder | Provider-neutral interfaces, cancellation, callers and configured Go checks |
 
@@ -448,10 +848,11 @@ a root cause from a screenshot or symptom description alone.
 
 ## Routing Evaluation
 
-[tests/roster-scenarios.yaml](tests/roster-scenarios.yaml) contains 26 reviewable
-cases: 18 calibration and eight held-out. Expected workers and behavior cover
+[tests/roster-scenarios.yaml](tests/roster-scenarios.yaml) contains 30 reviewable
+cases: 18 calibration and twelve held-out. Expected workers and behavior cover
 six identity layers, inference units/metadata/cache/concurrency, evaluation,
-release/storage/authorization, framework preservation, Git and direct answers.
+release/storage/authorization, framework preservation, Git, direct answers and
+portable rebuild planning without historical source files and incomplete phase gates.
 Unit tests validate fixture integrity and definition contracts, not live routing.
 
 For an explicitly commissioned live evaluation, run the current Orchestrator as
