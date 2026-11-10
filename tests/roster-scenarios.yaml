@@ -128,3 +128,8 @@
   prompt: "Write an implementation handoff from an approved service spec, without changing application code."
   expected_worker: GovDocumentationSuiteGenerator
   required_behavior: "Preserve approval evidence and acceptance criteria; return the handoff, not fake execution."
+- id: rebuild-spec
+  split: held-out
+  prompt: "Reverse-engineer this repository and its documentation to extract the business requirements and legacy-vs-rebuild decisions; propose a spec-driven rebuild plan and enterprise architecture recommendations; do not implement."
+  expected_worker: CodeRebuildEngineer
+  required_behavior: "Extract business need; classify legacy vs. keep-to-rebuild; produce spec plan and architecture guidance; no code implementation."

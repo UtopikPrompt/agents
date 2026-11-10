@@ -103,15 +103,16 @@ flowchart LR
     CodeDomainAdvisor --> CodeGeneralist["CodeGeneralist"]
     CodeDomainAdvisor --> CodeComfyUICustomNodeSpecialist["CodeComfyUICustomNodeSpecialist"]
 
-    CodeFrontendAdvisor --> CodeNextJsSpecialist["CodeNextJsSpecialist"]
-    CodeFrontendAdvisor --> CodeReactViteSpecialist["CodeReactViteSpecialist"]
-    CodeFrontendAdvisor --> CodeDesignSystemSpecialist["CodeDesignSystemSpecialist"]
+    CodeFrontendAdvisor --> CodeNextJsSpecialist["CodeNextJsSpecialist<br/>(Next.js applications and UI)"]
+    CodeFrontendAdvisor --> CodeReactViteSpecialist["CodeReactViteSpecialist<br/>(React/Vite applications and UI)"]
+    CodeFrontendAdvisor --> CodeDesignSystemSpecialist["CodeDesignSystemSpecialist<br/>(shared components and tokens)"]
     CodeFrontendAdvisor --> CodeMockupWireframeSpecialist["CodeMockupWireframeSpecialist"]
 
     CodeBackendAdvisor --> CodeSpringBootSpecialist["CodeSpringBootSpecialist"]
     CodeBackendAdvisor --> CodeExpressSpecialist["CodeExpressSpecialist"]
     CodeBackendAdvisor --> CodeGraphQLTRPCAgent["CodeGraphQLTRPCAgent"]
     CodeBackendAdvisor --> CodeDatabaseORMGenerator["CodeDatabaseORMGenerator"]
+    CodeDomainAdvisor --> CodeRebuildEngineer["CodeRebuildEngineer"]
     CodeBackendAdvisor --> CodeFastApiSpecialist["CodeFastApiSpecialist"]
 
     InfraDevOpsAdvisor --> InfraMonorepoManager["InfraMonorepoManager"]
@@ -147,7 +148,7 @@ flowchart LR
     class O hub;
     class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor domainAdvisor;
     class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
-    class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist frameworkWorker;
+    class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist,CodeRebuildArchitect frameworkWorker;
     class CodeMockupWireframeSpecialist worker;
     class CodeComfyUICustomNodeSpecialist frameworkWorker;
     class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraLLMInferenceSpecialist,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent,GovWebResearchAgent worker;
@@ -174,8 +175,9 @@ flowchart LR
 | **MultiLanguageBuilder** | worker | no | Polyglot builds across Python/Node.js/TypeScript with package management |
 | **InfraDevContainerSpecialist** | worker | no | `.devcontainer/` scaffolding, Dockerfiles, remote SSH, container lifecycle |
 | **InfraMCPServerGenerator** | worker | no | Model Context Protocol servers, JSON-RPC, editor integration |
-| **CodeReactViteSpecialist** | worker | no | Frontend scaffolding: TypeScript + React + Vite + Vitest |
+| **CodeReactViteSpecialist** | worker | no | React/Vite application screens, responsive CSS, interactions, component architecture, and Vitest |
 | **CodeFastApiSpecialist** | worker | no | Backend API scaffolding: FastAPI, Pydantic, SQLAlchemy |
+| **CodeRebuildEngineer** | worker | no | Reverse-engineers existing code to business requirements for a planned rebuild; legacy-vs-keep decisions and enterprise architecture |
 | **InfraMonorepoManager** | worker | no | Multi-package workspace coordination & version synchronization |
 | **InfraTestInfrastructureGenerator** | worker | no | Test suites across frameworks + CI/CD pipeline configuration |
 | **GovDocumentationSuiteGenerator** | worker | no | ADRs, API docs, READMEs, user documentation |
@@ -186,9 +188,9 @@ flowchart LR
 | **GovGitWorkflowAgent** | worker | yes | Local branches, scoped staging/commits, pushes, PR creation/updates/reviews/merges and authorized cleanup |
 | **GovWebResearchAgent** | worker | yes | Read-only SearXNG research, page verification, current documentation and cited findings |
 | **InfraCIDiagnostics** | worker | no | Root-cause diagnosis of failing CI/Actions jobs & PR errors, then suggests fixes |
-| **CodeNextJsSpecialist** | worker | no | Next.js architecture: App Router, Server Components, ISR |
+| **CodeNextJsSpecialist** | worker | no | Next.js applications: architecture, responsive UI, styling, interactions, Server Components, ISR |
 | **CodeSpringBootSpecialist** | worker | no | Java/Spring Boot backend scaffolding |
-| **CodeDesignSystemSpecialist** | worker | no | Shared UI component libraries & design systems: React/Vue/Angular, theming/tokens, prop types, accessibility |
+| **CodeDesignSystemSpecialist** | worker | no | Shared UI component libraries & design systems: React/Vue/Angular, semantic tokens, accessible states |
 | **CodeMockupWireframeSpecialist** | worker | no | Direct, numbered Unicode box-drawing mockups with one aligned `text` block per node, concise behavior notes, and no process narration |
 | **CodeDatabaseORMGenerator** | worker | no | Database schema & ORM setup: SQL/ORM scaffolding, migrations, indexes, constraints; SQLAlchemy/Prisma/Hibernate/Eloquent |
 | **CodeFrontendAdvisor** | advisor | no | Optional frontend specialist selection; never executes |
@@ -340,9 +342,9 @@ Orchestrator is the sole dispatcher and invokes independent workers concurrently
 only when their write sets are disjoint.
 
 | Domain Prefix | Advisor | Owned Agents |
-|---|---|---|
+|---|---|---|RebuildArchitect, Code
 | CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist, CodeComfyUICustomNodeSpecialist |
-| CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
+| CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist, CodeRebuildEngineer |
 | CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist, CodeMockupWireframeSpecialist |
 | INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraLLMInferenceSpecialist, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
 | GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GovGitWorkflowAgent, GovWebResearchAgent |

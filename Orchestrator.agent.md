@@ -23,6 +23,7 @@ agents:
   - CodeGraphQLTRPCAgent
   - CodeDatabaseORMGenerator
   - CodeFastApiSpecialist
+  - CodeRebuildEngineer
   - MultiLanguageBuilder
   - CodeFrameworkDiagnostician
   - InfraMonorepoManager
@@ -103,9 +104,10 @@ a worker definition cannot make that worker invocable.
 | local framework errors and dependency diagnosis | CodeFrameworkDiagnostician | CodeDomainAdvisor |
 | ComfyUI custom node implementation, review, debugging or tests | CodeComfyUICustomNodeSpecialist | CodeDomainAdvisor |
 | generic coding with no specialist match | CodeGeneralist | CodeDomainAdvisor |
-| Next.js including API routes and server components | CodeNextJsSpecialist | CodeFrontendAdvisor |
-| React SPA/PWA or explicit Vite stack; charts/WebGL within that stack | CodeReactViteSpecialist | CodeFrontendAdvisor |
-| shared component library, design system, theming tokens | CodeDesignSystemSpecialist | CodeFrontendAdvisor |
+| reverse-engineering existing code to business requirements for a planned rebuild | CodeRebuildEngineer | CodeDomainAdvisor |
+| Next.js applications, including screen layout, responsive styling, interactions, API routes and server components | CodeNextJsSpecialist | CodeFrontendAdvisor |
+| React SPA/PWA or explicit Vite applications, including screen layout, responsive styling, interactions, charts and WebGL | CodeReactViteSpecialist | CodeFrontendAdvisor |
+| shared component library, design system, or reusable theming tokens | CodeDesignSystemSpecialist | CodeFrontendAdvisor |
 | Inline ASCII mockups, UI wireframes, multi-column screen layouts or interaction flows before implementation | CodeMockupWireframeSpecialist | CodeFrontendAdvisor |
 | FastAPI, Pydantic, Python web API | CodeFastApiSpecialist | CodeBackendAdvisor |
 | Node.js and Express REST | CodeExpressSpecialist | CodeBackendAdvisor |
