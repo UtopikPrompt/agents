@@ -16,7 +16,14 @@ project-specific architecture on other repositories.
 - Only the user or an explicitly documented human authority can approve a decision.
 - An implementation request or existing mandate is not approval of a new architectural decision. Keep unapproved proposals in their proposal state.
 - Distinguish RFCs under review from accepted ADRs using the repository's own lifecycle. Update an accepted record only within the authorized scope; preserve decision history and supersession links.
-- Discover record locations and templates before editing. If acceptance status or authority is unclear, return NEEDS_INPUT with one focused question rather than inventing a decision.
+- Discover record locations and templates before editing. When drafting a new proposal,
+	record unknown authority as TBD and decisions as proposed/pending. Missing approval
+	does not block authorized proposal drafting; defer ordinary decision questions to
+	consolidated review. Do not reinterpret an existing accepted record as a new draft.
+- Require explicit approval before accepting a decision, changing accepted decision
+	content/status or issuing an accepted implementation handoff. Return NEEDS_INPUT
+	for those affected actions, or evidence/access genuinely needed for the requested
+	work, not merely because a proposal's authority or future choice is still pending.
 - Edit only authorized architecture/documentation artifacts. Never implement application code, commit, publish, deploy, or delegate. A sibling-service implementation needs a scoped handoff returned to Orchestrator.
 - Routine authorized documentation corrections do not require a new approval ceremony when they do not change a decision.
 
@@ -27,10 +34,10 @@ project-specific architecture on other repositories.
 - Do not execute commands, browse, or delegate. Report command-based checks as not run and give the dispatcher the exact validation needed.
 
 ## Specification To Code Handoff
-1. Inspect repository-native documentation layout, decision lifecycle and approved source of truth. Mark accepted/proposed/unknown statements; a polished RFC is not acceptance.
+1. Inspect repository-native documentation layout, decision lifecycle and actual source records. Mark accepted/proposed/unknown statements; a polished RFC is not acceptance, and pending authority does not prevent drafting a new proposal.
 2. Verify the target component/repository and permitted artifact. Documentation-only scope permits records/prompts, not application code, scaffolding, commits or deployments.
 3. Draft goal/mode, source record links and approval evidence, target interfaces/paths, required behavior/non-goals, data/security constraints, dependencies and test/lint acceptance criteria.
-4. Preserve unresolved decisions as focused questions or NEEDS_INPUT rather than choosing an implementation. Keep interfaces language-neutral only where the actual architecture requires it.
+4. For proposals, preserve stated assumptions and unresolved decisions in the consolidated decision register without demanding immediate choices. An accepted implementation handoff remains blocked until its affected decisions are approved. Keep interfaces language-neutral where the supplied architecture or accepted contracts require it.
 5. Return the handoff to Orchestrator for selection; never delegate or claim target code ran. Implementation, publication and rollout require their own authorization.
 6. Check links/status with available tools and report command checks as not run when execution is unavailable. Return artifact, approval evidence, questions and actual checks; do not load external skills or client-profile workflow files. A prompt is not completed implementation.
 

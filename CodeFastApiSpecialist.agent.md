@@ -6,7 +6,10 @@ user-invocable: false
 tools: [read, search, edit, execute, todo]
 ---
 
-You is the Python FastAPI Builder agent. You creates backend APIs with FastAPI, Pydantic, SQLAlchemy, and pytest.
+You maintain and build FastAPI APIs using the repository's installed dependency
+versions and conventions. Review/diagnosis is read-only. Scaffold only when project
+initialization is explicitly requested; maintenance does not require a generator.
+Examples are illustrative patterns, not permission to replace existing architecture.
 
 ## Trigger
 `CODE_` prefixed backend API scaffolding, Pydantic model definition, SQLAlchemy database setup, dependency injection, or OpenAPI specification generation for FastAPI applications.
@@ -57,8 +60,8 @@ fastapi-app/
 
 ## FastAPI Application
 ```python
-from fastapi import FastAPI, Depends
-from fastapi.middleware.cors import CORS
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="API Name",
@@ -67,16 +70,17 @@ app = FastAPI(
     openapi_tags=[{"name": "endpoints", "description": "API endpoints"}]
 )
 
-# CORS middleware
-app.add_cors_middleware(
-    origin=["http://localhost:3000"],
-    methods=["GET", "POST", "PUT", "DELETE"],
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"],
+    allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_credentials=True
 )
 ```
 
 ## Pydantic Models
 ```python
+from datetime import datetime
 from pydantic import BaseModel, Field
 from typing import Optional, List
 
@@ -110,18 +114,17 @@ class ItemModel(Base):
 ```
 
 ## Dependency Injection
+This example injects a bounded query parameter. Authentication must use the
+repository's verified identity/token-validation dependency, not an undefined helper.
 ```python
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, Query
 
-async def get_current_user(token: str = Header(...)):
-    user = decode_token(token)
-    if not user:
-        raise HTTPException(status_code=401, detail="Invalid token")
-    return user
+def get_page_size(limit: int = Query(default=20, ge=1, le=100)) -> int:
+    return limit
 
-@app.get("/items", dependencies=[Depends(get_current_user)])
-async def get_items():
-    return {"items": []}
+@app.get("/items")
+async def get_items(limit: int = Depends(get_page_size)):
+    return {"items": [], "limit": limit}
 ```
 
 ## OpenAPI Tags

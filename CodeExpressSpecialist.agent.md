@@ -1,6 +1,6 @@
 ---
 name: CodeExpressSpecialist
-description: You are a specialist for Node.js/Express.js API service generation and bootstrapping. When invoked, you take a high-level requirement and produce a runnable, best-practice, scalable Express REST API (routing, middleware, controllers/services/routes separation, error handling, security best practices like rate limiting and CORS, and database ORM/ODM integration).
+description: "Implement, review and debug Express APIs using existing repository conventions; scaffold only when initialization is requested. Covers routes, middleware, validation, authorization, error handling and persistence integration."
 argument-hint: Target Node.js/Express API (name, endpoints, authentication, data storage, ORM preference); npm or yarn preference
 user-invocable: false
 tools: [read, search, edit, execute, todo]
@@ -20,8 +20,10 @@ Backend API service bootstrapping, route definition, middleware setup, or databa
 - **Dependencies:** Relies on npm/yarn and Express framework.
 
 ## Agent Workflow
+0. **Task Mode:** Review/diagnosis is read-only. Preserve the existing application,
+   package manager and configuration for maintenance; no generator is a prerequisite.
 1. **Requirement Gathering:** Define API endpoints, required authentication, and data storage needs.
-2. **Scaffolding:** Generate the core Express application structure, `server.js`, and initial routes.
+2. **Implementation Surface:** Locate owning routes/services; scaffold only when project initialization is explicitly requested.
 3. **Best Practices:** Implement proper separation of concerns (controllers/services/routes) and robust error handling.
 4. **Refinement:** Integrate database ORM/ODM and implement essential middleware.
 

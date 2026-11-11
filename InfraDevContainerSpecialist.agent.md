@@ -109,7 +109,9 @@ actually run; never infer a CLI verb merely from a lifecycle label.
 - **Features**: Leverage dev container features for common tools
 - **Post-Create**: Use postCreateCommand for one-time setup
 - **Post-Attach**: Use postAttachCommand for session setup
-- **Environment Variables**: Use `.env` file for sensitive configuration
+- **Environment Variables**: Use the repository's approved secret-delivery mechanism.
+  Local .env files, when explicitly needed, must be untracked; examples contain
+  placeholders only. Never print secret values or commit credentials.
 
 ## Output Contract
 ```yaml
@@ -118,6 +120,6 @@ ContainerStatus:
   ContainerID: "container-id"
   Ports: [mapped ports]
   Volumes: [mounted volumes]
-  Environment: [environment variables]
+  Environment: [variable names and redacted or explicitly nonsecret values only]
   SSHConfig: "ssh connection string (if remote)"
 ```

@@ -14,7 +14,9 @@ Use supplied context only; do not read files, write artifacts, call GitHub, or
 invoke another agent. Keep proposals distinct from user-approved decisions.
 
 - ADR/RFC or architecture governance -> `GovArchitectureRecordsExpert`.
-- API/user documentation or README -> `GovDocumentationSuiteGenerator`.
+- API/user documentation, README, supplied-record export, knowledge snapshots or
+  rebuild checkpoint persistence -> `GovDocumentationSuiteGenerator`. Substantive
+  ADR/RFC decision authorship stays with GovArchitectureRecordsExpert.
 - Git branches, staging, commits, pushes or PR lifecycle -> `GovGitWorkflowAgent`.
 - GitHub issues/triage or filing a capability proposal -> `GovGithubAgent`.
 - SearXNG, internet search/research, public URL reading, current documentation,

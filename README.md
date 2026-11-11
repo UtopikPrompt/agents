@@ -23,7 +23,7 @@ requires it.
 Execution and ownership are separate. **Orchestrator is the only dispatcher**
 and directly invokes the selected worker. Its embedded routing and ownership tables contain
 names, ownership, and selection cues, not every specialist's full instructions.
-The six former domain routers are now tool-free **advisors**. Clear tasks skip
+The roster has seven tool-free **advisors**, including the business knowledge domain. Clear tasks skip
 them; ambiguous tasks consult at most one advisor, which returns a decision to
 the dispatcher rather than invoking a worker.
 
@@ -95,6 +95,7 @@ flowchart LR
     O --> CodeDomainAdvisor["CodeDomainAdvisor<br/>(Coding domain)"]
     O --> InfraDevOpsAdvisor["InfraDevOpsAdvisor<br/>(Infrastructure domain)"]
     O --> DocsGovernanceAdvisor["DocsGovernanceAdvisor<br/>(Documentation and governance)"]
+    O --> BusinessKnowledgeAdvisor["BusinessKnowledgeAdvisor<br/>(Business knowledge)"]
     O --> UtilityAdvisor["UtilityAdvisor<br/>(Utility domain)"]
     CodeDomainAdvisor --> CodeFrontendAdvisor["CodeFrontendAdvisor<br/>(Frontend group)"]
     CodeDomainAdvisor --> CodeBackendAdvisor["CodeBackendAdvisor<br/>(Backend group)"]
@@ -112,7 +113,11 @@ flowchart LR
     CodeBackendAdvisor --> CodeExpressSpecialist["CodeExpressSpecialist"]
     CodeBackendAdvisor --> CodeGraphQLTRPCAgent["CodeGraphQLTRPCAgent"]
     CodeBackendAdvisor --> CodeDatabaseORMGenerator["CodeDatabaseORMGenerator"]
-    CodeDomainAdvisor --> CodeRebuildEngineer["CodeRebuildEngineer"]
+    CodeDomainAdvisor --> CodeRebuildEngineer["CodeRebuildEngineer<br/>(roadmap, migration and integration)"]
+    CodeDomainAdvisor --> CodeProductModernizationExpert["CodeProductModernizationExpert"]
+    CodeDomainAdvisor --> CodeArchitectureExpert["CodeArchitectureExpert"]
+    CodeDomainAdvisor --> CodeContextSchemaAuditor["CodeContextSchemaAuditor"]
+    CodeDomainAdvisor --> CodeQualityGuardrailReviewer["CodeQualityGuardrailReviewer"]
     CodeBackendAdvisor --> CodeFastApiSpecialist["CodeFastApiSpecialist"]
 
     InfraDevOpsAdvisor --> InfraMonorepoManager["InfraMonorepoManager"]
@@ -135,6 +140,8 @@ flowchart LR
     DocsGovernanceAdvisor --> GovGitWorkflowAgent["GovGitWorkflowAgent"]
     DocsGovernanceAdvisor --> GovWebResearchAgent["GovWebResearchAgent"]
 
+    BusinessKnowledgeAdvisor --> BusinessKnowledgeExpert["BusinessKnowledgeExpert<br/>(requirements, rules and evidence)"]
+
     UtilityAdvisor --> AgentOptimizer["AgentOptimizer"]
     UtilityAdvisor --> Brainstorm["Brainstorm"]
     UtilityAdvisor --> ContextSummarizer["ContextSummarizer"]
@@ -146,11 +153,12 @@ flowchart LR
     classDef frameworkWorker fill:#f2d49b,stroke:#516399,color:#000;
     
     class O hub;
-    class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,UtilityAdvisor domainAdvisor;
+    class CodeDomainAdvisor,InfraDevOpsAdvisor,DocsGovernanceAdvisor,BusinessKnowledgeAdvisor,UtilityAdvisor domainAdvisor;
     class CodeFrontendAdvisor,CodeBackendAdvisor subdomainAdvisor;
     class CodeNextJsSpecialist,CodeReactViteSpecialist,CodeGraphQLTRPCAgent,CodeFastApiSpecialist,CodeExpressSpecialist,CodeSpringBootSpecialist,CodeDatabaseORMGenerator,CodeDesignSystemSpecialist,CodeRebuildEngineer frameworkWorker;
     class CodeMockupWireframeSpecialist worker;
     class CodeComfyUICustomNodeSpecialist frameworkWorker;
+    class BusinessKnowledgeExpert,CodeProductModernizationExpert,CodeArchitectureExpert,CodeContextSchemaAuditor,CodeQualityGuardrailReviewer worker;
     class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraLLMInferenceSpecialist,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent,GovWebResearchAgent worker;
 ```
 
@@ -163,6 +171,8 @@ flowchart LR
 | **Orchestrator** | dispatcher | yes | Direct specialist dispatch, concurrent independent fan-out, scoped payloads, concise synthesis |
 | **CodeBackendAdvisor** | advisor | no | Optional backend specialist selection; never executes |
 | **DocsGovernanceAdvisor** | advisor | no | Optional docs/governance specialist selection; never executes |
+| **BusinessKnowledgeAdvisor** | advisor | no | Optional dedicated business-knowledge selection; requirements, rules, processes and evidence analysis |
+| **BusinessKnowledgeExpert** | worker | no | Professional business-needs/requirements and logic catalogues, enterprise knowledge maps, traceability/impact and quality audits |
 | **InfraDevOpsAdvisor** | advisor | no | Optional infrastructure/DevOps specialist selection; never executes |
 | **UtilityAdvisor** | advisor | no | Optional utility specialist selection; never executes |
 | **AgentOptimizer** | worker | yes | Diagnostics & optimization of a VS Code agent's definition, tools, and instructions |
@@ -176,27 +186,31 @@ flowchart LR
 | **InfraDevContainerSpecialist** | worker | no | `.devcontainer/` scaffolding, Dockerfiles, remote SSH, container lifecycle |
 | **InfraMCPServerGenerator** | worker | no | Model Context Protocol servers, JSON-RPC, editor integration |
 | **CodeReactViteSpecialist** | worker | no | React/Vite application screens, responsive CSS, interactions, component architecture, and Vitest |
-| **CodeFastApiSpecialist** | worker | no | Backend API scaffolding: FastAPI, Pydantic, SQLAlchemy |
-| **CodeRebuildEngineer** | worker | no | Phase-gated business discovery and portable rebuild specifications; capability/code decisions, architecture, checkpoints and planning |
+| **CodeFastApiSpecialist** | worker | no | FastAPI maintenance/review and requested initialization; Pydantic, SQLAlchemy and endpoint tests |
+| **CodeRebuildEngineer** | worker | no | Transformation roadmap, migration/rollback, readiness and portable package integration using specialist findings |
+| **CodeProductModernizationExpert** | worker | no | Feature/opportunity assessment, proposed product scope, detailed to-be requirements and acceptance scenarios |
+| **CodeArchitectureExpert** | worker | no | Technical architecture/options, technology recommendations and component/data/interface/trust contracts |
+| **CodeContextSchemaAuditor** | worker | no | Read-only database/API/configuration/environment boundary audit with evidence-linked constraints and gaps |
+| **CodeQualityGuardrailReviewer** | worker | no | Independent read-only review of specifications, designs and code changes against requirements and repository evidence |
 | **InfraMonorepoManager** | worker | no | Multi-package workspace coordination & version synchronization |
-| **InfraTestInfrastructureGenerator** | worker | no | Test suites across frameworks + CI/CD pipeline configuration |
-| **GovDocumentationSuiteGenerator** | worker | no | ADRs, API docs, READMEs, user documentation and versioned rebuild phase records |
+| **InfraTestInfrastructureGenerator** | worker | no | Test suites, fixtures, mocks, coverage, CI gates and explicitly authorized scoped test runs |
+| **GovDocumentationSuiteGenerator** | worker | no | Documentation, business catalogues, portable knowledge snapshots and indexed rebuild reports/roadmaps |
 | **InfraPerformanceProfiler** | worker | no | Python/Node CPU/memory profiling with verified OS/runtime/profiler APIs |
 | **InfraLLMInferenceSpecialist** | worker | no | Ollama/llama.cpp/GGUF serving, VRAM/KV-cache/context estimates and controlled engine evaluation |
 | **InfraReleaseManager** | worker | no | Release preparation and authorized publication; Git mutations go to GovGitWorkflowAgent through Orchestrator |
 | **GovGithubAgent** | worker | no | Issue triage, GitHub Projects, agent capability proposal filing |
-| **GovGitWorkflowAgent** | worker | yes | Local branches, scoped staging/commits, pushes, PR creation/updates/reviews/merges and authorized cleanup |
+| **GovGitWorkflowAgent** | worker | yes | Scoped Git branches/commits/tags/pushes, PR lifecycle and separately authorized cleanup |
 | **GovWebResearchAgent** | worker | yes | Read-only SearXNG research, page verification, current documentation and cited findings |
 | **InfraCIDiagnostics** | worker | no | Root-cause diagnosis of failing CI/Actions jobs & PR errors, then suggests fixes |
 | **CodeNextJsSpecialist** | worker | no | Next.js applications: architecture, responsive UI, styling, interactions, Server Components, ISR |
-| **CodeSpringBootSpecialist** | worker | no | Java/Spring Boot backend scaffolding |
+| **CodeSpringBootSpecialist** | worker | no | Spring Boot maintenance/review and requested initialization using existing Java conventions |
 | **CodeDesignSystemSpecialist** | worker | no | Shared UI component libraries & design systems: React/Vue/Angular, semantic tokens, accessible states |
 | **CodeMockupWireframeSpecialist** | worker | no | Direct, numbered Unicode box-drawing mockups with one aligned `text` block per node, concise behavior notes, and no process narration |
 | **CodeDatabaseORMGenerator** | worker | no | Database schema & ORM setup: SQL/ORM scaffolding, migrations, indexes, constraints; SQLAlchemy/Prisma/Hibernate/Eloquent |
 | **CodeFrontendAdvisor** | advisor | no | Optional frontend specialist selection; never executes |
 | **CodeGraphQLTRPCAgent** | worker | no | GraphQL API & tRPC scaffolding: schema, resolvers, codegen (Apollo, Hasura, tRPC) |
-| **CodeExpressSpecialist** | worker | no | Node.js/Express REST API generation & bootstrapping |
-| **InfraCloudDeploymentAgent** | worker | no | Cross-cloud deployment & provisioning: cloud-init, pipelines, container orchestration (Azure DevOps, GitHub Actions) |
+| **CodeExpressSpecialist** | worker | no | Express API maintenance/review and requested initialization; routes, middleware and persistence |
+| **InfraCloudDeploymentAgent** | worker | no | Cross-cloud rollout stages and pipeline integration using approved infrastructure/workload artifacts |
 | **InfraIaCGenerator** | worker | no | Provider-native Bicep/ARM, Terraform or Pulumi; state and apply authorization boundaries |
 | **InfraKubernetesEngineer** | worker | no | Kubernetes cluster engineering: Helm/Kustomize manifests, networking, RBAC |
 | **InfraSecurityAuthAgent** | worker | no | Provider-neutral identity, RBAC/secrets, GitHub App/OIDC and application/cloud trust isolation |
@@ -221,26 +235,15 @@ The examples are starting points, not evidence that tools or services are availa
 
 **CodeRebuildEngineer: reverse-engineer a project for a rebuild**
 
-> Analyze [repository path] and [documentation path] to recover the business
-> problem, stakeholders, business needs, workflows and domain rules. Produce an
-> evidence-linked future-state specification with requirement IDs and acceptance
-> criteria. Propose preserve/redesign/replace/retire decisions for capabilities,
-> separately from code reuse. Compare enterprise architecture options and recommend
-> a proportionate design with trade-offs. Include migration, cutover, open decisions
-> and per-slice planning readiness. Deliver a portable package usable in an empty
-> repository: manifest, subsystem coverage, embedded rules and contracts, acceptance
-> scenarios with expected results, evidence summaries, ordered work packages and a
-> downstream kickoff prompt. Audit it without following historical source links;
-> mark exact gaps as PARTIAL. Separate facts, inference and proposals. Do not implement.
+> Assess [repository path] for a modern rebuild.
+> Save the results under [documentation directory].
+
+The agent owns the full analysis/proposal workflow and approval boundaries. Supply
+separate documentation paths or constraints only when they are specific to your task.
 
 **Use the exported package in a fresh repository**
 
-> Read [package entry point] as the declared target specification, not as a request
-> to rediscover the legacy codebase. Plan the rebuild from its explicit requirements,
-> contracts and acceptance scenarios. Preserve proposal and approval status. Start
-> with [requirement IDs or first slice]; identify the exact decisions needed before
-> implementation. Historical source is intentionally absent: request it only for
-> specific unresolved parity questions, not as a blanket prerequisite. Do not implement.
+> Plan the rebuild from [package entry point] for [capability or scope].
 
 **CodeGeneralist: implement a scoped change in the existing stack**
 
@@ -485,18 +488,138 @@ The examples are starting points, not evidence that tools or services are availa
 > blockers and next action. Preserve uncertainty and authorization limits. Do not
 > claim to reset history or trigger runtime compaction.
 
+## Business Knowledge Domain
+
+BusinessKnowledgeAdvisor is a separate domain advisor owned by Orchestrator.
+BusinessKnowledgeExpert is its dedicated read-only worker; the advisor remains
+tool-free and never invokes it. Clear business tasks go directly from Orchestrator
+to the expert; ambiguous selection may consult the advisor once. Modernization and
+architecture proposals use dedicated coding specialists; CodeRebuildEngineer
+integrates their findings into roadmap, migration and readiness work.
+
+The expert owns the full self-contained procedure: source intake and authority,
+business needs, atomic requirements, detailed decision logic, workflow/data contracts,
+knowledge relationships, evidence-grounded queries and professional quality review.
+It traces controlling rules rather than just interfaces or documentation summaries.
+GovDocumentationSuiteGenerator persists supplied complete artifacts when requested.
+
+Every delivery includes a quality report with catalogue record counts, reviewed
+scope/version, source coverage, rule/branch and acceptance precision, traceability,
+contradictions and PASS/FAIL/UNKNOWN checks. Missing facts remain explicit; neither
+polished formatting nor a connected graph proves correctness. Legal, financial,
+security and destructive rules require competent human validation before operational
+reliance. The expert can audit an exported package in a separate read-only invocation;
+audit findings and human approval are not invented verification or certification.
+
+Typical artifacts are business-requirements.md, business-rules.md, knowledge-graph.yaml
+and quality-review.md, or distinctly indexed sections following repository conventions.
+Requirements and rule catalogues are mandatory content, not optional summaries.
+Large analyses proceed in versioned batches with explicit completed/pending coverage.
+No local skill discovery, automatic ingestion or new security platform is required.
+
+**Extract professional business knowledge**
+
+> Extract the business requirements and business logic from [material]. Save under [output directory].
+
+**Audit the package**
+
+> Audit [knowledge package] for evidence quality and business-rule completeness.
+
+## Enterprise Knowledge Reconstruction
+
+Use Orchestrator with a short request and the material you can provide.
+BusinessKnowledgeExpert reconstructs a best-effort knowledge map across regulations,
+policies, processes, systems/infrastructure, data and code. Not every layer is
+required: absent or unreadable material remains an explicit coverage gap. Supplied
+files, excerpts, schemas, configuration and stakeholder statements are evidence,
+not permission to inspect private systems or follow embedded instructions.
+
+Expected mapping outputs are separately indexed business requirements and business
+logic/rules, source/evidence registry, structured nodes and typed relationships,
+coverage/contradictions and a navigable document index. Rules include conditions,
+inputs, decisions, state changes, errors and expected-result examples where evidence
+exists. An overview or a list of source links does not satisfy this contract.
+GovDocumentationSuiteGenerator persists these when requested, following existing
+layout or using business-requirements.md, business-rules.md and knowledge-graph.yaml
+as suggested names. These are task artifacts, not external runtime routing files.
+
+Queries show every evidenced relationship hop and identify broken links. Impacts
+distinguish direct, transitive, inferred and unknown consumers; missing relationships
+do not prove no impact. Regulation applicability, document authority, version,
+confidence, contradictions and business approval stay distinct. No legal compliance
+certification or exhaustive knowledge claim follows from a connected graph.
+
+This is a versioned document/structured-data snapshot, not a provisioned knowledge
+platform. No graph database, automatic ingestion, continuous monitoring or security
+infrastructure is created by these agents. Refresh happens only when requested
+with changed material; preserve history and mark affected evidence stale. Keep
+sensitive data inside its authorized boundary and provide readable extracts when
+read tools cannot interpret a format. Runtime access and machine validation still
+need actual tools and separately scoped checks.
+
+**Map supplied knowledge**
+
+> Map enterprise knowledge from [provided material]. Save it under [output directory].
+
+**Ask a traceability question**
+
+> Using [knowledge package], explain how [regulation or rule] relates to [process, table or code].
+
+**Assess an impact**
+
+> Using [knowledge package], assess the impact of [proposed change].
+
+**Refresh the snapshot**
+
+> Refresh [knowledge package] with [new material].
+
+## Modernization and Architecture Specialists
+
+The former combined rebuild role is separated by deliverable, not by adding another
+dispatcher. CodeProductModernizationExpert owns feature assessment and target product
+requirements; CodeArchitectureExpert owns technical design and contracts;
+CodeRebuildEngineer retains roadmap, migration/readiness and package integration.
+All three are read/search-only, inherit the selected model and never delegate.
+BusinessKnowledgeExpert's extraction procedure is unchanged. Orchestrator alone
+sequences their versioned outputs and commissions export/independent review.
+
+**Challenge the product**
+
+> Assess modernization opportunities for [product/package] and propose its to-be requirements.
+
+**Recommend technical architecture**
+
+> Recommend an architecture for [requirements/package], with options and technical contracts.
+
+No worker loads another worker's definition to do its own job. Procedures remain
+embedded for Remote SSH, while Orchestrator keeps only routing and handoff gates.
+Recommendations remain proposed until consolidated decisions and explicit build
+authorization. A missing input produces an owner-specific request, not silent role takeover.
+
+**Audit technical context before design**
+
+> Audit [repository path] schemas, APIs, configuration, and environment constraints before [design/generation task].
+
+**Review a proposed change independently**
+
+> Review [artifact or change/version] against [requirements and acceptance criteria]. Do not edit or execute it.
+
 ## Repository Rebuild Specifications
 
-Ask Orchestrator to analyze the supplied repository and documentation with
-CodeRebuildEngineer. Supply known business goals, stakeholders, supported consumers
-and constraints when available. The worker reconstructs current behavior without
-treating it as an approved future requirement or the current stack as mandatory.
+Ask Orchestrator for a rebuild assessment. It sequences business findings, product
+modernization, architecture and target specification before rebuild planning,
+reusing sufficient versioned artifacts rather than repeating completed work. Supply
+known goals, consumers and constraints; the current stack is not automatically mandatory.
 
-The specification includes a business brief; current-state workflows, rules and
+BusinessKnowledgeExpert owns as-is business catalogues. Product and architecture
+workers preserve their lineage when proposing changes; CodeRebuildEngineer integrates
+the versioned results without overwriting as-is facts or authoring missing specialist work.
+
+The report package includes a business brief; current-state workflows, rules and
 evidence; future-state requirements with stable IDs, priorities and acceptance
 criteria; a capability disposition matrix; target data and interface contracts;
-architecture options; migration and cutover considerations; and a decision log with
-phased planning input and a ready, conditional, or blocked planning-readiness verdict.
+architecture options; migration and cutover considerations; and a decision report
+with a numbered rebuild roadmap and a ready, conditional, or blocked readiness verdict.
 Traceability links needs, requirements, evidence, acceptance criteria and components.
 Observed behavior, inferred intent, stakeholder-confirmed needs and future proposals
 remain distinct. Missing evidence and approval are visible, not invented.
@@ -520,7 +643,7 @@ expected results, evidence summaries, ordered work packages and a kickoff prompt
 The worker reviews completeness using only the package and reports PARTIAL with
 exact gaps if it cannot complete it; an executive proposal alone is not sufficient.
 
-Source discovery and downstream planning are different phases. In a fresh repository,
+Source discovery and downstream planning are distinct workstreams. In a fresh repository,
 historical paths are provenance, not mandatory local files. Their absence prevents
 independent verification of legacy claims, but does not prevent planning against
 explicit target requirements. Unknown behavior and approval still need resolution
@@ -532,74 +655,29 @@ not implement the project or grant permission to scaffold it.
 The procedure is embedded for Remote SSH; static checks do not prove live routing
 or specification quality on a real repository.
 
-### Phased Rebuild Workflow
+### Rebuild Report Workflow
 
-Run the workflow per bounded capability. A report containing every section is not
-evidence that every phase is complete. Start with a product-wide inventory, then
-deepen a representative slice before attempting a full-product specification.
+Discovery, modernization, architecture and decision-making are **unnumbered report workstreams**, not numbered phases. CodeRebuildEngineer numbers only the proposed rebuild implementation roadmap. Bounded capability slices deepen evidence, but the report index must show product-wide coverage and gaps.
 
-| Phase | Responsible Role | Exit Gate |
+| Report | Responsible Role | Expected Content |
 |---|---|---|
-| 1. Inventory | CodeRebuildEngineer | Capability/dependency/consumer map with explicit evidence depth and coverage gaps |
-| 2. Recover business knowledge | CodeRebuildEngineer | Workflows, rules, exceptions, ownership and confidence traced to docs, implementation and available test evidence |
-| 3. Decide scope | User decides; CodeRebuildEngineer prepares options | Recorded dispositions, priorities, exclusions, compatibility and applicable migration decisions |
-| 4. Specify target behavior | CodeRebuildEngineer | Atomic requirements, data/interface contracts, measurable quality criteria and expected-result acceptance scenarios |
-| 5. Recommend architecture | CodeRebuildEngineer; user decides | Proportionate component/interface/data-flow design with explicit decision status |
-| 6. Review portable package | CodeGeneralist, separate read-only invocation by Orchestrator | Package-only review finds no required behavior left for the implementer to invent |
-| 7. Plan rebuild | CodeRebuildEngineer | Requirement-linked work packages, dependencies, test/lint gates and observable completion criteria |
-| 8. Build incrementally | Existing implementation specialist selected by Orchestrator | Explicitly authorized slice implemented and relevant tests/configured lint reported |
-| 9. Verify and transition | Separately scoped testing/operations workers; user authorizes cutover | Business acceptance evidence and applicable migration/reconciliation/rollback checks |
+| Discovery and as-is evidence | BusinessKnowledgeExpert | Inventory, business needs/rules, detailed current workflows, source evidence and coverage gaps |
+| Modernization assessment | CodeProductModernizationExpert | Keep/improve/replace/remove/add recommendations and detailed proposed product requirements |
+| Target architecture | CodeArchitectureExpert | Recommended architecture/options, component and data flows, technical contracts and trade-offs |
+| Consolidated decision report | CodeRebuildEngineer, with user review | Integrated proposals, alternatives, dependencies, open decisions and readiness |
+| Rebuild roadmap | CodeRebuildEngineer | Numbered implementation stages with scope, dependencies, acceptance gates, migration and rollback |
 
-CodeRebuildEngineer owns analysis and planning, never execution of Phases 8 or 9.
-Orchestrator checks artifacts against gates and coordinates existing workers; it
-does not gain implementation permissions. GovDocumentationSuiteGenerator persists
-complete artifacts and checkpoint history only when requested. No new agents or
-tool grants are required. These instructions guide behavior, not a workflow engine
-that technically enforces approvals.
+Orchestrator sequences these owners, checks report links/status, commissions independent package review, and hands complete content to GovDocumentationSuiteGenerator when persistence is requested. Pending user approval does not prevent report preparation; it does block accepted scope and implementation. Missing evidence is PARTIAL/UNKNOWN, never invented. Report completeness, evidence coverage, recommendation confidence and approval are distinct.
 
-Each slice returns a checkpoint containing capability ID, phase, artifact version,
-input/output references, entry/exit checks, evidence coverage, specification
-completeness, approval status, decision records, blockers and next action/phase.
-Checks have PASS/FAIL/UNKNOWN results with evidence; phase outcomes are COMPLETE,
-PARTIAL or NEEDS_INPUT. Missing evidence is not PASS. A recommended decision is not
-an approved one, and an approved vague requirement is still incomplete. Changed
-inputs invalidate affected downstream checks and independent reviews.
+The report package lives in `docs/rebuild/`. Its `README.md` is the index and resume point: read it first for package status, report links/versions, open decisions, last completed rebuild-roadmap stage, and exact next action. Reports use descriptive names; only implementation-roadmap stages are numbered. On resume, reconcile report versions and mark affected evidence/reviews stale. Do not rely on conversational memory or imply a report was saved without verifying its path.
 
-Independent review receives only the exported package, selected slice and review
-criteria. It must name missing rules, ambiguous contracts, absent expected outcomes
-and affected requirements without looking up legacy source or inventing answers.
-Its verdict is not business approval or proof that acceptance tests ran. Keep the
-existing bounded correction/retry policy; report unresolved gaps instead of looping.
+**Create or resume the assessment**
 
-Provisional design/planning may proceed when requested, but cannot close open
-approval gates or authorize implementation. Block only affected slices. In the
-original repository, prepare the evidence and portable package (Phases 1-6); plan
-and build in the fresh repository (Phases 7-9) without restarting source discovery
-unless a specific missing rule or parity contradiction requires it.
+> Assess this project for a modern rebuild. Save or resume the report package under docs/rebuild/.
 
-**Start a phased analysis**
+**Review report sufficiency**
 
-> Analyze [repository and documentation paths] using the phased rebuild workflow.
-> Begin with Phase 1 inventory, report coverage depth and propose a representative
-> capability for Phase 2. Return phase artifacts, explicit exit checks and a
-> checkpoint. Stop before approving future scope or implementing anything. Persist
-> the artifacts and checkpoint under [documentation directory] using the
-> documentation worker; preserve all proposal and approval states.
-
-**Resume a capability**
-
-> Resume [capability ID] from [checkpoint and artifact paths/version]. Reconcile
-> changes and invalidate stale checks. Complete the next authorized analysis phase
-> only; report exact missing evidence or bounded approval choices. Do not treat
-> earlier summaries or approval of analysis as completed specification gates.
-
-**Independently review an exported slice**
-
-> Review [package entry point/version] for [capability and requirement IDs] in a
-> separate read-only CodeGeneralist invocation. Use only the exported package.
-> Identify where implementation would require guessing rules, fields, state changes,
-> failure behavior or expected outcomes. Return evidence-linked PASS/FAIL/UNKNOWN
-> checks and affected IDs. Do not use legacy source, invent behavior, edit or execute.
+> Independently review [docs/rebuild/README.md] and its indexed reports for rebuild readiness.
 
 ## ComfyUI Custom Nodes
 
@@ -672,6 +750,41 @@ live agent discovery or ComfyUI execution.
     then sends only relevant cited findings to the implementation worker.
     Workers return research needs to Orchestrator rather than delegating.
 
+## Routing Boundaries
+
+Select by requested mode and primary artifact, not framework keywords alone.
+Diagnosis-only tracebacks go to CodeFrameworkDiagnostician; authorized repairs go
+to the known framework specialist, which includes local diagnosis. Maintenance and
+review never require project generation; scaffold only for requested initialization.
+Examples in worker definitions must be checked against the target's installed APIs,
+not treated as permission to install dependencies or replace architecture.
+
+IaC/state artifacts belong to InfraIaCGenerator; Kubernetes resources/runtime belong
+to InfraKubernetesEngineer; rollout/deployment stages belong to InfraCloudDeploymentAgent.
+Trust/permission design stays with InfraSecurityAuthAgent. Composite tasks use the
+primary owner and sequenced Orchestrator handoffs, not worker-to-worker delegation.
+
+Cross-language build contracts belong to MultiLanguageBuilder, workspace package
+graph/version coordination to InfraMonorepoManager, and container/host configuration
+to InfraDevContainerSpecialist. Build order follows the actual dependency graph.
+Tests/fixtures/CI test gates belong to InfraTestInfrastructureGenerator; failing-job
+diagnosis to InfraCIDiagnostics; deployment-pipeline stages to the deployment worker.
+Profiling reports the actual supported installed tool and measured workload, not
+assumed cross-language profiler compatibility or invented metrics.
+
+Documentation export preserves supplied records, business IDs and approval states;
+substantive ADR/RFC authorship stays with GovArchitectureRecordsExpert. Requested
+architecture records are integrated before independent package review, not mandated
+for every assessment. Export manifests enumerate business catalogues, snapshots,
+checkpoints, quality reports and incomplete/unverified artifacts, not just prose docs.
+
+Output contracts report actual providers/tools. Environment reports include variable
+names and redacted or explicitly nonsecret values only. CI diagnosis reports failing
+step, evidence, cause, fix and checks, not capability-filing fields. Brainstorm uses
+meaningful alternatives and evidence-qualified trade-offs rather than mandatory model
+latency or timeline estimates. Optimizer evidence comes from supplied sanitized records
+or an explicitly authorized capable producer; dispatcher access is not assumed.
+
 ## Web Research Workflow
 
 GovWebResearchAgent owns SearXNG search and URL reading; Orchestrator no longer
@@ -741,11 +854,12 @@ only when their write sets are disjoint.
 
 | Domain Prefix | Advisor | Owned Agents |
 |---|---|---|
-| CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist, CodeComfyUICustomNodeSpecialist, CodeRebuildEngineer |
+| CODE_ | CodeDomainAdvisor | CodeFrontendAdvisor, CodeBackendAdvisor, MultiLanguageBuilder, CodeFrameworkDiagnostician, CodeGeneralist, CodeComfyUICustomNodeSpecialist, CodeRebuildEngineer, CodeProductModernizationExpert, CodeArchitectureExpert, CodeContextSchemaAuditor, CodeQualityGuardrailReviewer |
 | CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
 | CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist, CodeMockupWireframeSpecialist |
 | INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraLLMInferenceSpecialist, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
 | GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GovGitWorkflowAgent, GovWebResearchAgent |
+| BUSINESS_ | BusinessKnowledgeAdvisor | BusinessKnowledgeExpert |
 | Miscellaneous | UtilityAdvisor | AgentOptimizer, Brainstorm, ContextSummarizer |
 
 ## Tool Policy
@@ -758,9 +872,9 @@ be worked around through terminal writes.
 | Role | Required Tools | Optional or Restricted Tools |
 |---|---|---|
 | Orchestrator | `read/readFile`, `search`, `agent`, `vscode/askQuestions` | No edit, execution, GitHub, or web access |
-| Six selection advisors | None | Explicit `tools: []` and `agents: []` |
+| Seven selection advisors | None | Explicit `tools: []` and `agents: []` |
 | Implementation workers | `read`, `search`, `edit`, `execute` | `todo` optional; GitHub access only for InfraCIDiagnostics |
-| Brainstorm and CodeFrameworkDiagnostician | `read`, `search` | No editing, execution, browsing, or delegation |
+| Brainstorm, CodeFrameworkDiagnostician, CodeRebuildEngineer, CodeProductModernizationExpert, CodeArchitectureExpert, CodeContextSchemaAuditor, CodeQualityGuardrailReviewer and BusinessKnowledgeExpert | `read`, `search` | Read-only analysis; no editing, execution, browsing, or delegation |
 | ContextSummarizer | `read` | No editing, execution, or runtime compaction |
 | GovWebResearchAgent | `read`, `search`, `io.github.ihor-sokoliuk/mcp-searxng/*` | Read-only web research; no editing, execution, GitHub, or delegation |
 | AgentOptimizer and documentation/governance writers | `read`, `search`, `edit` | `todo` optional for GovDocumentationSuiteGenerator; no terminal access |
@@ -831,8 +945,15 @@ example tools are not assumed installed, Windows-compatible, or executed.
 | Secure development bootstrap | InfraDevContainerSpecialist, MultiLanguageBuilder | Codespaces/dotfiles/SSH setup and host/container boundaries |
 | Container display operations | InfraDevContainerSpecialist, CodeGeneralist | Display access, schedule cases, explicit device-operation approval |
 | Specification to code handoff | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator | Accepted-spec evidence, scoped prompts and documentation-only boundaries |
-| Repository to rebuild specification | CodeRebuildEngineer | Capability-scoped phase gates/checkpoints, portable contracts, evidence, architecture, acceptance scenarios, migration and planning |
-| Rebuild phase coordination and records | Orchestrator, GovDocumentationSuiteGenerator | Gate checks, separate-reader review, authorized handoffs, versioned artifacts/decisions and stale-check invalidation |
+| Repository to rebuild specification | CodeRebuildEngineer | Report integration, numbered implementation roadmap, migration/readiness and consolidated decisions |
+| Product modernization and to-be requirements | CodeProductModernizationExpert | Evidence-linked feature challenges, proposed baseline/alternatives, detailed target workflows and acceptance criteria |
+| Technical architecture proposal | CodeArchitectureExpert | Proportionate options/design, technical contracts, quality/security trade-offs and proposed decisions |
+| Context and schema boundary audit | CodeContextSchemaAuditor | Evidence-linked database/API/configuration/environment contracts, conflicts, compatibility constraints and unknowns |
+| Independent quality guardrail review | CodeQualityGuardrailReviewer | Bounded evidence review of specs/designs/code, actionable findings, test gaps and residual risk; no fixes or execution |
+| Enterprise knowledge reconstruction/query | BusinessKnowledgeExpert | Six-layer coverage, detailed requirement/rule catalogues, source-qualified graph claims, bounded traceability/impact answers and explicit refresh |
+| Professional business knowledge quality | BusinessKnowledgeExpert | Source authority, controlling logic, decision boundaries, worked examples, traceability, completeness report and separate-reader audit |
+| Enterprise knowledge export | Orchestrator, GovDocumentationSuiteGenerator | Authorized portable snapshots/catalogues, source and endpoint consistency, classification boundaries and truthful validation status |
+| Rebuild report coordination and records | Orchestrator, GovDocumentationSuiteGenerator | Report-index/resume handoff, evidence gates without premature preference approvals, separate-reader review, complete versioned proposals and consolidated decisions |
 | Runtime symptom diagnosis | AgentOptimizer | Compare supplied run evidence across configuration, context, model, tools, UI and services; no direct log or terminal access |
 | Go contract validation | CodeGeneralist, MultiLanguageBuilder | Provider-neutral interfaces, cancellation, callers and configured Go checks |
 
@@ -848,11 +969,16 @@ a root cause from a screenshot or symptom description alone.
 
 ## Routing Evaluation
 
-[tests/roster-scenarios.yaml](tests/roster-scenarios.yaml) contains 30 reviewable
-cases: 18 calibration and twelve held-out. Expected workers and behavior cover
+[tests/roster-scenarios.yaml](tests/roster-scenarios.yaml) contains 44 reviewable
+cases: 18 calibration and twenty-six held-out. Expected workers and behavior cover
 six identity layers, inference units/metadata/cache/concurrency, evaluation,
 release/storage/authorization, framework preservation, Git, direct answers and
-portable rebuild planning without historical source files and incomplete phase gates.
+portable rebuild planning without historical source files, incomplete report evidence,
+enterprise knowledge gaps, source-qualified identity and stale-impact evidence.
+New held-out cases cover conflicting API/schema context and unsupported generated
+claims reviewed against supplied requirements.
+The business domain also has a professional audit case for untestable financial
+rules, missing source evidence and unsupported completeness claims.
 Unit tests validate fixture integrity and definition contracts, not live routing.
 
 For an explicitly commissioned live evaluation, run the current Orchestrator as
@@ -865,6 +991,12 @@ static suite. Reload/discover updated agents before a runtime test.
 
 ## Git Workflow
 
+New ADR/RFC proposals may be drafted with authority TBD and choices pending for
+consolidated review. Missing approval does not block drafting; it still blocks
+accepting decisions, changing accepted decision content/status, or treating a
+handoff as an approved implementation contract. Existing accepted records are not
+silently reclassified as drafts.
+
 Architecture records follow the target repository's own paths and RFC/ADR
 lifecycle. Only the user or its documented human authority accepts decisions;
 drafting or implementing a proposal never automatically approves it. Documentation
@@ -875,6 +1007,16 @@ authorization stages. InfraReleaseManager prepares artifacts and performs only
 explicitly authorized publication. It returns commit/tag/push requirements to
 Orchestrator for GovGitWorkflowAgent; no worker delegates. Preparation does not
 authorize publication, and publication does not authorize deployment.
+Monorepo version coordination does not publish or tag; lifecycle commands are checked
+for those side effects before execution. Git tags are bound to an explicitly approved
+name/commit, and tag creation does not authorize remote tag publication.
+
+GovGithubAgent separates read-only triage, unfiled proposals and authorized mutations.
+It verifies the supplied/actual host, owner, repository and owner type instead of
+assuming an organizational origin remote. Issue creation does not authorize a new
+project/board, and inaccessible targets are not silently replaced. API presentation
+preferences do not increase write scope. Reports distinguish proposed content from
+verified changes and remote IDs.
 
 Select **GovGitWorkflowAgent** directly or let Orchestrator route branch, commit, push,
 and PR tasks to it. It is user-level and follows the current repository's branch,
@@ -888,6 +1030,11 @@ and check `gh` if the needed tool is unavailable. The agent checks installation
 and host authentication before declaring a blocker, and checks for an existing
 PR before retrying an ambiguous creation failure. Fallbacks do not expand write
 authorization or permit automatic tool installation or authentication changes.
+Required PR procedures are embedded in GovGitWorkflowAgent. Local skills are optional
+enrichment, not a discovery prerequisite for Remote SSH. Reviews/summaries use the
+actual diff/status/discussion; publishing comments, approvals or thread resolution
+requires the corresponding authorization. Source fixes return to Orchestrator for
+the owning implementation specialist.
 
 Read-only preparation is the default. Explicit requests authorize the named
 operation, not subsequent publication or cleanup. For example, "commit these
@@ -900,15 +1047,17 @@ These are behavioral instructions, not a technical command sandbox.
 ## Model Policy
 
 Most agents inherit the model selected in VS Code; the runtime resolves that
-default when `model` is omitted. Orchestrator and the six routing advisors have
-a user-requested provisional `Claude Haiku 5.5` pin. It has not been benchmarked
-in this Copilot setup and is not a claim that it is optimal. Do not pin a separate
-model for every framework or agent.
+default when `model` is omitted. Orchestrator and the six pre-existing routing
+advisors retain user-requested provisional model overrides. These are not benchmarked
+optimal assignments. BusinessKnowledgeAdvisor and BusinessKnowledgeExpert
+inherit the selected model; no new pin or permission was added for this domain.
+Do not pin a separate model for every framework or agent.
 
 | Role | Baseline | Current assignment |
 |---|---|---|
-| Orchestrator | Inherited model with reliable reasoning and tool use | Claude Haiku 5.5 (provisional; evaluate dispatch and tool use) |
-| Domain advisors | Inherited model | Claude Haiku 5.5 (provisional; evaluate selection and structured responses) |
+| Orchestrator | Inherited model with reliable reasoning and tool use | Existing provisional frontmatter overrides; evaluate dispatch and tool use |
+| Six pre-existing advisors | Inherited model | Existing provisional overrides; evaluate selection and structured responses |
+| Business knowledge advisor and expert | Inherited model | Inherited; evaluate evidence fidelity and analytical completeness before considering overrides |
 | Implementation specialists and CodeGeneralist | Same inherited coding baseline | Keep inherited unless a focused comparison justifies an override |
 | Security, architecture, and complex diagnostics | Inherited model | Keep inherited unless task-specific evidence justifies an override |
 | ContextSummarizer | Inherited model | Keep inherited; evaluate constraint and state preservation before overriding |
@@ -949,8 +1098,8 @@ Evaluation gate:
 
 Model choice does not itself reduce the payload. The embedded index, minimal
 task context, local worker inspection, and concise results remain the context
-controls. Claude Haiku 5.5 is provisionally pinned for Orchestrator and the six
-advisors at the user's request; no candidate-model comparison has been performed.
+controls. Existing provisional overrides remain unchanged; the new business domain
+inherits its model. No candidate-model comparison has been performed for this domain.
 
 ## Existing Edit Protection
 
@@ -977,6 +1126,10 @@ Domain workers use `<Domain><Capability><Role>`:
 | CodeDomainAdvisor, CodeFrontendAdvisor, CodeBackendAdvisor | Code | CodeReactViteSpecialist |
 | InfraDevOpsAdvisor | Infra | InfraReleaseManager |
 | DocsGovernanceAdvisor | Gov | GovGitWorkflowAgent |
+| BusinessKnowledgeAdvisor | Business | BusinessKnowledgeExpert |
+
+The standalone business knowledge domain uses `Business`; `Gov` remains the
+documentation/governance prefix. This is an explicit domain prefix, not a naming exception.
 
 Worker role suffixes are `Agent`, `Specialist`, `Expert`, `Generator`, `Manager`,
 `Builder`, `Diagnostician`, `Diagnostics`, `Generalist`, `Engineer`, or `Profiler`.
@@ -984,7 +1137,7 @@ Prefer `Specialist` for new framework specialists, `Manager` for lifecycle owner
 workflow roles. Describe the capability rather than adding framework/version
 numbers or long implementation inventories to the name.
 
-Selection advisors end in `Advisor`; the current six advisor names and dispatcher
+Selection advisors end in `Advisor`; the current seven advisor names and dispatcher
 name Orchestrator are reserved architectural roles. Existing explicit exceptions
 are MultiLanguageBuilder under CodeDomainAdvisor, and AgentOptimizer, Brainstorm,
 and ContextSummarizer under UtilityAdvisor. New unprefixed names require an
@@ -1033,6 +1186,8 @@ CodePythonFastAPIBuilder                 -> CodeFastApiSpecialist
 CodeNodeJsExpressGenerator               -> CodeExpressSpecialist
 CodeSpringBootGenerator                  -> CodeSpringBootSpecialist
 GitGithubAgent                           -> GovGitWorkflowAgent
+GovBusinessKnowledgeAdvisor              -> BusinessKnowledgeAdvisor
+GovBusinessKnowledgeExpert               -> BusinessKnowledgeExpert
 ```
 
 ## Notes

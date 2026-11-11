@@ -68,6 +68,7 @@ requirements.txt     # Python dependencies (FastAPI context)
 
 ## SQLAlchemy Models
 ```python
+from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Text
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -94,18 +95,21 @@ class Post(Base):
 ```
 
 ## DB Session / Connection
+For SQLAlchemy 2.x async usage, keep driver, engine and session APIs consistent.
+Read DATABASE_URL from the target environment; never embed real connection secrets.
+Use the repository's synchronous pattern instead when that is the supported stack.
 ```python
-from sqlalchemy.orm import sessionmaker
-from sqlalchemy import create_engine
+import os
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-engine = create_engine(
-    "postgresql+asyncpg://user:password@localhost:5432/dbname",
+engine = create_async_engine(
+    os.environ["DATABASE_URL"],
     pool_pre_ping=True,
 )
 
-SessionLocal = sessionmaker(
+SessionLocal = async_sessionmaker(
     bind=engine,
-    class_=Base,
+    class_=AsyncSession,
     expire_on_commit=False,
 )
 ```

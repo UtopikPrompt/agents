@@ -56,7 +56,7 @@ AGENT_GLOB = "*.agent.md"
 REQUIRED_FIELDS = ("name", "description", "tools")
 TIER1_ADVISORS = {
     "CodeDomainAdvisor", "InfraDevOpsAdvisor",
-    "DocsGovernanceAdvisor", "UtilityAdvisor",
+    "DocsGovernanceAdvisor", "BusinessKnowledgeAdvisor", "UtilityAdvisor",
 }
 CODE_SUBADVISORS = {"CodeFrontendAdvisor", "CodeBackendAdvisor"}
 DISPATCHER_TOOLS = {"read/readFile", "search", "agent", "vscode/askQuestions"}
@@ -64,6 +64,11 @@ READ_ONLY_TOOLS = {
     "Brainstorm": {"read", "search"},
     "CodeFrameworkDiagnostician": {"read", "search"},
     "CodeRebuildEngineer": {"read", "search"},
+    "CodeProductModernizationExpert": {"read", "search"},
+    "CodeArchitectureExpert": {"read", "search"},
+    "CodeContextSchemaAuditor": {"read", "search"},
+    "CodeQualityGuardrailReviewer": {"read", "search"},
+    "BusinessKnowledgeExpert": {"read", "search"},
     "ContextSummarizer": {"read"},
     "GovWebResearchAgent": {"read", "search", "io.github.ihor-sokoliuk/mcp-searxng/*"},
 }
@@ -72,7 +77,7 @@ IMPLEMENTATION_TOOLS = {"read", "search", "edit", "execute"}
 DOMAIN_PREFIXES = {
     "CodeDomainAdvisor": "Code", "CodeFrontendAdvisor": "Code",
     "CodeBackendAdvisor": "Code", "InfraDevOpsAdvisor": "Infra",
-    "DocsGovernanceAdvisor": "Gov",
+    "DocsGovernanceAdvisor": "Gov", "BusinessKnowledgeAdvisor": "Business",
 }
 NAMING_EXCEPTIONS = {
     "MultiLanguageBuilder": "CodeDomainAdvisor",
@@ -82,6 +87,7 @@ NAMING_EXCEPTIONS = {
 WORKER_SUFFIXES = (
     "Agent", "Specialist", "Expert", "Generator", "Manager", "Builder",
     "Diagnostician", "Diagnostics", "Generalist", "Engineer", "Profiler",
+    "Auditor", "Reviewer",
 )
 
 

@@ -71,7 +71,7 @@ initOTel({
 ```yaml
 Observability:
   Metrics: [list of metrics]
-  Logs: "Application Insights" | "Log Analytics"
-  Tracing: "OpenTelemetry"
+  Logs: [actual configured provider and relevant artifacts, or unavailable]
+  Tracing: [actual configured stack, integration scope and validation status]
   Alerting: [list of alert rules]
 ```

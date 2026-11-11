@@ -3,7 +3,7 @@
 This repository contains user-level VS Code agents. Follow the Naming Convention
 and Agent Checklist in README.md whenever adding, renaming, or changing an agent.
 
-- Use PascalCase ASCII names with the owning domain's Code, Infra, or Gov prefix
+- Use PascalCase ASCII names with the owning domain's Code, Infra, Gov, or Business prefix
   and a descriptive role suffix. Filename must be <Name>.agent.md and frontmatter
   name must match exactly. Advisors end in Advisor. Do not invent new unprefixed
   names or silently expand the documented exceptions.

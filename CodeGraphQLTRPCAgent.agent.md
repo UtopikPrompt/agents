@@ -80,13 +80,18 @@ input CreateUserInput {
 ```
 
 ## tRPC Router
+Use the target's installed tRPC version and data layer. This initTRPC example
+assumes Zod and an existing database module exporting prisma; do not install or
+replace an ORM solely to reproduce the example.
 ```typescript
-import { router, TRPCError } from "@trpc/server";
-import { createServer } from "http";
+import { initTRPC, TRPCError } from "@trpc/server";
+import { z } from "zod";
 import { prisma } from "./db";
 
-export const userRouter = router({
-  get: routerProcedure.query(async ({ input }) => {
+const trpc = initTRPC.create();
+
+export const userRouter = trpc.router({
+  get: trpc.procedure.input(z.object({ id: z.number().int().positive() })).query(async ({ input }) => {
     const user = await prisma.user.findUnique({ where: { id: input.id } });
     if (!user) throw new TRPCError({ code: "NOT_FOUND" });
     return user;

@@ -1,4 +1,6 @@
+import ast
 import copy
+import re
 import runpy
 import unittest
 from pathlib import Path
@@ -43,6 +45,321 @@ class RosterValidatorTests(unittest.TestCase):
     def assert_check(self, check):
         report = self.validate()
         self.assertIn(check, report.check_counts, report.findings)
+
+    def test_split_workers_are_read_only_and_keep_distinct_ownership(self):
+        for name in ("CodeProductModernizationExpert", "CodeArchitectureExpert"):
+            with self.subTest(agent=name):
+                worker = self.agent(name)
+                self.assertEqual(worker["fm"]["tools"], ["read", "search"])
+                self.assertEqual(worker["fm"]["agents"], [])
+                self.assertNotIn("model", worker["fm"])
+                self.assertEqual(
+                    VALIDATOR["tool_profile"](name),
+                    ({"read", "search"}, {"read", "search"}),
+                )
+        product = self.agent("CodeProductModernizationExpert")["text"]
+        architecture = self.agent("CodeArchitectureExpert")["text"]
+        self.assertIn(
+            "feature/opportunity assessment and proposed target-product requirements report",
+            " ".join(product.split()),
+        )
+        self.assertIn(
+            "technical architecture proposal report and contracts",
+            " ".join(architecture.split()),
+        )
+        self.assertIn("BusinessKnowledgeExpert owns professional business extraction", product)
+        self.assertIn("CodeRebuildEngineer integrates migration/readiness/roadmap", architecture)
+        rebuild = self.agent("CodeRebuildEngineer")["text"]
+        self.assertNotIn("## Feature and Opportunity Assessment", rebuild)
+        self.assertNotIn("## Enterprise Architecture Recommendations", rebuild)
+        dispatcher = self.agent("Orchestrator")["text"]
+        for name in ("CodeProductModernizationExpert", "CodeArchitectureExpert"):
+            self.assertEqual(self.agent("Orchestrator")["fm"]["agents"].count(name), 1)
+            self.assertIn(name, self.domain("CodeDomainAdvisor")["children"])
+        self.assertIn("only this dispatcher invokes", dispatcher)
+        self.assertIn("Order reports as discovery, modernization", dispatcher)
+        self.assertIn("Target product specification", dispatcher)
+
+    def test_split_preserves_portability_gates_and_limits_dispatcher_size(self):
+        product = " ".join(self.agent("CodeProductModernizationExpert")["text"].split())
+        architecture = " ".join(self.agent("CodeArchitectureExpert")["text"].split())
+        rebuild = " ".join(self.agent("CodeRebuildEngineer")["text"].split())
+        for owner, definition in (("product", product), ("architecture", architecture)):
+            for clause in ("PASS/FAIL/UNKNOWN", "professional-report-v1", "Orchestrator", "PARTIAL"):
+                with self.subTest(owner=owner, clause=clause):
+                    self.assertIn(clause, definition)
+        self.assertIn("## Transformation Roadmap", rebuild)
+        self.assertIn("Each work package has an ID", rebuild)
+        self.assertIn("Request missing design through Orchestrator", rebuild)
+        dispatcher = self.agent("Orchestrator")["text"]
+        for name in (
+            "BusinessKnowledgeExpert", "CodeProductModernizationExpert",
+            "CodeArchitectureExpert", "CodeRebuildEngineer",
+        ):
+            self.assertIn(name, dispatcher.split("## Rebuild Report Coordination\n", 1)[1])
+        self.assertLess(len(dispatcher), 25000)
+        self.assertLess(len(self.agent("CodeRebuildEngineer")["text"]), 20000)
+
+    def test_audit_framework_modes_do_not_require_scaffolding_for_maintenance(self):
+        for name in (
+            "CodeNextJsSpecialist", "CodeReactViteSpecialist", "CodeExpressSpecialist",
+            "CodeSpringBootSpecialist", "CodeFastApiSpecialist",
+        ):
+            with self.subTest(agent=name):
+                definition = " ".join(self.agent(name)["text"].split()).lower()
+                self.assertIn("review/diagnosis is read-only", definition)
+                self.assertIn("initialization is explicitly requested", definition)
+                self.assertIn("maintenance", definition)
+
+    def test_audit_python_examples_parse_and_use_consistent_apis(self):
+        for name in ("CodeFastApiSpecialist", "CodeDatabaseORMGenerator"):
+            examples = re.findall(r"```python\n(.*?)```", self.agent(name)["text"], re.DOTALL)
+            self.assertTrue(examples)
+            for index, example in enumerate(examples):
+                with self.subTest(agent=name, example=index):
+                    ast.parse(example)
+        fastapi = self.agent("CodeFastApiSpecialist")["text"]
+        self.assertIn("app.add_middleware(", fastapi)
+        self.assertIn("allow_origins=", fastapi)
+        self.assertNotIn("app.add_cors_middleware", fastapi)
+        self.assertNotIn("decode_token(token)", fastapi)
+        database = self.agent("CodeDatabaseORMGenerator")["text"]
+        self.assertIn("engine = create_async_engine(", database)
+        self.assertIn("SessionLocal = async_sessionmaker(", database)
+        self.assertNotIn("class_=Base", database)
+        self.assertIn("from datetime import datetime", database)
+
+    def test_audit_typescript_examples_define_procedures_and_native_button_props(self):
+        trpc = self.agent("CodeGraphQLTRPCAgent")["text"]
+        self.assertIn("const trpc = initTRPC.create()", trpc)
+        self.assertIn("trpc.procedure.input(", trpc)
+        self.assertNotIn("routerProcedure", trpc)
+        button = self.agent("CodeDesignSystemSpecialist")["text"]
+        self.assertIn("extends ButtonHTMLAttributes<HTMLButtonElement>", button)
+        self.assertIn('"#FFFFFF" : "#1F2937"', button)
+
+    def test_audit_monorepo_and_github_preserve_operation_boundaries(self):
+        monorepo = self.agent("InfraMonorepoManager")["text"]
+        self.assertIn("Publication: \"not performed by this worker\"", monorepo)
+        self.assertNotIn("scriptPostVersion", monorepo)
+        self.assertNotIn("lerna publish", monorepo)
+        github = " ".join(self.agent("GovGithubAgent")["text"].split())
+        for clause in (
+            "**Triage:**", "**Proposal:**", "**Authorized mutation:**",
+            "Issue creation does not authorize project/board creation",
+            "never create one merely because it seems a better home",
+            "verify host, owner, repository and owner type",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, github)
+        self.assertNotIn("The agent MUST execute all actions", github)
+
+    def test_audit_git_workflows_are_embedded_and_tag_publication_is_separate(self):
+        git = " ".join(self.agent("GovGitWorkflowAgent")["text"].split())
+        self.assertIn("Local skills are optional enrichment", git)
+        self.assertIn("create pending review, add scoped line comments, then submit once", git)
+        self.assertIn("Tag creation does not authorize tag publication", git)
+        self.assertNotIn("load the matching available skill", git)
+        self.assertNotIn("load the available create-pull-request skill", git)
+
+    def test_audit_routing_uses_mode_and_primary_artifact(self):
+        dispatcher = self.agent("Orchestrator")["text"]
+        section = dispatcher.split("## Boundary Tie-Breakers\n", 1)[1].split("\n## ", 1)[0]
+        for clause in (
+            "Diagnosis-only framework traceback vs authorized repair",
+            "InfraIaCGenerator for IaC/state",
+            "InfraKubernetesEngineer for manifests/operators/pod troubleshooting",
+            "InfraMonorepoManager for package graph/version coordination",
+            "GovArchitectureRecordsExpert for substantive ADR/RFC proposals",
+            "version coordination alone does not authorize either",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, section)
+        diagnostician = self.agent("CodeFrameworkDiagnostician")["text"]
+        self.assertNotIn("engine/pyproject.toml", diagnostician)
+        self.assertNotIn("apps/dashboard/package.json", diagnostician)
+        self.assertNotIn("Lead Project Supervisor", diagnostician)
+        build = self.agent("MultiLanguageBuilder")["text"]
+        self.assertIn("no fixed language order is assumed", build)
+        self.assertIn("Scoped repository-local toolchain", build)
+
+    def test_audit_export_manifest_and_business_lineage_match_responsibilities(self):
+        writer = self.agent("GovDocumentationSuiteGenerator")["text"]
+        for field in ("ArtifactManifest:", "BusinessCatalogues:", "KnowledgeSnapshots:", "RebuildRecords:", "ApprovalStatus:"):
+            with self.subTest(field=field):
+                self.assertIn(field, writer)
+        rebuild = self.agent("CodeRebuildEngineer")["text"]
+        self.assertIn("Preserve supplied business IDs", rebuild)
+        self.assertNotIn("Reconstruct the data model and the domain rules", rebuild)
+        self.assertIn("GovArchitectureRecordsExpert when requested", self.agent("Orchestrator")["text"])
+
+    def test_audit_reporting_is_sanitized_provider_neutral_and_incident_specific(self):
+        container = self.agent("InfraDevContainerSpecialist")["text"]
+        self.assertIn("variable names and redacted or explicitly nonsecret values only", container)
+        self.assertNotIn("Environment: [environment variables]", container)
+        self.assertIn("actual configured provider", self.agent("InfraObservabilitySpecialist")["text"])
+        self.assertIn("actual configured provider", self.agent("InfraCloudDeploymentAgent")["text"])
+        self.assertIn("verified installed profiler", self.agent("InfraPerformanceProfiler")["text"])
+        incident = self.agent("InfraCIDiagnostics")["text"]
+        self.assertIn("**Root Cause**", incident)
+        self.assertNotIn("**Filed In**", incident)
+
+    def test_audit_utilities_and_mcp_require_real_evidence_not_hidden_capabilities(self):
+        brainstorm = " ".join(self.agent("Brainstorm")["text"].split())
+        self.assertIn("at most three meaningful options", brainstorm)
+        self.assertIn("not invented implementation dates", brainstorm)
+        self.assertNotIn("Extra variations drain local VRAM", brainstorm)
+        self.assertIn("evidence that could change it", brainstorm)
+        optimizer = " ".join(self.agent("AgentOptimizer")["text"].split())
+        self.assertIn("Do not assume the dispatcher has session-store tools", optimizer)
+        mcp = self.agent("InfraMCPServerGenerator")["text"]
+        self.assertIn("verify APIs against local SDK/source evidence", mcp)
+        self.assertIn("global/user client settings", mcp)
+        self.assertNotIn('"mcpVersion": "1.0.0"', mcp)
+
+    def test_business_knowledge_domain_definitions_have_restricted_roles(self):
+        advisor = self.agent("BusinessKnowledgeAdvisor")
+        worker = self.agent("BusinessKnowledgeExpert")
+        self.assertEqual(advisor["fm"]["tools"], [])
+        self.assertEqual(advisor["fm"]["agents"], [])
+        self.assertEqual(worker["fm"]["tools"], ["read", "search"])
+        self.assertEqual(worker["fm"]["agents"], [])
+        self.assertNotIn("model", advisor["fm"])
+        self.assertNotIn("model", worker["fm"])
+        self.assertEqual(
+            VALIDATOR["tool_profile"](worker["name"]),
+            ({"read", "search"}, {"read", "search"}),
+        )
+
+    def test_business_knowledge_professional_quality_gate_is_explicit(self):
+        definition = " ".join(self.agent("BusinessKnowledgeExpert")["text"].split())
+        for clause in (
+            "## Professional Quality Gate and Audit Mode",
+            "record counts by catalogue",
+            "A tautology such as correct output or successful save is not an oracle",
+            "No polished formatting or inventory count can substitute for semantic completeness",
+            "explicit competent human validation before operational reliance",
+            "No local skills, workflow files or client-profile discovery",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+
+    def test_business_knowledge_worker_rejects_writes_execution_and_delegation(self):
+        for tool in ("edit", "execute", "agent", "github/*"):
+            with self.subTest(tool=tool):
+                worker = copy.deepcopy(self.agent("BusinessKnowledgeExpert"))
+                worker["fm"]["tools"].append(tool)
+                report = VALIDATOR["Report"]()
+                VALIDATOR["check_tool_profiles"]([worker], report)
+                self.assertTrue(report.findings)
+                self.assertEqual(report.findings[0]["check"], "TOOL-1")
+
+    def test_business_knowledge_domain_has_unique_root_ownership_and_route(self):
+        domain = self.domain("BusinessKnowledgeAdvisor")
+        self.assertEqual(domain["parent"], "Orchestrator")
+        self.assertEqual(domain["children"], ["BusinessKnowledgeExpert"])
+        route = (
+            "business needs/requirements and business logic, process analysis, "
+            "enterprise knowledge mapping, evidence-linked traceability/impact queries, "
+            "snapshot refresh or knowledge quality audit"
+        )
+        self.assertEqual(domain["routes"][route], "BusinessKnowledgeExpert")
+        allowlist = self.agent("Orchestrator")["fm"]["agents"]
+        self.assertEqual(allowlist.count("BusinessKnowledgeAdvisor"), 1)
+        self.assertEqual(allowlist.count("BusinessKnowledgeExpert"), 1)
+        self.assertIn("BusinessKnowledgeAdvisor", VALIDATOR["TIER1_ADVISORS"])
+        self.assertEqual(VALIDATOR["DOMAIN_PREFIXES"]["BusinessKnowledgeAdvisor"], "Business")
+
+    def test_context_and_guardrail_workers_are_read_only_and_routed(self):
+        expected = {
+            "pre-design schema/API/config/environment audit": "CodeContextSchemaAuditor",
+            "evidence-based review of a proposed or changed artifact": "CodeQualityGuardrailReviewer",
+        }
+        domain = self.domain("CodeDomainAdvisor")
+        allowlist = self.agent("Orchestrator")["fm"]["agents"]
+        for cue, name in expected.items():
+            with self.subTest(agent=name):
+                worker = self.agent(name)
+                self.assertEqual(worker["fm"]["tools"], ["read", "search"])
+                self.assertEqual(worker["fm"]["agents"], [])
+                self.assertEqual(VALIDATOR["tool_profile"](name), ({"read", "search"}, {"read", "search"}))
+                self.assertEqual(allowlist.count(name), 1)
+                self.assertEqual(domain["routes"][cue], name)
+                self.assertIn(name, self.agent("CodeDomainAdvisor")["text"])
+        scenarios = VALIDATOR["yaml"].safe_load(
+            (VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml").read_text(encoding="utf-8")
+        )
+        for scenario_id, worker in (
+            ("context-schema-conflict-audit", "CodeContextSchemaAuditor"),
+            ("guardrail-unsupported-api-review", "CodeQualityGuardrailReviewer"),
+        ):
+            scenario = next(item for item in scenarios if item["id"] == scenario_id)
+            self.assertEqual(scenario["split"], "held-out")
+            self.assertEqual(scenario["expected_worker"], worker)
+
+    def test_business_knowledge_procedures_are_not_owned_by_rebuild_worker(self):
+        rebuild = self.agent("CodeRebuildEngineer")["text"]
+        self.assertIn("## Business Knowledge Ownership and Handoff", rebuild)
+        self.assertIn("BusinessKnowledgeExpert", rebuild)
+        self.assertNotIn("## Portable Enterprise Knowledge Graph Contract", rebuild)
+        self.assertNotIn("## Enterprise Knowledge Reconstruction", rebuild)
+        writer = " ".join(self.agent("GovDocumentationSuiteGenerator")["text"].split())
+        self.assertIn("Preserve its quality-review artifact", writer)
+        scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
+        scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
+        scenario = next(item for item in scenarios if item["id"] == "business-knowledge-professional-audit")
+        self.assertEqual(scenario["expected_worker"], "BusinessKnowledgeExpert")
+        self.assertIn("competent human validation", scenario["required_behavior"])
+
+    def test_rebuild_consumes_business_findings_without_claiming_extraction(self):
+        definition = " ".join(self.agent("CodeRebuildEngineer")["text"].split())
+        self.assertNotIn("extract the business need or requirement", definition)
+        self.assertNotIn("## Business Need Extraction", definition)
+        for clause in (
+            "BusinessKnowledgeExpert owns professional business needs",
+            "## Input Review and Traceability",
+            "Do not independently recreate business catalogues, product strategy or architecture",
+            "CodeProductModernizationExpert owns feature assessment",
+            "CodeArchitectureExpert owns technical options",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+
+    def test_architecture_proposals_allow_pending_authority_but_gate_acceptance(self):
+        definition = " ".join(self.agent("GovArchitectureRecordsExpert")["text"].split())
+        for clause in (
+            "record unknown authority as TBD and decisions as proposed/pending",
+            "Missing approval does not block authorized proposal drafting",
+            "Do not reinterpret an existing accepted record as a new draft",
+            "Require explicit approval before accepting a decision",
+            "changing accepted decision content/status",
+            "An accepted implementation handoff remains blocked",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+        self.assertNotIn("If acceptance status or authority is unclear, return NEEDS_INPUT", definition)
+        scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
+        scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
+        scenario = next(item for item in scenarios if item["id"] == "architecture-proposal-pending-authority")
+        self.assertEqual(scenario["expected_worker"], "GovArchitectureRecordsExpert")
+        self.assertIn("accepted", scenario["required_behavior"])
+
+    def test_business_knowledge_prefix_migration_is_complete(self):
+        root = VALIDATOR["PROMPTS_DIR"]
+        for name in ("BusinessKnowledgeAdvisor", "BusinessKnowledgeExpert"):
+            with self.subTest(agent=name):
+                self.assertEqual(self.agent(name)["stem"], name)
+                self.assertEqual(self.agent(name)["fm"]["name"], name)
+                self.assertTrue((root / f"{name}.agent.md").is_file())
+                self.assertFalse((root / f"Gov{name}.agent.md").exists())
+        self.assertIn(
+            "| BusinessKnowledgeAdvisor | Business | BusinessKnowledgeExpert |",
+            self.readme,
+        )
+        self.assertIn("Gov, or Business prefix", (root / "AGENTS.md").read_text(encoding="utf-8"))
+        self.assertEqual(VALIDATOR["DOMAIN_PREFIXES"]["DocsGovernanceAdvisor"], "Gov")
+        with patch.dict(VALIDATOR["DOMAIN_PREFIXES"], {"BusinessKnowledgeAdvisor": "Gov"}):
+            self.assert_check("NAM-1")
 
     def test_current_roster_passes(self):
         self.assertEqual(self.validate().findings, [])
@@ -313,10 +630,10 @@ class RosterValidatorTests(unittest.TestCase):
     def test_routing_scenarios_have_known_workers_and_held_out_cases(self):
         scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
         scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
-        self.assertEqual(len(scenarios), 30)
+        self.assertEqual(len(scenarios), 44)
         self.assertEqual(len({scenario["id"] for scenario in scenarios}), len(scenarios))
         self.assertEqual({scenario["split"] for scenario in scenarios}, {"calibration", "held-out"})
-        self.assertEqual(sum(scenario["split"] == "held-out" for scenario in scenarios), 12)
+        self.assertEqual(sum(scenario["split"] == "held-out" for scenario in scenarios), 26)
         rebuild_scenario = next(scenario for scenario in scenarios if scenario["id"] == "rebuild-spec")
         self.assertEqual(rebuild_scenario["expected_worker"], "CodeRebuildEngineer")
         for scenario in scenarios:
@@ -760,54 +1077,56 @@ class RosterValidatorTests(unittest.TestCase):
         self.assertEqual(report.findings[0]["check"], "TOOL-1")
 
     def test_rebuild_spec_requires_evidence_and_decision_ready_deliverables(self):
-        definition = self.agent("CodeRebuildEngineer")["text"]
+        definition = " ".join(self.agent("CodeRebuildEngineer")["text"].split())
         for clause in (
-            "## Evidence and Traceability",
+            "## Input Review and Traceability",
             "BN-001, BR-001, FR-001 and NFR-001",
             "repository-relative source paths and symbols",
-            "observed behavior, inferred intent, stakeholder-confirmed need",
-            "existing behavior is not automatically an approved future requirement",
-            "stakeholders, actors, workflows, pain points, desired outcomes, success",
-            "testable\n  acceptance criteria with observable outcomes",
+            "Keep observed, asserted, inferred and proposed records distinct",
             "## Migration and Planning Readiness",
             "migration validation and reconciliation",
             "cutover and rollback requirements",
             "planning-readiness verdict of ready, conditional, or blocked",
             "Never call an incomplete or unapproved specification implementation-ready",
-            "## Delivery",
-            "1. Executive business brief",
-            "8. Open questions, decision log",
+            "## Report Handoff and Delivery",
+            "## Report Handoff and Delivery",
+            "professional report package rooted at `docs/rebuild/README.md`",
+            "open decisions",
         ):
             with self.subTest(clause=clause):
                 self.assertIn(clause, definition)
 
     def test_rebuild_spec_separates_capability_retention_from_implementation(self):
-        definition = self.agent("CodeRebuildEngineer")["text"]
-        for clause in (
-            "preserve, redesign, replace, retire, or needs decision",
-            "preserve the business capability, not reuse its implementation",
-            "reuse candidate, rewrite, remove candidate, or undecided",
-            "contractual and\n  regulatory obligations",
-            "All dispositions are proposals until explicitly approved by the user",
-            "Compare viable architecture options",
-            "do not default to microservices or enterprise tooling",
-            "identity, authorization, trust boundaries, auditability, data governance",
-            "privacy and retention, resilience, availability, observability, testing",
-            "deployment and operating cost",
-            "Return the specification content in the response",
-            "select GovDocumentationSuiteGenerator to persist the content",
-            "Never claim files were saved by this worker",
-        ):
-            with self.subTest(clause=clause):
-                self.assertIn(clause, definition)
-        self.assertNotIn("add focused coverage first", definition)
-        self.assertIn("focused validation through Orchestrator", definition)
+        contracts = {
+            "CodeProductModernizationExpert": (
+                "Recommend keep, improve, replace, remove, add or needs decision",
+                "Preserving capability does not mean reusing code",
+                "preserve, improve to redesign and remove to retire",
+                "supported consumers and obligations",
+                "Acceptance scenarios use representative inputs and expected output/state",
+            ),
+            "CodeArchitectureExpert": (
+                "Compare viable options", "Modern does not automatically mean distributed",
+                "identity/authorization, trust boundaries", "privacy/retention",
+                "observability", "operating cost", "proposed decision records",
+            ),
+            "CodeRebuildEngineer": (
+                "Dispositions, code reuse and architecture choices remain proposals",
+                "Requested persistence goes to GovDocumentationSuiteGenerator",
+                "verify actual saved paths",
+                "focused validation through Orchestrator",
+            ),
+        }
+        for owner, clauses in contracts.items():
+            definition = " ".join(self.agent(owner)["text"].split())
+            for clause in clauses:
+                with self.subTest(owner=owner, clause=clause):
+                    self.assertIn(clause, definition)
 
     def test_rebuild_spec_routing_and_documentation_are_synchronized(self):
         route = (
-            "reverse-engineering repositories and documentation into business needs, "
-            "legacy capability decisions and a future-state rebuild specification "
-            "with architecture recommendations"
+            "integrated rebuild assessment, transformation roadmap, migration/rollback "
+            "planning, portable package or consolidated readiness/decisions"
         )
         self.assertEqual(
             self.domain("CodeDomainAdvisor")["routes"][route], "CodeRebuildEngineer"
@@ -817,7 +1136,7 @@ class RosterValidatorTests(unittest.TestCase):
         self.assertIn("Repository to rebuild specification | CodeRebuildEngineer", self.readme)
 
     def test_rebuild_package_requires_portable_behavior_and_completeness_review(self):
-        definition = self.agent("CodeRebuildEngineer")["text"]
+        definition = " ".join(self.agent("CodeRebuildEngineer")["text"].split())
         for clause in (
             "## Portable Rebuild Specification",
             "usable in a fresh repository without access to the",
@@ -829,15 +1148,15 @@ class RosterValidatorTests(unittest.TestCase):
             "Include an implementation handoff",
             "Include a downstream kickoff prompt",
             "Audit the package as if only its delivered files existed",
-            "Return PARTIAL with the exact",
+            "List unresolved dependencies and exact missing decisions",
         ):
             with self.subTest(clause=clause):
-                self.assertIn(clause, definition)
+                self.assertIn(" ".join(clause.split()), definition)
 
     def test_rebuild_package_consumption_limits_blockers_to_affected_slices(self):
         definition = self.agent("CodeRebuildEngineer")["text"]
         for clause in (
-            "Identify the task phase",
+            "Identify the requested report/workstream",
             "do not restart source discovery automatically",
             "evidence coverage, specification completeness and approval status",
             "Block only the affected decision or slice",
@@ -873,54 +1192,46 @@ class RosterValidatorTests(unittest.TestCase):
         self.assertIn("do not blanket-block independent work", dispatcher)
         self.assertIn("Use the exported package in a fresh repository", self.readme)
 
-    def test_rebuild_phase_workflow_requires_artifacts_and_explicit_gates(self):
+    def test_rebuild_report_workflow_keeps_phases_only_in_roadmap(self):
         definition = self.agent("CodeRebuildEngineer")["text"]
-        for phase in (
-            "1. Inventory", "2. Recover business knowledge", "3. Decide scope",
-            "4. Specify target behavior", "5. Recommend architecture",
-            "6. Review portable package", "7. Plan rebuild",
-        ):
-            with self.subTest(phase=phase):
-                self.assertIn(f"| {phase} |", definition)
         for clause in (
-            "## Phase Checkpoint Contract",
-            "an inventory is not a behavioral specification",
-            "capability_id, phase, artifact_version",
+            "## Professional Assessment Reports",
+            "## Report Index and Resume Contract",
+            "## Numbered Rebuild Roadmap",
+            "docs/rebuild/README.md",
+            "Numbered phases belong only inside the proposed implementation/rebuild roadmap",
             "PASS/FAIL/UNKNOWN",
-            "Phase outcome is COMPLETE, PARTIAL, or NEEDS_INPUT",
-            "Missing evidence is UNKNOWN, not PASS",
-            "invalidate affected",
-            "Each atomic FR/BR/NFR",
-            "words such as reliable, secure and",
-            "Phases 8 (build) and 9 (verify/transition)",
+            "workflow_version is professional-report-v1",
+            "Missing evidence is PARTIAL/UNKNOWN, never invented",
+            "Changed inputs invalidate affected downstream reports/reviews",
         ):
             with self.subTest(clause=clause):
                 self.assertIn(clause.lower(), definition.lower())
+        self.assertNotIn("## Phase-Gated Capability Workflow", definition)
+        self.assertNotIn("## Phase Checkpoint Contract", definition)
+        self.assertNotIn("| Phase | Entry |", definition)
 
-    def test_rebuild_phase_dispatch_requires_independent_review_and_authorization(self):
+    def test_rebuild_report_dispatch_requires_independent_review_and_authorization(self):
         dispatcher = self.agent("Orchestrator")["text"]
-        section = dispatcher.split("## Rebuild Phase Coordination\n", 1)[1].split("\n## ", 1)[0]
+        section = " ".join(dispatcher.split("## Rebuild Report Coordination\n", 1)[1].split("\n## ", 1)[0].split()).lower()
         for clause in (
-            "COMPLETE label alone is insufficient",
-            "Provisional later-phase drafts do not close earlier gates",
-            "separate read-only CodeGeneralist review",
-            "exported package, selected slice and sufficiency criteria",
-            "No edits,\n  commands or delegation",
-            "passing review is not approval",
-            "explicitly authorized slices",
-            "rather than relying solely on tests written with the implementation",
-            "invalidate affected downstream checks",
+            "Pending approval does not block report analysis",
+            "separate read-only codegeneralist invocation",
+            "supplied package content/criteria",
+            "review is not approval or executed test evidence",
+            "explicitly approved",
+            "changed inputs invalidate affected findings",
         ):
             with self.subTest(clause=clause):
-                self.assertIn(clause, section)
-        self.assertIn("### Phased Rebuild Workflow", self.readme)
-        self.assertIn("These instructions guide behavior, not a workflow engine", self.readme)
+                self.assertIn(clause.lower(), section)
+        self.assertIn("### Rebuild Report Workflow", self.readme)
+        self.assertIn("README.md` is the index and resume point", self.readme)
 
-    def test_rebuild_phase_records_preserve_checkpoints_and_review_versions(self):
+    def test_rebuild_report_records_preserve_versions_and_review_status(self):
         writer = self.agent("GovDocumentationSuiteGenerator")["text"]
-        section = writer.split("## Rebuild Phase Record Persistence\n", 1)[1].split("\n## ", 1)[0]
+        section = writer.split("## Rebuild Report and Roadmap Persistence\n", 1)[1].split("\n## ", 1)[0]
         for clause in (
-            "capability_id, phase, artifact_version",
+            "report_id, capability_id where relevant, roadmap_phase only for rebuild",
             "PASS/FAIL/UNKNOWN",
             "COMPLETE, PARTIAL and NEEDS_INPUT",
             "separate-reader findings with the exact reviewed artifact",
@@ -933,13 +1244,126 @@ class RosterValidatorTests(unittest.TestCase):
         scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
         scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
         expected = {
-            "rebuild-phase-gate": "CodeRebuildEngineer",
+            "rebuild-report-sufficiency": "CodeRebuildEngineer",
             "rebuild-independent-review": "CodeGeneralist",
         }
         for scenario_id, worker in expected.items():
             with self.subTest(scenario=scenario_id):
                 scenario = next(item for item in scenarios if item["id"] == scenario_id)
                 self.assertEqual(scenario["expected_worker"], worker)
+                self.assertEqual(scenario["split"], "held-out")
+
+    def test_rebuild_reports_defer_decisions_not_evidence_gaps(self):
+        definition = " ".join(self.agent("CodeRebuildEngineer")["text"].split())
+        for clause in (
+            "Record options for consolidated review instead of requesting feature approvals during discovery",
+            "Technical completeness, evidence coverage and approval are separate",
+            "a critical missing behavior or contract keeps only affected report scope PARTIAL",
+            "Delivery of this report is not approval",
+            "Preserve separate as-is and to-be specifications and their change map",
+            "workflow_version is professional-report-v1",
+            "map them by content into discovery, modernization, architecture",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+        self.assertNotIn("Unresolved approval keeps this gate open", definition)
+        self.assertNotIn("Phase 7 decision closure", definition)
+
+    def test_rebuild_consolidated_review_is_preserved_by_coordinator_and_writer(self):
+        dispatcher = " ".join(self.agent("Orchestrator")["text"].split())
+        writer = " ".join(self.agent("GovDocumentationSuiteGenerator")["text"].split())
+        for clause in (
+            "Pending approval does not block report analysis",
+            "Carry options into one decision report",
+            "do not make the user approve them on the fly",
+            "only numbered phases: implementation/rebuild stages",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, dispatcher)
+        for clause in (
+            "Analysis reports can be technically COMPLETE while approval_status remains pending",
+            "Keep distinct as-is, feature/opportunity assessment, proposed architecture, to-be",
+            "Explicit approval remains required to accept decisions or authorize implementation",
+            "Validate anchors against actual headings",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, writer)
+        self.assertIn("workflow_version professional-report-v1", writer)
+        scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
+        scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
+        scenario = next(item for item in scenarios if item["id"] == "rebuild-consolidated-review")
+        self.assertEqual(scenario["expected_worker"], "CodeRebuildEngineer")
+        self.assertEqual(scenario["split"], "held-out")
+
+    def test_enterprise_knowledge_requires_six_layers_and_explicit_business_catalogues(self):
+        definition = " ".join(self.agent("BusinessKnowledgeExpert")["text"].split())
+        for clause in (
+            "laws/regulations, internal policies, business processes, systems/infrastructure, enterprise data and source code",
+            "Missing layers limit conclusions, not all useful work",
+            "separately indexed business-requirement and business-rule catalogues",
+            "trigger, preconditions, inputs/fields, decision logic",
+            "Documentation-only material can establish a declared rule, not verified runtime implementation",
+            "A supplied regulation is not proof it applies",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+
+    def test_enterprise_knowledge_graph_has_provenance_and_stable_relationships(self):
+        definition = " ".join(self.agent("BusinessKnowledgeExpert")["text"].split())
+        for clause in (
+            "schema_version, snapshot_version, scope, source_registry, nodes, edges",
+            "from_id, relation, to_id, evidence_refs",
+            "equal names in different systems are not automatically the same entity",
+            "observed, asserted, inferred, proposed, unknown or contradicted",
+            "Review unique IDs, known edge endpoints, defined relations, resolvable evidence",
+            "Approval is not confidence",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+
+    def test_enterprise_knowledge_queries_preserve_broken_paths_and_refresh_limits(self):
+        definition = " ".join(self.agent("BusinessKnowledgeExpert")["text"].split())
+        for clause in (
+            "Show verified segments and the exact broken hop",
+            "Never invent a bridge to make a complete chain",
+            "directly evidenced impacts, transitive evidence-backed dependencies, inferred candidates",
+            "missing links do not prove absence of impact",
+            "Absence from a partial inventory is not confirmed deletion",
+            "Do not claim continuous monitoring or automatic indexing",
+            "Secrets and personal data are excluded or redacted",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, definition)
+
+    def test_enterprise_knowledge_dispatch_and_export_preserve_evidence_boundaries(self):
+        dispatcher = " ".join(self.agent("Orchestrator")["text"].split())
+        writer = " ".join(self.agent("GovDocumentationSuiteGenerator")["text"].split())
+        for clause in (
+            "A product overview or bare source links are not those deliverables",
+            "Require the exact broken hop when a chain is incomplete",
+            "Do not accept unsupported claims of legal compliance",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, dispatcher)
+        for clause in (
+            "business-requirements.md, business-rules.md and knowledge-graph.yaml",
+            "Review unique IDs, known edge endpoints, defined relations",
+            "Partial absence is not evidence of deletion",
+            "this role cannot run parsers, query engines or tests",
+        ):
+            with self.subTest(clause=clause):
+                self.assertIn(clause, writer)
+        self.assertIn("## Enterprise Knowledge Reconstruction", self.readme)
+        self.assertIn("Enterprise knowledge reconstruction/query | BusinessKnowledgeExpert", self.readme)
+        self.assertIn("traceability", self.agent("BusinessKnowledgeAdvisor")["text"])
+        scenario_path = VALIDATOR["PROMPTS_DIR"] / "tests" / "roster-scenarios.yaml"
+        scenarios = VALIDATOR["yaml"].safe_load(scenario_path.read_text(encoding="utf-8"))
+        for scenario_id in (
+            "enterprise-knowledge-broken-chain", "enterprise-knowledge-impact-refresh",
+        ):
+            with self.subTest(scenario=scenario_id):
+                scenario = next(item for item in scenarios if item["id"] == scenario_id)
+                self.assertEqual(scenario["expected_worker"], "BusinessKnowledgeExpert")
                 self.assertEqual(scenario["split"], "held-out")
 
     def test_unrelated_workers_reject_github_access(self):

@@ -71,9 +71,9 @@ You is the Performance Profiler agent. You manages performance profiling across 
 ## Output Contract
 ```yaml
 ProfileResult:
-  Tool: "Tachyon" | "Memray" | "Chrome DevTools"
-  CPUTime: "total CPU time"
-  MemoryUsage: "peak memory usage"
+  Tool: [verified installed profiler and version, or unavailable]
+  CPUTime: [measured value, units and workload, or not measured]
+  MemoryUsage: [measured value, units and workload, or not measured]
   Bottlenecks: [list of bottlenecks]
   Optimizations: [optimization suggestions]
 ```

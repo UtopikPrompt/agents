@@ -17,9 +17,17 @@ change files, or invoke agents. Select one worker from the supplied routing rows
 - Kubernetes manifests/operators/networking -> `InfraKubernetesEngineer`.
 - Local Ollama/llama.cpp/GGUF serving, VRAM/KV-cache/context sizing, or controlled engine evaluation -> `InfraLLMInferenceSpecialist`. Kubernetes scheduling/storage stays with InfraKubernetesEngineer; generic CPU profiling stays with InfraPerformanceProfiler; benchmark API/UI code stays in the coding domain.
 - IaC templates -> `InfraIaCGenerator`; end-to-end cloud deployment -> `InfraCloudDeploymentAgent`.
+- For combined cloud/IaC/Kubernetes work, choose the primary deliverable: IaC/state
+  -> InfraIaCGenerator; manifests/operators/pod state -> InfraKubernetesEngineer;
+  rollout/deployment-pipeline stages -> InfraCloudDeploymentAgent. Return dependent
+  handoff needs to Orchestrator; no combined task expands worker authority.
 - Auth/RBAC/secrets -> `InfraSecurityAuthAgent`; telemetry -> `InfraObservabilitySpecialist`.
 - Monorepo coordination -> `InfraMonorepoManager`; cross-language compilation
   without workspace coordination belongs to the coding domain.
+- Dependency/build contracts favor MultiLanguageBuilder, package graph/version
+  coordination favors InfraMonorepoManager, and container/host configuration favors
+  InfraDevContainerSpecialist. Test gates favor InfraTestInfrastructureGenerator;
+  failing-job diagnosis favors InfraCIDiagnostics, not deployment-pipeline ownership.
 - Other explicit tools map to their supplied routing rows (containers, MCP, profiling,
   releases). Return NO_MATCH for out-of-domain work.
 

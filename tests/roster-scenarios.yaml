@@ -132,19 +132,89 @@
   split: held-out
   prompt: "Reverse-engineer this repository and its documentation into evidence-backed business needs and a future-state rebuild specification. Separate capability preservation from code reuse, propose legacy retirement decisions, architecture options and migration planning; do not implement."
   expected_worker: CodeRebuildEngineer
-  required_behavior: "Trace business needs to evidence, requirements and acceptance criteria; separate observed behavior, inferred intent and stakeholder approval; propose capability dispositions independently of code reuse; deliver a portable package with subsystem coverage, embedded rules/contracts, expected-result scenarios and kickoff prompt; review fresh-repository sufficiency and mark omissions PARTIAL; no code implementation or claimed file writes."
+  required_behavior: "Orchestrator sequences BusinessKnowledgeExpert evidence, CodeProductModernizationExpert features/target requirements and CodeArchitectureExpert design before CodeRebuildEngineer integrates roadmap/migration and the portable package. Preserve lineage, completeness/approval distinctions and exact gaps; no worker delegates, implements or claims file writes."
 - id: rebuild-portable-consumption
   split: held-out
   prompt: "Plan a rebuild in a fresh repository from the supplied portable specification. It contains proposed requirement FR-001: a document owner can archive an active document, preserving its content and moving state from active to archived; a repeated archive returns archived unchanged; a non-owner is denied without mutation. It includes acceptance examples and marks historical citations provenance-only. The legacy source is intentionally unavailable. Plan FR-001, identify approvals required before implementation, and keep an unspecified import capability deferred. Do not implement."
   expected_worker: CodeRebuildEngineer
-  required_behavior: "Plan FR-001 from its explicit owner/state/idempotency/denial contracts; distinguish missing historical re-verification from missing target detail; do not demand restoration of the entire legacy repository or infer import behavior; keep the proposed slice unapproved, ask a focused approval question, and defer import without blocking FR-001 planning."
-- id: rebuild-phase-gate
+  required_behavior: "Plan FR-001 from its explicit owner/state/idempotency/denial contracts; distinguish missing historical re-verification from missing target detail; do not demand restoration of the entire legacy repository or infer import behavior; keep the proposed slice unapproved, record the approval question for consolidated review, and defer import without blocking FR-001 planning."
+- id: rebuild-report-sufficiency
   split: held-out
-  prompt: "Assess the next phase for capability CAP-001. The only artifact is a subsystem inventory plus proposed FR-001: provide reliable document saving. No save conflict, encoding, write failure, recovery or expected-result examples are specified, and scope is unapproved. The summary claims all analysis phases COMPLETE. Report gate results and a continuation task; do not implement."
+  prompt: "Assess whether the report package is sufficient for capability CAP-001. The only artifact is a subsystem inventory plus proposed FR-001: provide reliable document saving. No save conflict, encoding, write failure, recovery or expected-result examples are specified, and scope is unapproved. The summary claims all reports are COMPLETE. Report sufficiency results and a continuation task; do not implement."
   expected_worker: CodeRebuildEngineer
-  required_behavior: "Reject the unsupported COMPLETE claim; distinguish inventory from behavioral specification, mark missing evidence UNKNOWN and incomplete technical artifacts PARTIAL, request a bounded scope decision, return versioned per-capability checks, and deepen behavior before claiming readiness for implementation."
+  required_behavior: "Reject the unsupported COMPLETE claim; distinguish inventory from behavioral specification, mark missing evidence UNKNOWN and incomplete technical artifacts PARTIAL, carry ordinary scope decisions to the consolidated decision report, return versioned report checks, and deepen behavior before claiming readiness for implementation."
 - id: rebuild-independent-review
   split: held-out
-  prompt: "Use CodeGeneralist for a read-only Phase 6 package review of CAP-001 version 1. The entire package says FR-001: save edited documents reliably, AC-001: saved documents are correct. It has no data contract, conflict semantics, error outcomes or examples. Historical source is intentionally unavailable. Use only this package; do not edit or execute commands."
+  prompt: "Use CodeGeneralist for a read-only report-package sufficiency review of CAP-001 version 1. The entire package says FR-001: save edited documents reliably, AC-001: saved documents are correct. It has no data contract, conflict semantics, error outcomes or examples. Historical source is intentionally unavailable. Use only this package; do not edit or execute commands."
   expected_worker: CodeGeneralist
   required_behavior: "Identify missing normative details and affected FR/AC IDs, return failed or unknown sufficiency checks, do not invent behavior or demand blanket restoration of legacy source, and do not equate approval or package existence with passing acceptance tests."
+- id: rebuild-consolidated-review
+  split: held-out
+  prompt: "Assess a product before I make decisions. Supplied evidence describes document editing with explicit saving and CSV export; two export screens independently apply the same column mapping. Current behavior is available, but future platforms, approval of features and desired performance targets are unknown. Produce a feature/opportunity assessment, modern architecture recommendation, proposed to-be contracts and a numbered rebuild implementation roadmap. Do not ask me to decide feature choices on the fly; collect assumptions and alternatives for the consolidated decision report. Do not implement."
+  expected_worker: CodeRebuildEngineer
+  required_behavior: "Sequence the unnumbered business, modernization, architecture and target-product reports through their dedicated workers, then integrate the decision report and numbered rebuild implementation roadmap with CodeRebuildEngineer. Pending approval does not block independent report analysis; preserve evidence gaps and target assumptions without inventing demand, delegating from workers or approving implementation."
+- id: split-product-modernization
+  split: held-out
+  prompt: "Using the supplied business catalogue, challenge current product features and propose a keep/improve/replace/remove/add matrix plus detailed to-be workflows and acceptance scenarios. Do not select technical architecture, plan migration or implement."
+  expected_worker: CodeProductModernizationExpert
+  required_behavior: "Own feature/opportunity assessment and atomic target requirements, preserve business lineage and unknown demand, separate capability preservation from code reuse, and request architecture/roadmap follow-up through Orchestrator without delegation or premature approval questions."
+- id: split-technical-architecture
+  split: held-out
+  prompt: "Using supplied target requirements, recommend technical architecture and technologies, compare alternatives, and specify component/data/interface and trust contracts. Do not redesign feature scope, approve an ADR or implement."
+  expected_worker: CodeArchitectureExpert
+  required_behavior: "Own concrete proportionate architecture and technical contracts, retain proposed assumptions and evidence status, compare alternatives without default microservices, and return ADR/product/roadmap needs to Orchestrator without implementation, approval or delegation."
+- id: enterprise-knowledge-broken-chain
+  split: held-out
+  prompt: "Map the enterprise knowledge in these synthetic supplied excerpts and answer whether REG-001 is implemented by CODE-001. Source S1 section 1 states REG-001 requires records retained for 30 days. S2 section 2 says POL-001 derives from REG-001 and governs PROC-001. S3 symbol cleanup says CODE-001 deletes rows from DATA-001 after 45 days. No source connects PROC-001 to CODE-001 or establishes regulatory applicability. Produce explicit requirement/rule records and an evidence-linked snapshot; do not access other files or claim compliance."
+  expected_worker: BusinessKnowledgeExpert
+  required_behavior: "Map supplied regulation/policy/process/data/code separately, mark infrastructure not supplied, preserve source IDs/locators and evidence status, show supported segments and the missing PROC-001-to-CODE-001 hop, report potential 30/45-day inconsistency without asserting legal applicability/compliance, and never invent a bridge or executed validation."
+- id: enterprise-knowledge-impact-refresh
+  split: held-out
+  prompt: "Using the supplied snapshot, assess a proposed SYS-B schema change. Edge E1: SYS-A depends_on SYS-B, supported by source S1 version 1. New supplied S1 version 2 omits SYS-A but explicitly says this is only a partial inventory. Two tables in different systems are both labeled records. Refresh the map best-effort; do not access systems or run commands."
+  expected_worker: BusinessKnowledgeExpert
+  required_behavior: "Explain dependency direction and likely impact on SYS-A, mark old relationship evidence stale or unresolved rather than treating partial absence as deletion, preserve source-qualified IDs for equal table names and prior history, identify unknown consumers/validation needs, and claim neither continuous monitoring nor exhaustive cascading effects."
+- id: business-knowledge-professional-audit
+  split: held-out
+  prompt: "Audit a supplied business knowledge package for professional use. It declares COMPLETE, but FR-001 says process payments correctly, BR-001 says calculate the applicable fee, no units, thresholds, rounding, denial paths or worked expected results are given, and the cited source is unavailable. Review only the package and report readiness; do not implement or guess financial rules."
+  expected_worker: BusinessKnowledgeExpert
+  required_behavior: "Reject unsupported completeness, name non-atomic/untestable requirements and missing rule branches, calculations, units and evidence, return severity and affected IDs with FAIL/UNKNOWN checks and exact validation needs, preserve unknown source/authority, and require competent human validation before operational reliance without inventing fee defaults or certification."
+- id: architecture-proposal-pending-authority
+  split: held-out
+  prompt: "Draft a new proposed ADR comparing one application deployment with separate services, using supplied requirements for a small team and isolated local processing. Approval and decision authority are unknown. Prepare the proposal without asking for a decision now. A separate existing ADR is accepted; its replacement is not authorized. Do not implement or change that accepted record."
+  expected_worker: GovArchitectureRecordsExpert
+  required_behavior: "Proceed with the new proposed record and authority TBD, preserve assumptions and pending choices for consolidated review, do not block drafting merely for missing approval, and require explicit approval before changing/accepting decisions or issuing an accepted implementation handoff; never demote the existing accepted record to a draft."
+- id: audit-framework-diagnosis-only
+  split: held-out
+  prompt: "Diagnose this FastAPI traceback and identify the owning manifest from the supplied source path. Root-cause analysis only; do not edit or initialize a project."
+  expected_worker: CodeFrameworkDiagnostician
+  required_behavior: "Locate the actual manifest from the failing package, separate confirmed cause from missing runtime evidence, and return a repair handoff without scaffolding or assuming fixed backend/frontend paths."
+- id: audit-framework-authorized-repair
+  split: held-out
+  prompt: "Fix the supplied endpoint regression in this existing FastAPI service, including local diagnosis, regression coverage and configured lint. Preserve the current application structure."
+  expected_worker: CodeFastApiSpecialist
+  required_behavior: "Repair in the existing framework without a prerequisite generator or extra diagnosis-only hop, preserve package conventions, and run tests/lint with exact outcomes."
+- id: audit-iac-cluster-artifact
+  split: held-out
+  prompt: "Update the Terraform module defining a managed Kubernetes cluster. The deliverable is the IaC/state contract only; do not apply or roll out workloads."
+  expected_worker: InfraIaCGenerator
+  required_behavior: "Own the Terraform artifact, preserve state/account boundaries, validate locally and report Kubernetes/rollout follow-up without applying or provisioning."
+- id: audit-monorepo-version-no-publication
+  split: held-out
+  prompt: "Synchronize package versions and dependency ranges across this polyglot workspace. Do not publish, commit, tag or push."
+  expected_worker: InfraMonorepoManager
+  required_behavior: "Choose workspace graph/version ownership, inspect lifecycle side effects, change only authorized version files and validate affected packages; return release/Git requirements without running publication hooks."
+- id: audit-readonly-issue-triage
+  split: held-out
+  prompt: "Triage these supplied GitHub issue summaries for duplicates and missing acceptance criteria. Return recommendations only; do not change issues or create projects."
+  expected_worker: GovGithubAgent
+  required_behavior: "Use read-only triage mode, do not force capability design or filing questions, preserve the supplied target and issue IDs, and distinguish proposed changes from actions not performed."
+- id: context-schema-conflict-audit
+  split: held-out
+  prompt: "Audit technical boundaries before a proposed API integration. The OpenAPI excerpt declares GET /v2/orders returns orderId as a string; a checked-in client expects an integer from GET /v1/orders. Deployment configuration names SERVICE_URL, but the supported version policy and environment matrix are absent. Do not select a contract or generate code; report evidence, conflicts, unknowns and the handoff needed."
+  expected_worker: CodeContextSchemaAuditor
+  required_behavior: "Compare declared API contract, client expectations and supplied configuration; trace each claim to evidence, distinguish observed from asserted and unknown, identify affected compatibility boundaries, inspect relevant test sources if present without executing them, and return unresolved authority/version questions without selecting or generating a replacement."
+- id: guardrail-unsupported-api-review
+  split: held-out
+  prompt: "Independently review this proposed change against the supplied repository API and acceptance criteria. The proposal calls IWorkspaceConfigService.getTenantConfig(), but the checked-in interface exposes getWorkspaceConfig() only; the acceptance criteria also require a denied request to produce no state change. Review only; do not edit or run tests."
+  expected_worker: CodeQualityGuardrailReviewer
+  required_behavior: "Report the unsupported method as an evidence-backed finding, check the denied-operation invariant against the supplied code/tests, identify any remaining unverified behavior, separate confirmed defects from risks, and do not invent APIs, fix the change, execute tests or approve the artifact."

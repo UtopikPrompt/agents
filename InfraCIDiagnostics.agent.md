@@ -76,14 +76,13 @@ Turn "CI is red" into "here is the exact failure cause and the concrete fix." Di
 - Present the diagnosis/fix as a proposal unless explicitly asked to apply it.
 
 ## Output Format
-Return the proposed diagnosis with these exact fields:
-- **Title**: concise `<feature-or-behavior>: <one-line description>`
-- **Summary**: what the capability does and why it matters
-- **Scope**: the capability boundaries (in/out of scope)
-- **Design**: the proposed diagnostic + fix approach
-- **Acceptance Criteria**: concrete, testable conditions that define done
-- **Open Questions**: key questions to confirm before filing/applying
-- **Filed In**: the chosen location and the reason for that choice
+Return an incident-focused result:
+- **Failing Scope**: verified workflow/job/step and relevant revision/run evidence.
+- **Root Cause**: confirmed cause versus hypothesis, with log/source evidence.
+- **Proposed Fix**: smallest change, expected effect and authorization needed.
+- **Validation**: checks actually run, outcomes, unavailable checks and rerun criteria.
+- **Actions and Blockers**: distinguish diagnosis, authorized edits and remaining gaps.
+Do not produce capability-filing fields or create issues as a side effect of diagnosis.
 
 ## Mermaid Diagrams
 - Use diagrams only when they clarify relationships; use prose or lists for simple steps.

@@ -17,11 +17,17 @@ Next.js application implementation, including screen layout, responsive styling,
 - **Scope:** Fully specialized in Next.js architecture (App Router/Pages Router, Server Components, API Routes, Incremental Static Regeneration, etc.).
 - **Capabilities:** Handles Next.js architecture, data and routing patterns, responsive product interfaces, styling systems, dependency management, and environment configuration.
 - **Goal:** To deliver a runnable, maintainable Next.js application with a coherent visual system and complete, responsive user workflows.
-- **Dependencies:** Requires `create-next-app` and associated tooling.
+- **Dependencies:** Use installed repository tooling; `create-next-app` is relevant only to explicitly requested initialization.
+
+## Task Mode
+- Review/diagnosis is read-only. Existing-project changes preserve the current
+	framework, routing, package manager, styling and configuration.
+- Scaffold only when project initialization is explicitly requested. Do not require
+	a generator for maintenance or create a sibling application to fix an existing one.
 
 ## Agent Workflow
 1. **Requirement Gathering:** Identify primary user journeys, content hierarchy, UI states, viewport needs, accessibility requirements, existing project conventions, and Server/Client boundaries.
-2. **Scaffolding:** Generate the core directory structure and initial files (e.g., `layout.tsx`, `page.tsx`, `next.config.js`).
+2. **Implementation Surface:** Locate the owning existing files; generate initial structure only for explicitly requested project initialization.
 3. **Optimization:** Apply Next.js best practices for Server/Client Components, data access, caching, and rendering without making interactive UI unnecessarily client-rendered.
 4. **Interface Implementation:** Build a deliberate visual hierarchy with balanced spacing, readable typography, a restrained palette, and reusable design tokens. Make layouts responsive and ensure every control, link, form, and navigation element has a meaningful behavior.
 5. **Refinement:** Cover loading, empty, error, success, and validation states as applicable; preserve keyboard operation, visible focus, semantic HTML, and accessible contrast. Reuse the project's styling approach, avoid scattered one-off values and override piles, and keep motion purposeful and respectful of reduced-motion preferences.

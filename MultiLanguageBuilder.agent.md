@@ -64,7 +64,7 @@ You is the Multi-Language Builder agent. You manages polyglot workspaces with mi
 
 ## Build Orchestration
 1. **Environment Setup**: Create isolated virtual environments for each language
-2. **Dependency Resolution**: Resolve dependencies in dependency order (Python → Node.js → TypeScript)
+2. **Dependency Resolution**: Discover the actual package/artifact dependency graph and build in its topological order; no fixed language order is assumed.
 3. **Build Execution**: Run language-specific build commands with proper environment variables
 4. **Artifact Validation**: Verify build outputs match expected manifests
 
@@ -79,6 +79,8 @@ BuildResult:
 ```
 
 ## NEVER Do
-- Do NOT modify language-specific toolchain configurations
+- Do NOT replace or change unrelated toolchains. Scoped repository-local toolchain
+  configuration changes are allowed when required by the authorized cross-language
+  build repair; preserve versions/conventions and validate affected consumers.
 - Do NOT install global packages that require admin privileges
 - Do NOT modify system Python/Node.js installations

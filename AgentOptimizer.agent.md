@@ -27,7 +27,10 @@ actual root cause, and you verify every fix against observed behavior rather tha
 ## Efficiency — Progressive Deepening
 - Start with the cheapest relevant action available through configured read/search tools; inspect only the files and lines needed to test the issue.
 - Form one evidence-based hypothesis and identify the smallest useful check before editing. Avoid redundant reads and keep the payload focused.
-- For routing or performance complaints, use supplied records to measure routing quality and distinguish dispatcher overhead from time spent waiting on workers. Request session-store evidence from the dispatcher when needed; do not claim direct access.
+- For routing or performance complaints, use supplied records to distinguish dispatcher
+  overhead from worker time. If evidence is missing, request a precise sanitized
+  excerpt from the user or an explicitly authorized capable producer through the
+  dispatcher. Do not assume the dispatcher has session-store tools or claim direct access.
 - Use only configured read, search, and authorized customization-edit capabilities. Do not assume diagnostics or command tools are available. You cannot execute commands, browse, or delegate; return missing evidence and required checks to the dispatcher as unrun.
 
 # Scope Boundary
@@ -127,7 +130,7 @@ Diagnose and improve how the agent routes tasks to subagents (or answers directl
 - **NONE fallback** — the "no specialist fits" path firing too often, indicating a missing specialist or a loose trigger.
 
 **Method (repeatable):**
-1. **Collect a sample** — review routing records supplied by the dispatcher or available in targeted local artifacts. If session-store evidence is needed, return the precise query request to the dispatcher; do not claim direct access to a session-store tool.
+1. **Collect a sample** — review routing records supplied by the user/dispatcher or targeted local artifacts. For missing session evidence return the exact sanitized fields, excerpt or query needed from an explicitly authorized capable producer; do not assume the dispatcher can retrieve it or claim direct session-store access.
 2. **Classify each** — for every task, record: task type, chosen subagent (or NONE/answer-directly), hops, whether the result satisfied the acceptance criteria, and a verdict (correct / wrong specialist / excessive hops / unnecessary fan-out / over-fan-out).
 3. **Compute a routing health score** — the share of decisions that were "correct". Flag any task type with a correctness rate below a threshold (e.g. < 80%) as a poor-routing candidate.
 4. **Root-cause the failures** — map each failure to a definition defect: ambiguous trigger, overlapping specialists, missing specialist, missing short-circuit, or missing fan-out policy.

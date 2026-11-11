@@ -59,23 +59,25 @@ state/               # State management
 
 ## Component Example (React)
 ```typescript
-import { forwardRef } from "react";
+import { forwardRef, type ButtonHTMLAttributes } from "react";
 
-export interface ButtonProps {
+export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: "primary" | "secondary";
   size?: "sm" | "md" | "lg";
 }
 
 export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ variant = "primary", size = "md", children, ...props }, ref) => {
-    const color = variant === "primary" ? "#0078D4" : "#FFFFFF";
+    const backgroundColor = variant === "primary" ? "#0078D4" : "#FFFFFF";
+    const foregroundColor = variant === "primary" ? "#FFFFFF" : "#1F2937";
     const fontSize = size === "sm" ? "0.875rem" : size === "lg" ? "1.25rem" : "1rem";
     return (
       <button
+        type="button"
         ref={ref}
         style={{
-          backgroundColor: color,
-          color: variant === "primary" ? "#FFFFFF" : color,
+          backgroundColor,
+          color: foregroundColor,
           fontSize,
           padding: "0.5rem 1rem",
           borderRadius: "0.25rem",
