@@ -165,12 +165,12 @@ flowchart LR
 | **DocsGovernanceAdvisor** | advisor | no | Optional docs/governance specialist selection; never executes |
 | **InfraDevOpsAdvisor** | advisor | no | Optional infrastructure/DevOps specialist selection; never executes |
 | **UtilityAdvisor** | advisor | no | Optional utility specialist selection; never executes |
-| **AgentOptimizer** | worker | yes | Diagnostics & optimization of a VS Code agent's definition, tools, and instructions |
+| **AgentOptimizer** | worker | no | Diagnostics & optimization of a VS Code agent's definition, tools, and instructions |
 | **GovArchitectureRecordsExpert** | worker | no | Repository-native ADRs/RFCs; preserves human approval and documentation-only boundaries |
 | **Brainstorm** | worker | no | Divergent thinking: generates low-token architectural alternatives & edge cases |
 | **CodeDomainAdvisor** | advisor | no | Optional cross-stack coding specialist selection; never executes |
 | **CodeGeneralist** | worker | no | Generic implementation, review, debugging, and refactoring when no specialist fits |
-| **CodeComfyUICustomNodeSpecialist** | worker | yes | ComfyUI custom nodes: version-aware APIs, registration, tensor/model contracts, frontend extensions and workflow tests |
+| **CodeComfyUICustomNodeSpecialist** | worker | no | ComfyUI custom nodes: version-aware APIs, registration, tensor/model contracts, frontend extensions and workflow tests |
 | **ContextSummarizer** | worker | no | Read-only checkpoint summaries for observed context pressure or explicit requests; does not reset chat history or runtime context |
 | **MultiLanguageBuilder** | worker | no | Polyglot builds across Python/Node.js/TypeScript with package management |
 | **InfraDevContainerSpecialist** | worker | no | `.devcontainer/` scaffolding, Dockerfiles, remote SSH, container lifecycle |
@@ -185,8 +185,8 @@ flowchart LR
 | **InfraLLMInferenceSpecialist** | worker | no | Ollama/llama.cpp/GGUF serving, VRAM/KV-cache/context estimates and controlled engine evaluation |
 | **InfraReleaseManager** | worker | no | Release preparation and authorized publication; Git mutations go to GovGitWorkflowAgent through Orchestrator |
 | **GovGithubAgent** | worker | no | Issue triage, GitHub Projects, agent capability proposal filing |
-| **GovGitWorkflowAgent** | worker | yes | Local branches, scoped staging/commits, pushes, PR creation/updates/reviews/merges and authorized cleanup |
-| **GovWebResearchAgent** | worker | yes | Read-only SearXNG research, page verification, current documentation and cited findings |
+| **GovGitWorkflowAgent** | worker | no | Local branches, scoped staging/commits, pushes, PR creation/updates/reviews/merges and authorized cleanup |
+| **GovWebResearchAgent** | worker | no | Read-only SearXNG research, page verification, current documentation and cited findings |
 | **InfraCIDiagnostics** | worker | no | Root-cause diagnosis of failing CI/Actions jobs & PR errors, then suggests fixes |
 | **CodeNextJsSpecialist** | worker | no | Next.js applications: architecture, responsive UI, styling, interactions, Server Components, ISR |
 | **CodeSpringBootSpecialist** | worker | no | Java/Spring Boot backend scaffolding |
@@ -1041,7 +1041,9 @@ GitGithubAgent                           -> GovGitWorkflowAgent
     updated names in saved workflows. Restart/select Orchestrator in a main chat
     when the editor has not refreshed its agent discovery list.
 - Orchestrator's `agents:` is the direct invocation allowlist, not ownership.
-    Advisors have `tools: []` and `agents: []`; workers have no delegation tool.
+    Only Orchestrator is user-invocable; workers and advisors are selected through
+    its dispatch. Advisors have `tools: []` and `agents: []`; workers have no
+    delegation tool.
 - Orchestrator's embedded tables control ownership and selection cues; update them, the allowlist,
     and ownership documentation together when adding or renaming an agent.
 
@@ -1084,7 +1086,8 @@ has not been re-tested; refresh agent selection after the migration.
     and allowlist, then separately invoked CodeDesignSystemSpecialist.
     That worker returned a scoped approach without files, commands, or nested calls.
 
-These tests verify direct invocation and advisor/worker separation in this session.
+These historical tests verify direct worker invocation and advisor/worker separation
+in that session; current user entry is through Orchestrator only.
 They are not a full automatic-routing evaluation of a fresh Orchestrator main
 chat, nor a benchmark of context size or output quality. Select the updated
 Orchestrator as the main chat agent to use the contract; running it inside another

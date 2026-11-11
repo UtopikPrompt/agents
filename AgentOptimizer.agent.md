@@ -10,7 +10,7 @@ description: >
 argument-hint: >
   Describe the agent symptom (won't load, ignoring instructions, not invoking tools,
   base-on-context broken, slow, unexpected behavior) and any config/logs.
-user-invocable: true
+user-invocable: false
 disable-model-invocation: false
 tools: [read, edit, search]
 ---

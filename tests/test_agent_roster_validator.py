@@ -47,9 +47,17 @@ class RosterValidatorTests(unittest.TestCase):
     def test_current_roster_passes(self):
         self.assertEqual(self.validate().findings, [])
 
-    def test_comfyui_worker_is_user_invocable_and_routed(self):
+    def test_only_orchestrator_is_user_invocable(self):
+        user_invocable = {
+            entry["name"]
+            for entry in self.files
+            if entry["fm"]["user-invocable"] is True
+        }
+        self.assertEqual(user_invocable, {"Orchestrator"})
+
+    def test_comfyui_worker_is_not_user_invocable_and_routed(self):
         worker = self.agent("CodeComfyUICustomNodeSpecialist")
-        self.assertIs(worker["fm"]["user-invocable"], True)
+        self.assertIs(worker["fm"]["user-invocable"], False)
         self.assertEqual(worker["fm"]["tools"], ["read", "search", "edit", "execute"])
         self.assertEqual(worker["fm"]["agents"], [])
         domain = self.domain("CodeDomainAdvisor")
@@ -968,7 +976,7 @@ class RosterValidatorTests(unittest.TestCase):
         worker = self.agent("GovWebResearchAgent")
         self.assertEqual(set(worker["fm"]["tools"]), expected)
         self.assertEqual(worker["fm"]["agents"], [])
-        self.assertIs(worker["fm"]["user-invocable"], True)
+        self.assertIs(worker["fm"]["user-invocable"], False)
 
     def test_web_research_rejects_mutation_and_delegation_tools(self):
         for tool in ("edit", "execute", "agent", "github/*"):
@@ -1049,9 +1057,9 @@ class RosterValidatorTests(unittest.TestCase):
                 self.agent("GovGitWorkflowAgent")["fm"]["tools"].remove(tool)
                 self.assert_check("TOOL-1")
 
-    def test_git_worker_is_user_invocable_and_routed(self):
+    def test_git_worker_is_not_user_invocable_and_routed(self):
         worker = self.agent("GovGitWorkflowAgent")
-        self.assertIs(worker["fm"]["user-invocable"], True)
+        self.assertIs(worker["fm"]["user-invocable"], False)
         self.assertEqual(worker["fm"]["agents"], [])
         domain = self.domain("DocsGovernanceAdvisor")
         self.assertIn("GovGitWorkflowAgent", domain["children"])
