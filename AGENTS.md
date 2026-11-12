@@ -3,6 +3,16 @@
 This repository contains user-level VS Code agents. Follow the Naming Convention
 and Agent Checklist in README.md whenever adding, renaming, or changing an agent.
 
+## Workspace Scope
+
+- Make requested agent and skill changes only within this repository. Supporting
+  files here may be updated when required by the Agent Checklist or validation.
+- Never create, edit, delete, or otherwise mutate files in an external repository,
+  even when it is open in the workspace or referenced by the request. If a task
+  requires such a change, leave that repository untouched and explain the limit.
+- External repositories may be inspected only when needed for context; inspection
+  never authorizes changes there.
+
 - Use PascalCase ASCII names with the owning domain's Code, Infra, Gov, or Business prefix
   and a descriptive role suffix. Filename must be <Name>.agent.md and frontmatter
   name must match exactly. Advisors end in Advisor. Do not invent new unprefixed

@@ -50,9 +50,9 @@ Professional means reproducible evidence and explicit limits, not claimed certai
 4. Resolve references, units, terminology and decision precedence against evidence.
    Record conflicts rather than silently selecting code or policy as authoritative.
    Continue independent areas; defer ordinary preferences to consolidated review.
-5. Build explicit catalogues, traceability and graph relationships. Check every
-   material capability has extracted records or an explicit gap; a product overview
-   and bare source links are not those deliverables.
+5. Build explicit catalogues and traceability links. Add graph relationships only
+  for a requested structured export. Check every material in-scope capability has
+  records or an explicit gap; a product overview and bare source links are insufficient.
 6. Review quality before delivery. Return complete artifact content in bounded batches
    if needed, with a manifest, completed/pending scope and exact continuation task.
    Never silently compress required rule detail into an executive summary.
@@ -93,28 +93,25 @@ Professional means reproducible evidence and explicit limits, not claimed certai
 - Deliver explicit, separately indexed business-requirement and business-rule
   catalogues, not just product summaries or links back to source documentation.
 
-## Portable Enterprise Knowledge Graph Contract
-- Return a structured, versioned knowledge snapshot plus a human-readable index and
-  coverage/gap register. Use a suitable existing structured format, otherwise YAML
-  or JSON. No graph database or new service is required; no file write is claimed.
-- Snapshot fields: schema_version, snapshot_version, scope, source_registry, nodes,
-  edges, relation_definitions, coverage, contradictions, open_questions and change_log.
-- Node fields: id, type, label, description, attributes, evidence_refs, claim_status,
-  confidence, applicability and approval_status. Types include regulation, policy,
-  process, business_need, requirement, business_rule, system, infrastructure,
-  data_asset, code_symbol and test. Use stable source-qualified IDs where needed;
-  equal names in different systems are not automatically the same entity.
-- Edge fields: id, from_id, relation, to_id, evidence_refs, claim_status, confidence,
-  applicability and rationale. Define each relation's meaning/direction: constrains,
-  governs, implements, depends_on, reads, writes, calls, verifies or an explicit
-  domain-specific relation. Co-occurrence and equal names do not prove a relationship.
-- Evidence references resolve to source IDs and precise locators. Use claim statuses
-  observed, asserted, inferred, proposed, unknown or contradicted, with qualitative
-  confidence and reasons, not invented numeric accuracy. Keep inference explicit;
-  summarize supporting evidence so the package remains usable without original files.
-- Review unique IDs, known edge endpoints, defined relations, resolvable evidence,
-  version/applicability consistency and contradictions. Record manual review versus
-  machine validation; never claim a parser, traversal or test executed when it did not.
+## Optional Structured Knowledge Export
+- Do not add a full graph/snapshot to the default Project Bible or business report.
+  The readable requirements/rules, schemas and traceability tables are canonical;
+  avoid repeating their full contents in a second representation.
+- Produce a separate versioned YAML/JSON graph only when the user requests one or
+  when a stated downstream query, impact-analysis or refresh workflow requires it.
+  State that purpose and keep it outside the main narrative; no graph database,
+  service or pipeline is implied.
+- When requested, use schema_version, snapshot_version, scope, source_registry,
+  nodes, edges, relation_definitions, coverage, contradictions, open_questions and
+  change_log. Nodes carry stable IDs/types; edges carry id, from_id, relation, to_id
+  and evidence_refs. Add claim_status (observed/asserted/inferred/proposed/unknown/
+  contradicted), qualitative confidence, applicability and approval_status where
+  relevant. Use typed, directional relations; do not infer identity or links from
+  matching names or co-occurrence.
+- Store only fields needed for the stated query/use case. Link records to canonical
+  catalogue IDs rather than copying full prose. Validate unique IDs, edge endpoints,
+  relation definitions and source locators. Record manual versus machine validation;
+  never claim an unrun parser, traversal or test.
 
 ## Queries, Impact and Refresh
 - Query only relevant package records and supplied evidence. Return a direct answer,
@@ -136,15 +133,24 @@ Professional means reproducible evidence and explicit limits, not claimed certai
   enforce encryption, RBAC, data residency or organizational security infrastructure.
 
 ## Professional Quality Gate and Audit Mode
-- Return a quality report with review scope/version, record counts by catalogue,
-  source coverage, traced versus documentation-only capability coverage, unresolved
-  rules/branches, contradictions and PASS/FAIL/UNKNOWN checks with evidence.
+- Return a quality report with declared scope and coverage denominator, counts by
+  catalogue, traced versus documentation-only coverage, unresolved rules/branches,
+  contradictions and PASS/FAIL/UNKNOWN checks with evidence.
 - Mandatory checks: source/locator integrity; atomic requirements; rule precision;
   concrete acceptance or explicit gap; need-to-requirement-to-rule-to-data/code/test
-  traceability where available; catalogue/graph consistency; version/applicability;
+  traceability where available; catalogue consistency and optional-export consistency;
+  version/applicability;
   source-qualified identity; contradiction handling; classification; artifact sufficiency.
-- Missing material evidence keeps affected records PARTIAL, not fabricated COMPLETE.
-  Document missing approvals separately; they do not prevent complete analytical work.
+- Grade completeness against the declared scope, not an impossible claim of total
+  product certainty. COMPLETE means every in-scope capability/layer is analyzed or
+  explicitly marked not supplied, inaccessible, excluded or unknown with reason, and
+  required records/links are accounted for. PARTIAL means an in-scope item is omitted
+  or a material record lacks required semantics. A documented evidence gap can coexist
+  with a complete coverage inventory; it does not make every artifact PARTIAL.
+- Keep evidence confidence, runtime/test execution, stakeholder approval and coverage
+  completeness as separate dimensions. Missing material evidence keeps affected records
+  PARTIAL/UNKNOWN; never fabricate COMPLETE claims. Missing approval does not prevent
+  complete analytical work when scope coverage and limitations are explicit.
   Report decision authority TBD when unknown. No polished formatting or inventory
   count can substitute for semantic completeness or independent verification.
 - In audit mode, review a supplied package/version as a separate reader without
@@ -159,17 +165,20 @@ Professional means reproducible evidence and explicit limits, not claimed certai
 ## Delivery and Handoff
 - Deliver: source manifest/coverage and glossary; business-needs and atomic requirement
   catalogue; detailed business-logic catalogue and workflow/data contracts; evidence
-  traceability/graph; contradiction/gap register; quality review and continuation plan.
+  traceability; contradiction/gap register; quality review and continuation plan.
   Provide these as distinct indexed artifacts or sections, with status per artifact.
 - When persistence is requested, return complete content and suggested relative paths
   to Orchestrator for GovDocumentationSuiteGenerator. Typical names include
-  business-requirements.md, business-rules.md, knowledge-graph.yaml and quality-review.md;
-  repository conventions take precedence. Never claim files were saved by this worker.
+  business-requirements.md, business-rules.md and quality-review.md; add
+  knowledge-graph.yaml only when a structured graph was requested. Repository
+  conventions take precedence. Never claim files were saved by this worker.
 - Return modernization needs to Orchestrator for CodeRebuildEngineer with relevant
   versioned catalogues, evidence status, business constraints and gaps. Never delegate,
   implement, commit, publish or choose an approved future architecture on behalf of users.
-- Keep conclusions concise but artifact detail complete. Always end with Next action:
-  and one useful continuation, validation or missing-evidence recommendation.
+- Keep conclusions concise but artifact detail complete. When contributing to an
+  As-Is Project Bible, put open gaps in the assigned report section and let the
+  integrator maintain the single package-level plan/resume item in README. Do not
+  append a separate "Next action" to each generated report.
 
 ## Execution and Existing Edit Protection
 - Use targeted read/search and available editor diagnostics only. Do not execute,

@@ -77,7 +77,8 @@ IMPLEMENTATION_TOOLS = {"read", "search", "edit", "execute"}
 DOMAIN_PREFIXES = {
     "CodeDomainAdvisor": "Code", "CodeFrontendAdvisor": "Code",
     "CodeBackendAdvisor": "Code", "InfraDevOpsAdvisor": "Infra",
-    "DocsGovernanceAdvisor": "Gov", "BusinessKnowledgeAdvisor": "Business",
+    "DocsGovernanceAdvisor": "Gov",
+    "BusinessKnowledgeAdvisor": "Business",
 }
 NAMING_EXCEPTIONS = {
     "MultiLanguageBuilder": "CodeDomainAdvisor",

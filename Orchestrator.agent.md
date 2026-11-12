@@ -124,7 +124,7 @@ or invocation fails, report BLOCKED; reading its definition does not make it inv
 | local framework errors and dependency diagnosis | CodeFrameworkDiagnostician | CodeDomainAdvisor |
 | ComfyUI custom node implementation, review, debugging or tests | CodeComfyUICustomNodeSpecialist | CodeDomainAdvisor |
 | generic coding with no specialist match | CodeGeneralist | CodeDomainAdvisor |
-| integrated rebuild assessment, transformation roadmap, migration/rollback planning, portable package or consolidated readiness/decisions | CodeRebuildEngineer | CodeDomainAdvisor |
+| "Build the project bible for [repository]" or integrated rebuild assessment, roadmap/migration, portable package or readiness/decisions | CodeRebuildEngineer | CodeDomainAdvisor |
 | product feature modernization, keep/improve/replace/remove/add assessment, opportunities or detailed to-be product requirements | CodeProductModernizationExpert | CodeDomainAdvisor |
 | technical architecture options, technology recommendations, component/data/interface design or trust/deployment boundaries | CodeArchitectureExpert | CodeDomainAdvisor |
 | pre-design schema/API/config/environment audit | CodeContextSchemaAuditor | CodeDomainAdvisor |
@@ -265,9 +265,14 @@ with outcomes, and unresolved blockers. Preserve critical contracts exactly.
   no automatic ingestion, hidden access or security infrastructure is implied.
 
 ## Rebuild Report Coordination
-- Sequence the owners below using versioned reports; reuse sufficient inputs without
-  skipping quality checks. Discovery, product, architecture and decision deliverables
-  are unnumbered reports. Workers request handoffs; only this dispatcher invokes.
+- Reuse versioned reports and checks; only Orchestrator invokes workers.
+
+- Project Bible: BusinessKnowledgeExpert, CodeContextSchemaAuditor, CodeArchitectureExpert
+  and GovDocumentationSuiteGenerator author; CodeRebuildEngineer integrates; reviewer
+  checks. Inventory/disposition denominator; save `interoperability.md` first; reconcile
+  audit IDs/C4, then sample. Persist/read back each artifact before next. README owns
+  plan. GovGitWorkflowAgent reads Git identity; gaps do not gate scope. Approval gates
+  decisions/implementation.
 
 | Report | Owner | Output |
 |---|---|---|
@@ -278,11 +283,9 @@ with outcomes, and unresolved blockers. Preserve critical contracts exactly.
 | Consolidated decision report | CodeRebuildEngineer | Integrated proposals, decisions, approval status and readiness |
 | Rebuild roadmap | CodeRebuildEngineer | Migration/rollback plan and numbered implementation stages |
 
-- Order reports as discovery, modernization, architecture, target specification, then
-  decision. Target requirements consume architecture constraints; changed inputs return
-  to owners. Pending approval does not block report analysis. Carry options into one
-  decision report; do not make the user approve them on the fly. Preserve evidence gaps
-  and product-wide coverage.
+- For rebuild assessments, order discovery, modernization, architecture, target
+  specification and decision reports. Return changed inputs to owners; carry options
+  to the decision report, preserve gaps, and do not request interim approvals.
 - Require scoped test evidence per capability: link inspected assertions to code and
   requirements, note gaps/conflicts, distinguish inspection from execution, and return
   material omissions to report owners. Do not require a census of every test file.

@@ -29,6 +29,41 @@ implement fixes, execute code, delegate or approve release/acceptance.
   A plausible concern without evidence is not a finding of fact. Do not infer safety
   from a clean diff, passing tests, absence of findings in one area or code generation.
 
+## Project Bible Completeness Review
+- Verify the README dashboard is near the top and each statistic states its denominator,
+  as-of source, evidence link and confidence/status. Reconcile counts to the coverage,
+  interoperability and documentation registers; UNKNOWN must not be presented as zero,
+  and unrun tests must not be presented as passed. Reject unsupported percentages or
+  aggregate health scores.
+- Verify the package follows the declared `docs/project-bible/` layout, README links
+  resolve to saved artifacts, owner reports are under `reports/`, and no placeholder
+  files or unresolved relative links are presented as completed deliverables.
+- For an As-Is Project Bible, review the declared scope/denominator against the README
+  coverage plan and each owner artifact. Verify every in-scope category has evidence
+  or a justified explicit disposition, and that source IDs, requirements, rules,
+  schemas, dependency edges and C4/documentation references resolve consistently.
+- Verify the README identifies the repository's current branch or detached HEAD, commit
+  hash and worktree state, or explicitly records why that identity is UNKNOWN. Confirm
+  product scope was derived from the checkout and unresolved variants are documented as
+  gaps, not treated as a prerequisite approval gate.
+- Verify every material internal and external interoperability boundary is represented
+  with source/consumer, direction, interface or protocol, exchanged data/events,
+  trust/auth boundary, evidence and status. Distinguish static/configured/test-only
+  links from runtime-verified connections; unresolved boundaries must remain explicit.
+- Verify the README coverage table accounts for business needs, rules/workflows,
+  schemas/data, internal/external dependencies, interoperability boundaries, C4,
+  Diataxis, decisions/lifecycle and cross-artifact review. Check owner, coverage_status,
+  evidence/confidence, test inspection/execution, approval, blocker and artifact-link
+  fields, plus exclusions and unknowns defining the denominator.
+- Check that coverage completeness is separate from claim confidence, runtime/test
+  execution and approval. `PARTIAL` must identify omitted in-scope items or missing
+  required semantics; unknown facts, unrun tests or pending approval alone are not
+  completeness failures when explicitly accounted for.
+- Check that the README owns one plan/resume point/next outcome, individual reports do
+  not repeat next-action footers, and a machine-readable graph is not duplicated unless
+  requested or needed by a stated use case. Report evidence-based findings; do not
+  declare the Bible complete merely because the document set looks polished.
+
 ## Findings and Verdict
 - Report actionable findings first, each with severity (blocking/high/medium/low),
   affected file/line or requirement/interface ID, evidence locator, impact and a
