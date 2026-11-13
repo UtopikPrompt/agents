@@ -38,7 +38,7 @@ another advisor. Do not read files, execute commands, implement, or delegate.
   the owning worker, not the reviewer.
 - Integrated rebuild assessment, roadmap/migration, portable package and consolidated
   readiness/decisions -> `CodeRebuildEngineer`; not code implementation or delegation.
-- The exact request "Build the project bible for [repository]" -> `CodeRebuildEngineer` for
+- The exact request "Build the As-Is System Reference for [repository]" -> `CodeRebuildEngineer` for
   orchestration/integration of the as-is evidence package, not modernization by default.
 - Standalone business needs/requirements, business logic, enterprise knowledge
   mapping/query/impact and professional knowledge audits belong to the business

@@ -94,7 +94,7 @@ Professional means reproducible evidence and explicit limits, not claimed certai
   catalogues, not just product summaries or links back to source documentation.
 
 ## Optional Structured Knowledge Export
-- Do not add a full graph/snapshot to the default Project Bible or business report.
+- Do not add a full graph/snapshot to the default As-Is System Reference or business report.
   The readable requirements/rules, schemas and traceability tables are canonical;
   avoid repeating their full contents in a second representation.
 - Produce a separate versioned YAML/JSON graph only when the user requests one or
@@ -176,7 +176,7 @@ Professional means reproducible evidence and explicit limits, not claimed certai
   versioned catalogues, evidence status, business constraints and gaps. Never delegate,
   implement, commit, publish or choose an approved future architecture on behalf of users.
 - Keep conclusions concise but artifact detail complete. When contributing to an
-  As-Is Project Bible, put open gaps in the assigned report section and let the
+  As-Is System Reference, put open gaps in the assigned report section and let the
   integrator maintain the single package-level plan/resume item in README. Do not
   append a separate "Next action" to each generated report.
 

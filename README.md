@@ -136,6 +136,7 @@ flowchart LR
 
     DocsGovernanceAdvisor --> GovArchitectureRecordsExpert["GovArchitectureRecordsExpert"]
     DocsGovernanceAdvisor --> GovDocumentationSuiteGenerator["GovDocumentationSuiteGenerator"]
+    DocsGovernanceAdvisor --> GovOfficeDocumentGenerator["GovOfficeDocumentGenerator"]
     DocsGovernanceAdvisor --> GovGithubAgent["GovGithubAgent"]
     DocsGovernanceAdvisor --> GovGitWorkflowAgent["GovGitWorkflowAgent"]
     DocsGovernanceAdvisor --> GovWebResearchAgent["GovWebResearchAgent"]
@@ -159,7 +160,7 @@ flowchart LR
     class CodeMockupWireframeSpecialist worker;
     class CodeComfyUICustomNodeSpecialist frameworkWorker;
     class BusinessKnowledgeExpert,CodeProductModernizationExpert,CodeArchitectureExpert,CodeContextSchemaAuditor,CodeQualityGuardrailReviewer worker;
-    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraLLMInferenceSpecialist,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovGithubAgent,GovGitWorkflowAgent,GovWebResearchAgent worker;
+    class AgentOptimizer,Brainstorm,ContextSummarizer,CodeGeneralist,CodeFrameworkDiagnostician,MultiLanguageBuilder,InfraObservabilitySpecialist,InfraMonorepoManager,InfraDevContainerSpecialist,InfraMCPServerGenerator,InfraCloudDeploymentAgent,InfraKubernetesEngineer,InfraSecurityAuthAgent,InfraIaCGenerator,InfraPerformanceProfiler,InfraLLMInferenceSpecialist,InfraTestInfrastructureGenerator,InfraReleaseManager,InfraCIDiagnostics,GovArchitectureRecordsExpert,GovDocumentationSuiteGenerator,GovOfficeDocumentGenerator,GovGithubAgent,GovGitWorkflowAgent,GovWebResearchAgent worker;
 ```
 
 
@@ -187,7 +188,7 @@ flowchart LR
 | **InfraMCPServerGenerator** | worker | no | Model Context Protocol servers, JSON-RPC, editor integration |
 | **CodeReactViteSpecialist** | worker | no | React/Vite application screens, responsive CSS, interactions, component architecture, and Vitest |
 | **CodeFastApiSpecialist** | worker | no | FastAPI maintenance/review and requested initialization; Pydantic, SQLAlchemy and endpoint tests |
-| **CodeRebuildEngineer** | worker | no | As-Is Project Bible integration; rebuild roadmap, migration/readiness and portable package coordination |
+| **CodeRebuildEngineer** | worker | no | As-Is System Reference integration; rebuild roadmap, migration/readiness and portable package coordination |
 | **CodeProductModernizationExpert** | worker | no | Feature/opportunity assessment, proposed product scope, detailed to-be requirements and acceptance scenarios |
 | **CodeArchitectureExpert** | worker | no | As-is C4 views or proposed technical architecture, with component/data/interface/trust contracts |
 | **CodeContextSchemaAuditor** | worker | no | Read-only database/API/configuration/environment boundary audit with evidence-linked constraints and gaps |
@@ -195,6 +196,7 @@ flowchart LR
 | **InfraMonorepoManager** | worker | no | Multi-package workspace coordination & version synchronization |
 | **InfraTestInfrastructureGenerator** | worker | no | Test suites, fixtures, mocks, coverage, CI gates and explicitly authorized scoped test runs |
 | **GovDocumentationSuiteGenerator** | worker | no | Documentation, Diataxis classification, business catalogues, portable knowledge snapshots and indexed reports |
+| **GovOfficeDocumentGenerator** | worker | no | Create and validate requested native PowerPoint `.pptx` and Visio `.vsdx` deliverables from supplied content |
 | **InfraPerformanceProfiler** | worker | no | Python/Node CPU/memory profiling with verified OS/runtime/profiler APIs |
 | **InfraLLMInferenceSpecialist** | worker | no | Ollama/llama.cpp/GGUF serving, VRAM/KV-cache/context estimates and controlled engine evaluation |
 | **InfraReleaseManager** | worker | no | Release preparation and authorized publication; Git mutations go to GovGitWorkflowAgent through Orchestrator |
@@ -445,6 +447,15 @@ separate documentation paths or constraints only when they are specific to your 
 > distinguish provenance-only references from missing requirements. Do not change
 > application code.
 
+**GovOfficeDocumentGenerator: create native Office deliverables**
+
+> Create native `.pptx` and `.vsdx` files from [approved content] at [output paths].
+> Check local generators for both formats before creating either file. If a required
+> generator is unavailable, stop and report the exact setup needed; do not substitute
+> Markdown or `.drawio` sources. Do not install or download tools. Reopen and validate
+> each generated file, preserve evidence and approval status, and report visual rendering
+> as unverified unless it was actually inspected.
+
 **GovGithubAgent: triage issues without changing them**
 
 > Triage open issues in the explicitly supplied repository using [scope and
@@ -606,16 +617,16 @@ authorization. A missing input produces an owner-specific request, not silent ro
 
 ## Repository Rebuild Specifications
 
-**Default first outcome: As-Is Project Bible**
+**Default first outcome: As-Is System Reference**
 
 Use the exact prompt:
 
-> Build the project bible for [repository]
+> Build the As-Is System Reference for [repository]
 
 Orchestrator coordinates business needs/rules/flows, schemas and internal/external
 dependencies, current-state C4 views, Diataxis classification of existing documents,
 and decision/lifecycle records. The package is evidence-linked, distinguishes facts
-from inference/gaps, and is indexed at `docs/project-bible/README.md`. This default is
+from inference/gaps, and is indexed at `docs/system-reference/README.md`. This default is
 current-state only; it does not start modernization, target redesign or implementation.
 The requested repository's current checkout and branch are the default source. Record
 the repository root, branch (or detached HEAD), commit hash and worktree state, using a
@@ -625,7 +636,7 @@ start or complete evidence collection. Approval remains separate for stakeholder
 decisions, scope expansion, and implementation. If Git metadata is unavailable, record
 UNKNOWN and continue.
 Start the evidence pass with a repository-derived map of material systems, capability
-families, data stores and interface candidates. Persist `docs/project-bible/interoperability.md`
+families, data stores and interface candidates. Persist `docs/system-reference/current-state/interoperability.md`
 first; disposition each candidate, then reconcile its stable boundary IDs with C4 before
 sampling detailed capabilities. Save each complete owner report and read it back before
 commissioning the next; an unsaved summary is a persistence blocker, not a deliverable.
@@ -648,19 +659,26 @@ Use the frameworks for distinct concerns rather than combining their templates:
 - [Pact consumer/provider contracts](https://docs.pact.io/) describe expectations;
     they do not prove verification ran or that a live peer interoperates.
 
-The README holds the declared coverage denominator and an unnumbered domain table for
-owner, coverage, evidence/confidence, test inspection/execution, approval, blockers and
-artifact link, including a dedicated interoperability-boundaries row reconciled across
-schema contracts and C4 views, plus exclusions and unknowns. It contains the only resume point and one
-proposed next outcome. Individual reports present evidence and gaps without a
+Use stable artifact filenames; record `artifact_version` in metadata, not paths.
+Git history tracks revisions and stable paths prevent unnecessary link churn.
+Store as-is evidence under `docs/system-reference/current-state/`, with the detailed
+coverage table, exclusions and unknowns in `coverage.md`. Keep the System Reference
+current-state only. Store modernization assessment, target architecture and roadmap in
+the separate `docs/rebuild/` package; place executive files with the package they summarize.
+Keep each README a concise dashboard, artifact/status index,
+resume point and one proposed next outcome. Individual reports present evidence and gaps without a
 "Next action" footer. Continue in-scope evidence work under the request; recommend one
 out-of-scope next outcome when complete or blocked, with its rationale and approval needs.
 
 **Continue into a rebuild assessment**
 
-Ask Orchestrator for a rebuild assessment. It sequences business findings, product
-modernization, architecture and target specification before rebuild planning,
-reusing sufficient versioned artifacts rather than repeating completed work. Supply
+For both deliverables, use:
+
+> Build the As-Is System Reference and modernization plan for this repo.
+
+Orchestrator sequences business findings, product modernization, architecture and
+target specification before rebuild planning, reusing sufficient artifacts. The Project
+System Reference is the as-is evidence baseline; `docs/rebuild/` is the proposed change package. Supply
 known goals, consumers and constraints; the current stack is not automatically mandatory.
 
 BusinessKnowledgeExpert owns as-is business catalogues. Product and architecture
@@ -910,7 +928,7 @@ only when their write sets are disjoint.
 | CODE_ / Backend | CodeBackendAdvisor | CodeSpringBootSpecialist, CodeExpressSpecialist, CodeGraphQLTRPCAgent, CodeDatabaseORMGenerator, CodeFastApiSpecialist |
 | CODE_ / Frontend | CodeFrontendAdvisor | CodeNextJsSpecialist, CodeReactViteSpecialist, CodeDesignSystemSpecialist, CodeMockupWireframeSpecialist |
 | INFRA_/_DevOps | InfraDevOpsAdvisor | InfraMonorepoManager, InfraDevContainerSpecialist, InfraMCPServerGenerator, InfraCloudDeploymentAgent, InfraKubernetesEngineer, InfraSecurityAuthAgent, InfraIaCGenerator, InfraPerformanceProfiler, InfraLLMInferenceSpecialist, InfraTestInfrastructureGenerator, InfraReleaseManager, InfraCIDiagnostics, InfraObservabilitySpecialist |
-| GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovGithubAgent, GovGitWorkflowAgent, GovWebResearchAgent |
+| GOV_/_Docs | DocsGovernanceAdvisor | GovArchitectureRecordsExpert, GovDocumentationSuiteGenerator, GovOfficeDocumentGenerator, GovGithubAgent, GovGitWorkflowAgent, GovWebResearchAgent |
 | BUSINESS_ | BusinessKnowledgeAdvisor | BusinessKnowledgeExpert |
 | Miscellaneous | UtilityAdvisor | AgentOptimizer, Brainstorm, ContextSummarizer |
 
@@ -930,6 +948,7 @@ be worked around through terminal writes.
 | ContextSummarizer | `read` | No editing, execution, or runtime compaction |
 | GovWebResearchAgent | `read`, `search`, `io.github.ihor-sokoliuk/mcp-searxng/*` | Read-only web research; no editing, execution, GitHub, or delegation |
 | AgentOptimizer and documentation/governance writers | `read`, `search`, `edit` | `todo` optional for GovDocumentationSuiteGenerator; no terminal access |
+| GovOfficeDocumentGenerator | `read`, `search`, `edit`, `execute` | Local native-file generation and validation only; no package installation, downloads or online conversion without explicit approval |
 | GovGithubAgent | `read`, `search`, `execute`, `github/*` | Terminal limited by instructions to read-only repository inspection; no source editing |
 | GovGitWorkflowAgent | `read`, `search`, `execute`, `github/*` | Scoped Git mutations only when requested, plus validation; no application source editing or delegation |
 
@@ -1028,7 +1047,7 @@ release/storage/authorization, framework preservation, Git, direct answers and
 portable rebuild planning without historical source files, incomplete report evidence,
 enterprise knowledge gaps, source-qualified identity and stale-impact evidence.
 New held-out cases cover conflicting API/schema context and unsupported generated
-claims reviewed against supplied requirements, plus the as-is Project Bible trigger.
+claims reviewed against supplied requirements, plus the As-Is System Reference trigger.
 The business domain also has a professional audit case for untestable financial
 rules, missing source evidence and unsupported completeness claims.
 Unit tests validate fixture integrity and definition contracts, not live routing.

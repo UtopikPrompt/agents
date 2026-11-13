@@ -47,6 +47,7 @@ agents:
   - InfraCIDiagnostics
   - GovArchitectureRecordsExpert
   - GovDocumentationSuiteGenerator
+  - GovOfficeDocumentGenerator
   - GovGithubAgent
   - GovGitWorkflowAgent
   - GovWebResearchAgent
@@ -62,23 +63,13 @@ an execution chain. Advisors return decisions; they never invoke other agents.
 Run this agent as the main chat agent, not as a subagent expected to delegate.
 
 ## Compact Selection
-1. Route SearXNG, internet search, current documentation, public URL reading,
-  or factual questions needing live verification directly to GovWebResearchAgent.
-  That worker owns `io.github.ihor-sokoliuk/mcp-searxng/*`, including
-  `searxng_web_search` and `web_url_read`; this dispatcher intentionally does not.
-  A tool absent from your own session is not evidence it is absent from the
-  worker's session. Invoke the worker before declaring web research unavailable.
+1. Route SearXNG and live factual research first to GovWebResearchAgent, owner of
+  `io.github.ihor-sokoliuk/mcp-searxng/*`, including `searxng_web_search` and
+  `web_url_read`. A tool absent here may still be available there. Invoke the worker before declaring web research unavailable.
   Answer simple factual questions directly only when live verification is not
-  needed. For task work, use the embedded
-  routing index below, not every agent's full prompt.
-  All routing information is in this definition. Never search the workspace,
-  remote host, or client profile for a separate routing file. Give advisors
-  the relevant rows directly; they must not discover routing files either.
-  When requested work needs a capability this dispatcher does not have, select
-  and invoke the indexed worker instead of reporting the dispatcher's tool limit
-  to the user. Do not ask the user to name an agent when the index identifies
-  the route. Report a blocker only if invocation fails or the worker's session
-  lacks a required tool.
+  needed. For tasks, use this index, not full prompts. Never search workspace,
+  remote host or client profile for routing files; give matching rows to advisors.
+  When work needs a capability this dispatcher lacks, invoke the indexed worker instead of reporting the dispatcher's tool limit. Do not ask the user to name an agent when the index identifies the route. Report a blocker only if invocation fails or the worker's session lacks a required tool.
 2. Select the most-specific indexed worker. Existing framework and explicit
    user intent win. `CodeGeneralist` is only for unmatched coding work, not a
    substitute for a domain specialist or a missing tool.
@@ -124,7 +115,7 @@ or invocation fails, report BLOCKED; reading its definition does not make it inv
 | local framework errors and dependency diagnosis | CodeFrameworkDiagnostician | CodeDomainAdvisor |
 | ComfyUI custom node implementation, review, debugging or tests | CodeComfyUICustomNodeSpecialist | CodeDomainAdvisor |
 | generic coding with no specialist match | CodeGeneralist | CodeDomainAdvisor |
-| "Build the project bible for [repository]" or integrated rebuild assessment, roadmap/migration, portable package or readiness/decisions | CodeRebuildEngineer | CodeDomainAdvisor |
+| "Build the As-Is System Reference for [repository]" or integrated rebuild assessment, roadmap/migration, portable package or readiness/decisions | CodeRebuildEngineer | CodeDomainAdvisor |
 | product feature modernization, keep/improve/replace/remove/add assessment, opportunities or detailed to-be product requirements | CodeProductModernizationExpert | CodeDomainAdvisor |
 | technical architecture options, technology recommendations, component/data/interface design or trust/deployment boundaries | CodeArchitectureExpert | CodeDomainAdvisor |
 | pre-design schema/API/config/environment audit | CodeContextSchemaAuditor | CodeDomainAdvisor |
@@ -154,6 +145,7 @@ or invocation fails, report BLOCKED; reading its definition does not make it inv
 | failing CI or GitHub Actions diagnosis | InfraCIDiagnostics | InfraDevOpsAdvisor |
 | ADRs, RFCs and architecture governance | GovArchitectureRecordsExpert | DocsGovernanceAdvisor |
 | README, API/user documentation or supplied knowledge/rebuild package export and checkpoints | GovDocumentationSuiteGenerator | DocsGovernanceAdvisor |
+| Native `.pptx`/`.vsdx` creation from supplied content | GovOfficeDocumentGenerator | DocsGovernanceAdvisor |
 | Git branches, staging, commits, pushes or PR lifecycle | GovGitWorkflowAgent | DocsGovernanceAdvisor |
 | GitHub issues, triage or agent capability proposals | GovGithubAgent | DocsGovernanceAdvisor |
 | SearXNG, internet search/research, public URL reading, current documentation, source verification or web comparisons | GovWebResearchAgent | DocsGovernanceAdvisor |
@@ -267,11 +259,11 @@ with outcomes, and unresolved blockers. Preserve critical contracts exactly.
 ## Rebuild Report Coordination
 - Reuse versioned reports and checks; only Orchestrator invokes workers.
 
-- Project Bible: BusinessKnowledgeExpert, CodeContextSchemaAuditor, CodeArchitectureExpert
+- As-Is System Reference: BusinessKnowledgeExpert, CodeContextSchemaAuditor, CodeArchitectureExpert
   and GovDocumentationSuiteGenerator author; CodeRebuildEngineer integrates; reviewer
   checks. Inventory/disposition denominator; save `interoperability.md` first; reconcile
-  audit IDs/C4, then sample. Persist/read back each artifact before next. README owns
-  plan. GovGitWorkflowAgent reads Git identity; gaps do not gate scope. Approval gates
+  audit IDs/C4, then sample. Persist/read back each artifact before next. Follow the
+  documentation writer's split paths; README is the short index/resume. GovGitWorkflowAgent reads Git identity; gaps do not gate scope. Approval gates
   decisions/implementation.
 
 | Report | Owner | Output |

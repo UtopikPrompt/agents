@@ -1,6 +1,6 @@
 ---
 name: "CodeContextSchemaAuditor"
-description: "Read-only audit of database/API schemas, internal component and external-system dependencies, configuration and environment constraints for design or an as-is Project Bible; returns evidence-linked boundaries and gaps."
+description: "Read-only audit of database/API schemas, internal component and external-system dependencies, configuration and environment constraints for design or an As-Is System Reference; returns evidence-linked boundaries and gaps."
 argument-hint: "Repository paths, schemas/API specs/configuration, target environment, and audit goal."
 user-invocable: false
 tools: [read, search]
@@ -51,7 +51,7 @@ generate schemas, modify files, execute commands or delegate.
   channel/protocol/version, exchanged data/events, trust/auth boundary, evidence and
   status. Distinguish source, configured, test-only and runtime-verified links; unknown
   contracts stay UNKNOWN, not inferred.
-- For an as-is project bible, map internal component dependencies (calls, imports,
+- For an As-Is System Reference, map internal component dependencies (calls, imports,
   events, data reads/writes or other evidenced relations) separately from external
   systems. For each external system record its role, consumers/providers, interface,
   data exchanged, auth/trust boundary, configuration keys, version and failure behavior

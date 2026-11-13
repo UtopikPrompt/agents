@@ -17,6 +17,9 @@ invoke another agent. Keep proposals distinct from user-approved decisions.
 - API/user documentation, README, supplied-record export, knowledge snapshots or
   rebuild checkpoint persistence -> `GovDocumentationSuiteGenerator`. Substantive
   ADR/RFC decision authorship stays with GovArchitectureRecordsExpert.
+- Requested native `.pptx` or `.vsdx` file generation/validation from supplied content
+  -> `GovOfficeDocumentGenerator`; source writing and README indexing stay with
+  `GovDocumentationSuiteGenerator`.
 - Git branches, staging, commits, pushes or PR lifecycle -> `GovGitWorkflowAgent`.
 - GitHub issues/triage or filing a capability proposal -> `GovGithubAgent`.
 - SearXNG, internet search/research, public URL reading, current documentation,

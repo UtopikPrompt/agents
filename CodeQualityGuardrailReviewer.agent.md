@@ -29,16 +29,21 @@ implement fixes, execute code, delegate or approve release/acceptance.
   A plausible concern without evidence is not a finding of fact. Do not infer safety
   from a clean diff, passing tests, absence of findings in one area or code generation.
 
-## Project Bible Completeness Review
+## As-Is System Reference Completeness Review
 - Verify the README dashboard is near the top and each statistic states its denominator,
   as-of source, evidence link and confidence/status. Reconcile counts to the coverage,
   interoperability and documentation registers; UNKNOWN must not be presented as zero,
   and unrun tests must not be presented as passed. Reject unsupported percentages or
   aggregate health scores.
-- Verify the package follows the declared `docs/project-bible/` layout, README links
-  resolve to saved artifacts, owner reports are under `reports/`, and no placeholder
-  files or unresolved relative links are presented as completed deliverables.
-- For an As-Is Project Bible, review the declared scope/denominator against the README
+- Verify the As-Is System Reference is current-state only and rebuild proposals are in the separate
+  `docs/rebuild/` package; there is no duplicate `docs/system-reference/modernization/` tree.
+  README is a concise dashboard/index/resume; the only detailed coverage table is in
+  `current-state/coverage.md`. Keep observed architecture/C4 under current-state and
+  target proposals/roadmap under `docs/rebuild/`. Index requested executive files and
+  verify relative links resolve. Filenames must be stable across revisions; versions
+  belong in artifact metadata, not paths. Reject duplicate coverage tables, empty
+  placeholders or unresolved links presented as completed deliverables.
+- For an As-Is System Reference, review the declared scope/denominator against the README
   coverage plan and each owner artifact. Verify every in-scope category has evidence
   or a justified explicit disposition, and that source IDs, requirements, rules,
   schemas, dependency edges and C4/documentation references resolve consistently.
@@ -62,7 +67,7 @@ implement fixes, execute code, delegate or approve release/acceptance.
 - Check that the README owns one plan/resume point/next outcome, individual reports do
   not repeat next-action footers, and a machine-readable graph is not duplicated unless
   requested or needed by a stated use case. Report evidence-based findings; do not
-  declare the Bible complete merely because the document set looks polished.
+  declare the reference complete merely because the document set looks polished.
 
 ## Findings and Verdict
 - Report actionable findings first, each with severity (blocking/high/medium/low),
